@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# build output
+dist/
+.next/
+out/
+build/
+
+# drizzle
+backend/drizzle/
+
+# logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+
+# vercel
+.vercel

@@ -1,0 +1,430 @@
+@import "tailwindcss";
+
+:root {
+  /* LEAF-C brand palette — from LEAF-C LOGO-4 */
+  --brand-navy: #0d2a4a;
+  --brand-navy-light: #164a6e;
+  --brand-navy-dark: #081e36;
+  /* Accent aliases — components use brand-orange / brand-gold class names */
+  --brand-orange: #ad8c53;
+  --brand-orange-light: #c8a45d;
+  --brand-orange-dark: #8a7042;
+  --brand-gold: #c8a45d;
+  --brand-bronze: #ad8c53;
+
+  /* Warm neutrals — primary surfaces */
+  --charcoal: #0d2a4a;
+  --charcoal-light: #164a6e;
+  --charcoal-muted: #3d5568;
+  --warm-white: #faf8f5;
+  --warm-cream: #f5f0e8;
+  --warm-sand: #ebe4d8;
+
+  /* Semantic tokens — bronze/gold accent, logo navy structure */
+  --background: var(--warm-white);
+  --foreground: #1a2433;
+  --heading: var(--brand-navy);
+  --primary: var(--brand-bronze);
+  --primary-foreground: #ffffff;
+  --accent: var(--brand-bronze);
+  --accent-foreground: #ffffff;
+  --muted: var(--warm-cream);
+  --muted-foreground: #5c5c5c;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --border: #d4cdc3;
+  --border-subtle: #e8e2d9;
+
+  /* Status */
+  --success: #15803d;
+  --warning: #b45309;
+  --error: #b91c1c;
+  --info: var(--charcoal-muted);
+
+  /* Typography scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Shadows — warm charcoal tint, not navy */
+  --shadow-sm: 0 1px 3px rgb(26 26 26 / 0.06);
+  --shadow-md: 0 4px 16px rgb(26 26 26 / 0.08);
+  --shadow-lg: 0 12px 40px rgb(26 26 26 / 0.12);
+  --shadow-glow: 0 0 28px rgb(173 140 83 / 0.35);
+  --shadow-card: 0 2px 8px rgb(26 26 26 / 0.05), 0 8px 24px rgb(26 26 26 / 0.06);
+
+  /* Gradients — navy / bronze / gold */
+  --gradient-hero: linear-gradient(
+    135deg,
+    var(--brand-navy-dark) 0%,
+    var(--brand-navy) 40%,
+    rgb(173 140 83 / 0.85) 100%
+  );
+  --gradient-hero-warm: linear-gradient(
+    160deg,
+    var(--warm-cream) 0%,
+    var(--warm-white) 50%,
+    rgb(173 140 83 / 0.08) 100%
+  );
+  --gradient-accent: linear-gradient(
+    90deg,
+    var(--brand-bronze) 0%,
+    var(--brand-gold) 100%
+  );
+  --gradient-cta: linear-gradient(
+    135deg,
+    var(--brand-orange-dark) 0%,
+    var(--brand-bronze) 50%,
+    var(--brand-gold) 100%
+  );
+  --gradient-cta-navy: linear-gradient(
+    135deg,
+    var(--brand-navy) 0%,
+    var(--brand-navy-light) 35%,
+    var(--brand-bronze) 70%,
+    var(--brand-gold) 100%
+  );
+  --gradient-subtle: linear-gradient(
+    180deg,
+    var(--warm-cream) 0%,
+    var(--background) 100%
+  );
+  --gradient-mesh: radial-gradient(
+      ellipse 80% 60% at 20% 40%,
+      rgb(173 140 83 / 0.14) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 80% 20%,
+      rgb(200 164 93 / 0.12) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 60% 80%,
+      rgb(13 42 74 / 0.08) 0%,
+      transparent 50%
+    );
+
+  /* Focus ring — WCAG visible focus */
+  --ring: 2px solid var(--brand-bronze);
+  --ring-offset: 2px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-heading: var(--heading);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-navy-light: var(--brand-navy-light);
+  --color-brand-navy-dark: var(--brand-navy-dark);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-light: var(--brand-orange-light);
+  --color-brand-orange-dark: var(--brand-orange-dark);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-bronze: var(--brand-bronze);
+  --color-charcoal: var(--charcoal);
+  --color-charcoal-light: var(--charcoal-light);
+  --color-charcoal-muted: var(--charcoal-muted);
+  --color-warm-white: var(--warm-white);
+  --color-warm-cream: var(--warm-cream);
+  --color-warm-sand: var(--warm-sand);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-montserrat);
+  --shadow-glow: var(--shadow-glow);
+  --shadow-card: var(--shadow-card);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
+
+/* Dark hero banners — explicit light text; do not use text-heading here */
+.hero-heading {
+  color: var(--warm-white);
+}
+
+/* Pattern overlays */
+.pattern-grid {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.pattern-grid-warm {
+  background-image:
+    linear-gradient(rgb(173 140 83 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(173 140 83 / 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.pattern-diamonds {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M0 20L20 0 40 20 20 40z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.pattern-dots {
+  background-image: radial-gradient(
+    rgb(173 140 83 / 0.12) 1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+}
+
+/* Section dividers */
+.section-divider {
+  height: 3px;
+  background: var(--gradient-accent);
+  border-radius: 2px;
+  width: 64px;
+}
+
+.section-divider-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-divider-navy {
+  height: 3px;
+  background: var(--brand-navy);
+  border-radius: 2px;
+  width: 64px;
+}
+
+.section-divider-duo {
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--brand-navy) 0%,
+    var(--brand-bronze) 100%
+  );
+  border-radius: 2px;
+  width: 64px;
+}
+
+/* Staggered fade-in animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
+
+.animate-delay-1 { animation-delay: 0.1s; }
+.animate-delay-2 { animation-delay: 0.2s; }
+.animate-delay-3 { animation-delay: 0.3s; }
+.animate-delay-4 { animation-delay: 0.4s; }
+.animate-delay-5 { animation-delay: 0.5s; }
+
+/* Hero emblem — justice scale animations */
+@keyframes justice-beam-sway {
+  0%,
+  100% {
+    transform: rotate(-1.4deg);
+  }
+  50% {
+    transform: rotate(1.4deg);
+  }
+}
+
+@keyframes justice-pan-level {
+  0%,
+  100% {
+    transform: rotate(1.4deg);
+  }
+  50% {
+    transform: rotate(-1.4deg);
+  }
+}
+
+@keyframes hero-emblem-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes hero-particle-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate(6px, -10px) scale(1.15);
+    opacity: 0.7;
+  }
+}
+
+.hero-emblem {
+  aspect-ratio: 1 / 1.05;
+  animation: hero-emblem-float 7s ease-in-out infinite;
+}
+
+.justice-beam-sway {
+  animation: justice-beam-sway 6s ease-in-out infinite;
+  transform-origin: 0 0;
+}
+
+.justice-pan-level {
+  animation: justice-pan-level 6s ease-in-out infinite;
+  transform-origin: 0 -8px;
+}
+
+.hero-emblem-glass {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 8px 32px rgb(0 0 0 / 0.25);
+}
+
+.hero-particle {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgb(200 164 93 / 0.9) 0%, transparent 70%);
+}
+
+.hero-particle-1 {
+  top: 18%;
+  left: 12%;
+  width: 4px;
+  height: 4px;
+  animation: hero-particle-drift 6s ease-in-out infinite;
+}
+
+.hero-particle-2 {
+  top: 28%;
+  right: 14%;
+  width: 3px;
+  height: 3px;
+  animation: hero-particle-drift 7.5s ease-in-out infinite 1s;
+}
+
+.hero-particle-3 {
+  bottom: 22%;
+  left: 20%;
+  width: 2.5px;
+  height: 2.5px;
+  animation: hero-particle-drift 8s ease-in-out infinite 2s;
+}
+
+.hero-particle-4 {
+  bottom: 30%;
+  right: 18%;
+  width: 3.5px;
+  height: 3.5px;
+  animation: hero-particle-drift 5.5s ease-in-out infinite 0.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-emblem,
+  .justice-beam-sway,
+  .justice-pan-level,
+  .hero-particle {
+    animation: none;
+  }
+}
+
+/* Card hover lift */
+.hover-lift {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Table styling */
+.table-styled thead tr {
+  background: linear-gradient(
+    90deg,
+    var(--brand-navy) 0%,
+    var(--brand-navy-light) 55%,
+    var(--charcoal-light) 100%
+  );
+  color: white;
+}
+
+.table-styled thead th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  text-align: left;
+}
+
+.table-styled tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color 0.15s ease;
+}
+
+.table-styled tbody tr:hover {
+  background: rgb(173 140 83 / 0.06);
+}
+
+.table-styled tbody td {
+  padding: 0.875rem 1.5rem;
+}
+
+/* KPI accent borders */
+.kpi-accent-orange { border-left: 4px solid var(--brand-bronze); }
+.kpi-accent-gold { border-left: 4px solid var(--brand-gold); }
+.kpi-accent-charcoal { border-left: 4px solid var(--charcoal); }
+.kpi-accent-navy { border-left: 4px solid var(--brand-navy); }
+
+/* Focus visible for all interactive elements */
+:focus-visible {
+  outline: var(--ring);
+  outline-offset: var(--ring-offset);
+}
