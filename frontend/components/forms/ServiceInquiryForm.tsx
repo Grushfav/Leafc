@@ -89,9 +89,11 @@ type ServiceInquiryFormProps = {
 function FormProgressBar({
   currentStep,
   totalSteps,
+  compact = false,
 }: {
   currentStep: number;
   totalSteps: number;
+  compact?: boolean;
 }) {
   const progress = Math.round((currentStep / totalSteps) * 100);
 
@@ -106,7 +108,7 @@ function FormProgressBar({
             {STEPS[currentStep - 1]?.label}
           </p>
         </div>
-        <p className="font-heading text-3xl font-extrabold tabular-nums text-brand-orange drop-shadow-sm">
+        <p className="font-heading text-3xl font-extrabold tabular-nums text-brand-navy drop-shadow-sm">
           {progress}
           <span className="text-lg text-brand-orange/70">%</span>
         </p>
@@ -129,7 +131,7 @@ function FormProgressBar({
         />
       </div>
 
-      <ol className="mt-4 grid grid-cols-3 gap-2">
+      <ol className={cn("mt-4 grid grid-cols-3", compact ? "gap-1.5" : "gap-2")}>
         {STEPS.map((step) => {
           const isComplete = step.id < currentStep;
           const isActive = step.id === currentStep;
@@ -138,7 +140,8 @@ function FormProgressBar({
             <li
               key={step.id}
               className={cn(
-                "flex items-center gap-2 rounded-xl border px-3 py-2 transition-all duration-300",
+                "flex min-w-0 items-center justify-center gap-2 rounded-xl border transition-all duration-300",
+                compact ? "flex-col px-1.5 py-2" : "px-3 py-2",
                 isActive &&
                   "border-brand-orange bg-brand-orange/10 shadow-glow ring-2 ring-brand-orange/30",
                 isComplete &&
@@ -150,7 +153,8 @@ function FormProgressBar({
             >
               <span
                 className={cn(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-heading text-xs font-bold transition-colors",
+                  "flex shrink-0 items-center justify-center rounded-full font-heading text-xs font-bold transition-colors",
+                  compact ? "h-6 w-6" : "h-7 w-7",
                   isActive && "bg-brand-orange text-white shadow-sm",
                   isComplete && "bg-brand-orange/20 text-brand-orange",
                   !isActive && !isComplete && "bg-warm-cream text-muted-foreground",
@@ -161,7 +165,8 @@ function FormProgressBar({
               </span>
               <span
                 className={cn(
-                  "hidden font-heading text-xs font-semibold sm:inline",
+                  "font-heading text-[10px] font-semibold leading-none sm:text-xs",
+                  compact && "truncate",
                   isActive && "text-heading",
                 )}
               >
@@ -336,7 +341,11 @@ export function ServiceInquiryForm({
 
   return (
     <form id={id} onSubmit={handleSubmit} className={className} noValidate>
-      <FormProgressBar currentStep={step} totalSteps={STEPS.length} />
+      <FormProgressBar
+        currentStep={step}
+        totalSteps={STEPS.length}
+        compact={compact}
+      />
 
       {step === 1 && (
         <div className="animate-fade-in-up">
@@ -529,7 +538,7 @@ export function ServiceInquiryForm({
         </div>
       )}
 
-      <div className="mt-8 flex flex-wrap items-center gap-3">
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         {step > 1 && (
           <Button
             type="button"

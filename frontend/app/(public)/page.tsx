@@ -8,7 +8,7 @@ import {
   Card,
   CardBody,
 } from "@/components/ui/Card";
-import { IconBriefcase, IconBuilding, IconGlobe, IconGraduationCap, IconLock, IconPulse, IconScale, IconSearch, IconUser } from "@/components/icons/MonoIcons";
+import { IconBriefcase, IconBuilding, IconClipboard, IconGlobe, IconGraduationCap, IconLock, IconMonitor, IconPulse, IconScale, IconSearch } from "@/components/icons/MonoIcons";
 import { cn } from "@/lib/utils";
 
 const services = [
@@ -101,36 +101,43 @@ const trustItems = [
   },
 ];
 
-const clientSegments = [
+const industries = [
   {
-    title: "Private Clients",
-    subtitle: "Individuals & families",
+    title: "Insurance & Financial Services",
+    body: "Risk assessment, fraud detection, and compliance audits.",
+    Icon: IconScale,
     accent: "navy" as const,
-    Icon: IconUser,
-    items: [
-      "Personal due diligence & background checks",
-      "Discreet investigative support",
-      "Integrity & polygraph screening",
-      "Confidential advisory consultations",
-    ],
   },
   {
-    title: "Corporate Clients",
-    subtitle: "Enterprises & institutions",
-    accent: "orange" as const,
+    title: "Banking & Investment Firms",
+    body: "Integrity screening, internal investigations, and governance reviews.",
     Icon: IconBuilding,
-    items: [
-      "Compliance frameworks & governance reviews",
-      "Internal investigations & fraud response",
-      "Workforce training & certification",
-      "Enterprise risk & integrity programmes",
-    ],
+    accent: "orange" as const,
   },
-];
-
-const serveStats = [
-  { value: "Same rigour", label: "Private or enterprise mandates" },
-  { value: "Global", label: "Multi-jurisdictional coverage" },
+  {
+    title: "Auditing & Accounting Firms",
+    body: "Due diligence support and forensic verification.",
+    Icon: IconClipboard,
+    accent: "navy" as const,
+  },
+  {
+    title: "Business Process Outsourcing",
+    body: "Workforce integrity testing and operational compliance.",
+    Icon: IconMonitor,
+    accent: "orange" as const,
+  },
+  {
+    title: "Corporate Enterprises",
+    body: "Executive vetting, security audits, and training programs.",
+    Icon: IconBriefcase,
+    accent: "navy" as const,
+  },
+  {
+    title: "Government Agencies",
+    body: "Regulatory compliance, polygraph examinations, and confidential investigations.",
+    Icon: IconGlobe,
+    accent: "orange" as const,
+  },
 ];
 
 const polygraphServices = [
@@ -146,8 +153,23 @@ export default function HomePage() {
       <HomeHero />
 
       {/* Services offered — photo cards */}
-      <section className="relative bg-background py-20 sm:py-24">
-        <div className="pattern-dots absolute inset-0 opacity-50" aria-hidden />
+      <section className="relative overflow-hidden bg-background py-20 sm:py-24">
+        <Image
+          src="/services_background image.jpeg"
+          alt=""
+          fill
+          className="object-cover object-center opacity-55 mix-blend-multiply"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-background/40" aria-hidden />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-warm-white via-warm-white/75 to-transparent"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-warm-white/70 to-warm-cream"
+          aria-hidden
+        />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="section-divider-duo section-divider-center" aria-hidden />
@@ -284,43 +306,20 @@ export default function HomePage() {
               </h2>
               <div className="section-divider-duo mt-4" aria-hidden />
               <p className="mt-6 leading-relaxed text-muted-foreground">
-                Certified examiners deliver scientifically validated examinations
-                — governed by strict chain-of-custody and confidentiality
-                protocols.
+                Certified examiners conduct scientifically validated polygraph
+                examinations under rigorously enforced chain of custody and
+                confidentiality protocols. Every stage of the process, from
+                subject preparation through data analysis and reporting, follows
+                standardized procedures designed to eliminate bias, preserve
+                evidentiary integrity, and ensure legal admissibility. Examiners
+                are credentialed professionals whose methods are benchmarked
+                against international standards, and all documentation is
+                securely maintained to guarantee accuracy, transparency, and
+                confidentiality.
               </p>
-
-              <div className="mt-8 rounded-2xl border border-brand-orange/20 bg-surface/90 p-5 shadow-sm sm:p-6">
-                <div className="mb-4 flex items-center gap-3">
-                  <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-orange/25 bg-brand-orange/10 text-brand-orange"
-                    aria-hidden
-                  >
-                    <IconPulse className="h-5 w-5" />
-                  </span>
-                  <p className="font-heading text-xs font-bold uppercase tracking-[0.16em] text-brand-navy">
-                    Services offered
-                  </p>
-                </div>
-                <ul className="space-y-2">
-                  {polygraphServices.map((item) => (
-                    <li
-                      key={item}
-                      className="flex items-start gap-3 rounded-xl border border-border-subtle/80 bg-warm-cream/60 px-3.5 py-3 text-sm font-medium leading-snug text-charcoal transition-colors hover:border-brand-orange/25 hover:bg-brand-orange/[0.05]"
-                    >
-                      <span
-                        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[9px] font-bold text-white"
-                        aria-hidden
-                      >
-                        ✓
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
 
-            <div className="flex flex-col gap-5 lg:col-span-7">
+            <div className="lg:col-span-7">
               <div className="relative min-h-[280px] overflow-hidden rounded-3xl bg-surface shadow-card ring-1 ring-black/[0.04] sm:min-h-[360px] lg:min-h-[480px]">
                 <div className="absolute inset-x-0 top-0 z-10 h-1 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold" aria-hidden />
                 <Image
@@ -331,7 +330,40 @@ export default function HomePage() {
                   sizes="(max-width: 1024px) 100vw, 58vw"
                 />
               </div>
-              <Link href="/polygraph" className="block sm:self-end">
+            </div>
+
+            <div className="rounded-2xl border border-brand-orange/20 bg-surface/90 p-5 shadow-sm sm:p-6 lg:col-span-12">
+              <div className="mb-4 flex items-center gap-3">
+                <span
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-orange/25 bg-brand-orange/10 text-brand-orange"
+                  aria-hidden
+                >
+                  <IconPulse className="h-5 w-5" />
+                </span>
+                <p className="font-heading text-xs font-bold uppercase tracking-[0.16em] text-brand-navy">
+                  Services offered
+                </p>
+              </div>
+              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {polygraphServices.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 rounded-xl border border-border-subtle/80 bg-warm-cream/60 px-3.5 py-3 text-sm font-medium leading-snug text-charcoal transition-colors hover:border-brand-orange/25 hover:bg-brand-orange/[0.05]"
+                  >
+                    <span
+                      className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[9px] font-bold text-white"
+                      aria-hidden
+                    >
+                      ✓
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex justify-center lg:col-span-12">
+              <Link href="/polygraph" className="block w-full sm:w-auto">
                 <Button variant="accent" size="lg" className="w-full sm:w-auto">
                   Request Examination
                 </Button>
@@ -341,7 +373,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Private & corporate clients */}
+      {/* Industries we serve */}
       <section className="relative overflow-hidden py-20 sm:py-24">
         <div
           className="absolute inset-0 bg-gradient-to-br from-warm-cream via-warm-white to-brand-orange/10"
@@ -353,130 +385,83 @@ export default function HomePage() {
           aria-hidden
         />
         <div className="pattern-grid-warm absolute inset-0 opacity-50" aria-hidden />
-        <div
-          className="absolute -right-24 top-10 h-72 w-72 rounded-full bg-brand-orange/15 blur-3xl"
-          aria-hidden
-        />
-        <div
-          className="absolute -left-16 bottom-0 h-64 w-64 rounded-full bg-brand-navy/10 blur-3xl"
-          aria-hidden
-        />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
-            <div className="lg:col-span-5">
-              <Badge variant="accent" className="mb-4 shadow-sm">
-                Who We Serve
-              </Badge>
-              <h2 className="font-heading text-3xl font-bold text-brand-navy sm:text-4xl lg:text-[2.5rem] lg:leading-tight">
-                Institutional &{" "}
-                <span className="bg-gradient-to-r from-brand-orange to-brand-gold bg-clip-text text-transparent">
-                  Corporate
-                </span>{" "}
-                Solutions
-              </h2>
-              <div className="section-divider-duo mt-4" aria-hidden />
-              <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-                LEAF‑C supports individuals, families, and organizations with
-                the same uncompromising rigor, providing tailored investigative,
-                compliance, and training solutions whether the mandate is personal
-                or enterprise‑wide.
-              </p>
-
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                {serveStats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="rounded-2xl border border-brand-navy/10 bg-surface/80 p-4 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md"
-                  >
-                    <p className="font-heading text-sm font-bold uppercase tracking-wide text-brand-orange">
-                      {stat.value}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              <Link href="/get-started" className="mt-8 inline-block">
-                <Button variant="accent" size="lg" className="shadow-glow">
-                  Request services
-                </Button>
-              </Link>
+          <div className="mx-auto max-w-3xl text-center">
+            <Badge variant="accent" className="mb-4 shadow-sm">
+              Who We Serve
+            </Badge>
+            <h2 className="font-heading text-3xl font-bold text-brand-navy sm:text-4xl">
+              Industries We Serve
+            </h2>
+            <div className="section-divider-duo section-divider-center mt-4" aria-hidden />
+            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+              LEAF‑C supports individuals, families, and institutions with the
+              same investigative, compliance, and integrity testing rigor,
+              across sectors, and to international standards of accuracy,
+              confidentiality, and accountability.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <span className="rounded-full border border-brand-navy/15 bg-surface/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-brand-navy">
+                Private clients
+              </span>
+              <span className="rounded-full border border-brand-orange/25 bg-surface/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-brand-orange">
+                Institutional partners
+              </span>
             </div>
+          </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:col-span-7">
-              {clientSegments.map((segment, index) => (
+          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {industries.map((industry, index) => {
+              const accent = serviceAccentStyles[industry.accent];
+
+              return (
                 <article
-                  key={segment.title}
+                  key={industry.title}
                   className={[
                     "group relative overflow-hidden rounded-3xl border bg-surface shadow-card transition-all duration-500 hover:-translate-y-1 hover:shadow-xl",
-                    segment.accent === "navy"
-                      ? "border-brand-navy/15 hover:border-brand-navy/30 hover:shadow-[0_12px_40px_rgb(0_38_99_/_0.12)]"
+                    industry.accent === "navy"
+                      ? "border-brand-navy/15 hover:border-brand-navy/30"
                       : "border-brand-orange/20 hover:border-brand-orange/40 hover:shadow-glow",
-                    "animate-fade-in-up",
-                    index === 1 ? "animate-delay-1 sm:mt-8" : "",
                   ].join(" ")}
                 >
                   <div
-                    className={[
-                      "h-1.5 w-full",
-                      segment.accent === "navy"
-                        ? "bg-gradient-to-r from-brand-navy via-brand-navy-light to-brand-orange"
-                        : "bg-gradient-to-r from-brand-orange via-brand-gold to-brand-orange-light",
-                    ].join(" ")}
+                    className={cn("h-1.5 w-full bg-gradient-to-r", accent.bar)}
                     aria-hidden
                   />
-                  <div className="p-6 sm:p-7">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-brand-orange">
-                          {segment.subtitle}
-                        </p>
-                        <h3 className="mt-2 font-heading text-xl font-bold text-charcoal">
-                          {segment.title}
-                        </h3>
-                      </div>
+                  <div className={cn("bg-gradient-to-br p-6", accent.panel)}>
+                    <div className="flex items-start justify-between gap-3">
                       <span
-                        className={[
-                          "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border transition-transform duration-300 group-hover:scale-105",
-                          segment.accent === "navy"
-                            ? "border-brand-navy/15 bg-brand-navy/5 text-brand-navy"
-                            : "border-brand-orange/25 bg-brand-orange/10 text-brand-orange",
-                        ].join(" ")}
+                        className={cn(
+                          "flex h-12 w-12 items-center justify-center rounded-2xl border transition-transform duration-300 group-hover:scale-105",
+                          accent.icon,
+                        )}
                         aria-hidden
                       >
-                        <segment.Icon className="h-7 w-7" />
+                        <industry.Icon className="h-6 w-6" />
+                      </span>
+                      <span className="font-heading text-xs font-bold tabular-nums text-muted-foreground/70">
+                        {String(index + 1).padStart(2, "0")}
                       </span>
                     </div>
-
-                    <ul className="mt-6 space-y-3">
-                      {segment.items.map((item) => (
-                        <li
-                          key={item}
-                          className={[
-                            "flex items-start gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm text-muted-foreground transition-colors",
-                            segment.accent === "navy"
-                              ? "group-hover:border-brand-navy/10 group-hover:bg-brand-navy/[0.03]"
-                              : "group-hover:border-brand-orange/15 group-hover:bg-brand-orange/[0.04]",
-                          ].join(" ")}
-                        >
-                          <span
-                            className={[
-                              "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white",
-                              segment.accent === "navy" ? "bg-brand-navy" : "bg-brand-orange",
-                            ].join(" ")}
-                            aria-hidden
-                          >
-                            ✓
-                          </span>
-                          <span className="font-medium text-charcoal/85">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <h3 className="mt-5 font-heading text-lg font-bold text-brand-navy">
+                      {industry.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {industry.body}
+                    </p>
                   </div>
                 </article>
-              ))}
-            </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-12 flex justify-center">
+            <Link href="/get-started" className="block w-full sm:w-auto">
+              <Button variant="accent" size="lg" className="w-full shadow-glow sm:w-auto">
+                Request services
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -490,7 +475,7 @@ export default function HomePage() {
           className="object-cover object-center"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-surface/85" aria-hidden />
+        <div className="absolute inset-0 bg-surface/55" aria-hidden />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="section-divider-duo section-divider-center" aria-hidden />

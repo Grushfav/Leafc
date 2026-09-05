@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -37,13 +38,21 @@ export default function OperationsPage() {
   return (
     <>
       <section className="relative overflow-hidden bg-charcoal text-white">
-        <div className="pattern-diamonds absolute inset-0 opacity-30" aria-hidden />
+        <Image
+          src="/operations_background.jpeg"
+          alt=""
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-charcoal/65" aria-hidden />
         <div
-          className="absolute inset-0 bg-gradient-to-br from-charcoal-light via-charcoal to-brand-orange/20"
+          className="absolute inset-0 bg-gradient-to-r from-charcoal/80 via-charcoal/45 to-transparent"
           aria-hidden
         />
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <Badge variant="outline-navy" className="mb-4">Operations Division</Badge>
+          <Badge variant="accent" className="mb-4">Operations Division</Badge>
           <h1 className="hero-heading text-4xl font-bold sm:text-5xl">
             Investigations & Field Operations
           </h1>

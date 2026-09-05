@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 const VIDEO_SRC = "/Lady_justice_Video.mp4";
 const POSTER_SRC = "/hero-justice.svg";
 const HERO_MEDIA_CLASS =
-  "object-cover object-[55%_center] sm:object-[center_right]";
-const SLIDE_LEAD_SECONDS = 1.25;
+  "object-cover object-[64%_center] sm:object-[center_right]";
+const SLIDE_LEAD_SECONDS = 0.7;
 const INTRO_FALLBACK_MS = 16000;
 
 export function HomeHero() {
