@@ -87,7 +87,29 @@ export default function TrainingPage() {
             Upcoming Programmes
           </h2>
         </div>
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-5 grid max-w-5xl gap-5 text-sm leading-relaxed text-muted-foreground sm:grid-cols-2">
+          <p>
+            Our Training Division is dedicated to building professional capacity
+            in investigative methods, integrity testing, and compliance protocols.
+            We deliver structured programs that combine theoretical foundations
+            with practical simulations, ensuring participants gain both knowledge
+            and applied skills. Each course is designed to meet international
+            standards, equipping professionals with the tools to conduct
+            examinations, manage sensitive data, and uphold strict confidentiality
+            requirements.
+          </p>
+          <p>
+            Beyond technical instruction, we emphasize ethical practice and
+            organizational resilience. Our certified trainers guide participants
+            through real-world case studies, chain-of-custody procedures, and
+            advanced reporting techniques, preparing them to operate effectively
+            in high-stakes environments. Whether serving corporate clients,
+            government agencies, or financial institutions, the Training Division
+            ensures every graduate is ready to apply scientifically validated
+            methods with confidence and integrity.
+          </p>
+        </div>
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {programmes.map((prog) => (
             <Card key={prog.id} variant="elevated" className="flex flex-col">
               <CardHeader className="border-none">

@@ -68,7 +68,30 @@ export default function ConsultancyPage() {
       <section className="border-b border-border-subtle bg-warm-cream py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="font-heading text-lg font-semibold text-heading">Our Advisory Process</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-5 grid max-w-5xl gap-5 text-sm leading-relaxed text-muted-foreground sm:grid-cols-2">
+            <p>
+              Our Consultancy Division provides organizations with evidence-based
+              frameworks to strengthen governance, compliance, and risk
+              management. We design anti-fraud systems, conduct comprehensive
+              audits, and deliver policy advisory services that align with
+              international best practices. By combining technical expertise with
+              sector-specific insight, we help clients anticipate vulnerabilities,
+              implement robust safeguards, and maintain operational integrity
+              across complex environments.
+            </p>
+            <p>
+              Beyond compliance, we position consultancy as a strategic advantage.
+              Our specialists support corporations, financial institutions, and
+              government agencies in building resilient structures that withstand
+              regulatory scrutiny and market pressures. From due diligence
+              assessments to whistleblower system design, every solution is
+              tailored to reinforce transparency, accountability, and long-term
+              trust. The Consultancy Division ensures that clients are not only
+              protected against risk but also empowered to thrive in competitive
+              and regulated landscapes.
+            </p>
+          </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {processSteps.map((s) => (
               <div key={s.step} className="relative rounded-xl border border-border-subtle bg-surface p-5 hover-lift">
                 <span className="font-heading text-3xl font-bold text-brand-orange/30">{s.step}</span>

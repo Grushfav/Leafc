@@ -78,7 +78,30 @@ export default function OperationsPage() {
             Operational Capabilities
           </h2>
         </div>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-5 grid max-w-5xl gap-5 text-sm leading-relaxed text-muted-foreground sm:grid-cols-2">
+          <p>
+            Our Operations Division delivers specialized investigative and
+            compliance services designed to protect organizations from internal
+            and external threats. We conduct insurance and corporate
+            investigations, deploy intelligence and surveillance capabilities,
+            and apply advanced digital forensics to uncover critical evidence.
+            Each assignment is executed with precision, leveraging
+            technology-driven methodologies to ensure accuracy, reliability,
+            and confidentiality.
+          </p>
+          <p>
+            Beyond investigations, the division provides verification services
+            such as background checks and integrity assessments, enabling
+            clients to make informed decisions with confidence. Our operational
+            teams are trained to respond swiftly in high-risk environments,
+            maintaining strict chain-of-custody protocols and evidentiary
+            standards. Whether supporting corporations, financial institutions,
+            or government agencies, the Operations Division ensures that every
+            engagement strengthens organizational resilience and safeguards
+            reputational trust.
+          </p>
+        </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {capabilities.map((name) => (
             <Card key={name} variant="elevated">
               <CardBody className="py-4">

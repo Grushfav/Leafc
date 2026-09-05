@@ -30,6 +30,10 @@ export function HomeHero() {
     setRevealed(true);
   }, []);
 
+  const showVideoFrame = useCallback(() => {
+    setVideoReady(true);
+  }, []);
+
   const freezeLastFrame = useCallback(() => {
     if (frozenRef.current) return;
     frozenRef.current = true;
@@ -37,6 +41,7 @@ export function HomeHero() {
     if (video && !video.paused) {
       video.pause();
     }
+    setVideoReady(true);
     revealCard();
   }, [revealCard]);
 
@@ -74,6 +79,33 @@ export function HomeHero() {
     return () => window.clearTimeout(timeout);
   }, [reduceMotion, revealed, freezeLastFrame]);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || reduceMotion) return;
+
+    const reveal = () => {
+      video.playbackRate = PLAYBACK_RATE;
+      setVideoReady(true);
+    };
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      reveal();
+    }
+
+    if (video.ended || (video.paused && video.currentTime > 0)) {
+      freezeLastFrame();
+    }
+
+    video.addEventListener("loadeddata", reveal);
+    video.addEventListener("canplay", reveal);
+    video.addEventListener("playing", reveal);
+    return () => {
+      video.removeEventListener("loadeddata", reveal);
+      video.removeEventListener("canplay", reveal);
+      video.removeEventListener("playing", reveal);
+    };
+  }, [reduceMotion, freezeLastFrame]);
+
   return (
     <section className="relative min-h-[442px] overflow-hidden bg-charcoal sm:min-h-[493px]">
       {reduceMotion ? (
@@ -100,10 +132,12 @@ export function HomeHero() {
           aria-hidden
           onEnded={freezeLastFrame}
           onError={freezeLastFrame}
-          onPlaying={() => setVideoReady(true)}
+          onPlaying={showVideoFrame}
+          onCanPlay={showVideoFrame}
           onPlay={(event) => {
             const video = event.currentTarget;
             video.playbackRate = PLAYBACK_RATE;
+            showVideoFrame();
             const tick = () => {
               syncIntro();
               if (frozenRef.current || revealedRef.current) return;
@@ -117,9 +151,7 @@ export function HomeHero() {
           }}
           onLoadedData={(event) => {
             event.currentTarget.playbackRate = PLAYBACK_RATE;
-            if (!event.currentTarget.paused) {
-              setVideoReady(true);
-            }
+            showVideoFrame();
           }}
           onLoadedMetadata={(event) => {
             const duration = event.currentTarget.duration;
