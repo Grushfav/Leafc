@@ -10,7 +10,6 @@ const variants = {
   muted: "bg-warm-cream text-muted-foreground",
   success: "bg-success/10 text-success border border-success/20",
   warning: "bg-warning/10 text-warning border border-warning/20",
-  navy: "bg-brand-navy text-white",
   "outline-navy":
     "border border-brand-navy/30 bg-brand-navy/5 text-brand-navy",
 } as const;

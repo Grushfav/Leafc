@@ -85,9 +85,14 @@ export default function GetStartedPage() {
             </Card>
 
             <p className="mt-6 text-sm text-muted-foreground">
-              Already a client?{" "}
-              <Link href="/dashboard" className="font-medium text-brand-orange hover:underline">
-                Access the client portal
+              New here?{" "}
+              <Link href="/signup" className="font-medium text-brand-orange hover:underline">
+                Create an account
+              </Link>
+              {" · "}
+              Already registered?{" "}
+              <Link href="/login" className="font-medium text-brand-orange hover:underline">
+                Sign in
               </Link>
             </p>
           </div>

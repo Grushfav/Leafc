@@ -1,6 +1,8 @@
 import { Router } from "express";
+import { desc, eq } from "drizzle-orm";
 import { serviceInquiries } from "../db/schema.js";
 import { db } from "../db/index.js";
+import { isStaffRole, requireAuth } from "../middleware/auth.js";
 
 export const inquiriesRouter = Router();
 
@@ -128,5 +130,52 @@ inquiriesRouter.post("/", async (req, res) => {
     res.status(500).json({
       error: "Unable to submit inquiry right now. Please try again shortly.",
     });
+  }
+});
+
+inquiriesRouter.get("/", requireAuth, async (req, res) => {
+  try {
+    if (isStaffRole(req.auth!.role)) {
+      const rows = await db
+        .select({
+          id: serviceInquiries.id,
+          referenceNumber: serviceInquiries.referenceNumber,
+          fullName: serviceInquiries.fullName,
+          email: serviceInquiries.email,
+          organization: serviceInquiries.organization,
+          clientType: serviceInquiries.clientType,
+          serviceInterest: serviceInquiries.serviceInterest,
+          status: serviceInquiries.status,
+          createdAt: serviceInquiries.createdAt,
+        })
+        .from(serviceInquiries)
+        .orderBy(desc(serviceInquiries.createdAt))
+        .limit(50);
+
+      res.json({ inquiries: rows });
+      return;
+    }
+
+    const rows = await db
+      .select({
+        id: serviceInquiries.id,
+        referenceNumber: serviceInquiries.referenceNumber,
+        fullName: serviceInquiries.fullName,
+        email: serviceInquiries.email,
+        organization: serviceInquiries.organization,
+        clientType: serviceInquiries.clientType,
+        serviceInterest: serviceInquiries.serviceInterest,
+        status: serviceInquiries.status,
+        createdAt: serviceInquiries.createdAt,
+      })
+      .from(serviceInquiries)
+      .where(eq(serviceInquiries.email, req.auth!.email))
+      .orderBy(desc(serviceInquiries.createdAt))
+      .limit(50);
+
+    res.json({ inquiries: rows });
+  } catch (error) {
+    console.error("Failed to list inquiries:", error);
+    res.status(500).json({ error: "Unable to load inquiries." });
   }
 });

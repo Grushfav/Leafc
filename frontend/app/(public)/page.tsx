@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { HomeHero } from "@/components/layout/HomeHero";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 import {
   Card,
@@ -100,14 +101,6 @@ const trustItems = [
   },
 ];
 
-const partners = [
-  "Future Hub Alliance",
-  "International Compliance Board",
-  "Regional Development Bank",
-  "National Justice Institute",
-  "Integrity Reform Initiative",
-];
-
 const clientSegments = [
   {
     title: "Private Clients",
@@ -150,54 +143,7 @@ const polygraphServices = [
 export default function HomePage() {
   return (
     <>
-      {/* Hero — tech background with readable text column */}
-      <section className="relative min-h-[442px] overflow-hidden bg-charcoal sm:min-h-[493px]">
-        <Image
-          src="/hero-justice.svg"
-          alt=""
-          fill
-          priority
-          className="object-cover object-[center_right]"
-          sizes="100vw"
-        />
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-warm-white/95 from-0% via-warm-white/75 via-[38%] to-transparent to-[58%]"
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-7xl px-4 pt-[5.1rem] pb-[4.25rem] sm:px-6 sm:pt-[6.8rem] sm:pb-[5.1rem] lg:px-8">
-          <div className="max-w-2xl animate-fade-in-up rounded-2xl bg-warm-white/80 p-5 shadow-lg sm:p-7 lg:max-w-xl">
-            <Badge variant="accent" className="mb-5">
-              Integrity & Excellence
-            </Badge>
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-brand-navy sm:text-4xl lg:text-5xl">
-              Integrity. Insight. Innovation.
-            </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-brand-navy/80 sm:text-lg">
-              LEAF‑C provides multidisciplinary investigative, compliance, and
-              training services, combining institutional rigor with deep
-              expertise to support governments, enterprises, and justice partners
-              worldwide.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href="/get-started">
-                <Button variant="accent" size="md">
-                  Get Started
-                </Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button variant="secondary" size="md">
-                  Access Client Portal
-                </Button>
-              </Link>
-              <Link href="/consultancy">
-                <Button variant="outline" size="md">
-                  Explore Divisions
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HomeHero />
 
       {/* Services offered — photo cards */}
       <section className="relative bg-background py-20 sm:py-24">
@@ -622,25 +568,6 @@ export default function HomePage() {
               </p>
               <ServiceInquiryForm className="mt-6" compact />
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Partner strip */}
-      <section className="border-y border-border-subtle bg-surface py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-center font-heading text-xs font-semibold uppercase tracking-widest text-brand-navy">
-            Trusted by Leading Institutions
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-8">
-            {partners.map((partner) => (
-              <span
-                key={partner}
-                className="rounded-lg border border-brand-navy/15 bg-warm-white px-5 py-2.5 font-heading text-sm font-medium text-charcoal/70 transition-colors hover:border-brand-navy/30 hover:text-brand-navy"
-              >
-                {partner}
-              </span>
-            ))}
           </div>
         </div>
       </section>

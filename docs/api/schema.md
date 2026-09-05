@@ -12,15 +12,19 @@ divisions ──┬── users
 users ──┬── cases (assigned / client)
         ├── documents
         ├── enrollments
+        ├── training_sessions (createdBy)
         ├── polygraph_sessions (examiner)
         ├── risk_assessments
         └── audit_logs
 
 cases ──┬── documents
         ├── polygraph_sessions
-        └── risk_assessments
+        ├── risk_assessments
+        ├── case_assignments
+        └── case_notes
 
-training_programs ── enrollments
+training_programs ──┬── enrollments
+                    └── training_sessions
 ```
 
 ## Tables
@@ -32,11 +36,14 @@ training_programs ── enrollments
 | id | serial | PK |
 | name | text | Required |
 | email | text | Unique |
-| role | enum | `admin`, `investigator`, `client`, `trainer`, `polygraph_examiner` |
-| division_id | integer | FK → divisions |
-| password_hash | text | Nullable until auth implemented |
+| role | enum | `admin`, `senior_agent`, `agent`, `customer` |
+| customer_kind | enum | `individual`, `organization` — customers only |
+| organization_name | text | Required for organisation customers |
+| password_hash | text | bcrypt hash |
+| division_id | integer | FK → divisions (optional) |
 | is_active | boolean | Default true |
 | last_login_at | timestamp | Nullable |
+| avatar_url | text | Public path to profile photo (`/uploads/avatars/...`) |
 | created_at | timestamp | Auto |
 | updated_at | timestamp | Auto |
 
@@ -59,16 +66,38 @@ training_programs ── enrollments
 | reference_number | text | Unique (e.g. INV-2026-0412) |
 | title | text | Required |
 | description | text | Nullable |
-| status | enum | `draft`, `active`, `on_hold`, `closed`, `archived` |
+| status | text | `new`, `urgent`, `in_progress`, `paused`, `completed` |
 | priority | enum | `low`, `medium`, `high`, `critical` |
 | division_id | integer | FK → divisions |
-| assigned_to_id | integer | FK → users (investigator) |
+| assigned_to_id | integer | FK → users (lead assigned agent) |
 | client_id | integer | FK → users |
 | jurisdiction | text | Nullable |
 | opened_at | timestamp | Nullable |
 | closed_at | timestamp | Nullable |
 | created_at | timestamp | Auto |
 | updated_at | timestamp | Auto |
+
+### case_assignments
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | serial | PK |
+| case_id | integer | FK → cases |
+| user_id | integer | FK → users (`senior_agent` or `agent`) |
+| assigned_by_id | integer | FK → users |
+| created_at | timestamp | Auto |
+
+Unique constraint on `(case_id, user_id)`.
+
+### case_notes
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | serial | PK |
+| case_id | integer | FK → cases |
+| author_id | integer | FK → users |
+| body | text | Notation text |
+| created_at | timestamp | Auto, append-only |
 
 ### documents
 
@@ -119,6 +148,25 @@ training_programs ── enrollments
 | notes | text | Nullable |
 
 Unique constraint on `(program_id, user_id)`.
+
+### training_sessions
+
+Dated offering of a training session. Standalone sessions are allowed (`program_id` nullable) so admins can schedule without catalogue CRUD.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | serial | PK |
+| program_id | integer | FK → training_programs (nullable) |
+| title | text | Required |
+| description | text | Nullable |
+| scheduled_at | timestamp | Required session date/time |
+| location | text | Nullable venue |
+| duration_days | integer | Nullable length in days |
+| max_seats | integer | Nullable capacity |
+| status | enum | `scheduled`, `cancelled`, `completed` |
+| created_by_id | integer | FK → users |
+| created_at | timestamp | Auto |
+| updated_at | timestamp | Auto |
 
 ### polygraph_sessions
 

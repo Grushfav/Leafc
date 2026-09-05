@@ -1,49 +1,38 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import {
   Card,
   CardBody,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
+import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 
 const programmes = [
   {
     id: "TRN-001",
     title: "Forensic Investigation Fundamentals",
     duration: "5 days",
-    seats: "12 / 20",
     level: "Foundation",
-    icon: "🔬",
   },
   {
     id: "TRN-002",
     title: "International Compliance & AML",
     duration: "3 days",
-    seats: "18 / 25",
     level: "Intermediate",
-    icon: "📋",
   },
   {
     id: "TRN-003",
     title: "Ethics in Public Service",
     duration: "2 days",
-    seats: "8 / 15",
     level: "Foundation",
-    icon: "⚖",
   },
   {
     id: "TRN-004",
     title: "Advanced Digital Forensics",
     duration: "10 days",
-    seats: "6 / 10",
     level: "Advanced",
-    icon: "💻",
   },
 ];
 
@@ -92,41 +81,20 @@ export default function TrainingPage() {
               </h2>
             </div>
             <div className="mt-6 grid gap-6 sm:grid-cols-2">
-              {programmes.map((prog) => {
-                const [filled, total] = prog.seats.split(" / ").map(Number);
-                const pct = (filled / total) * 100;
-                return (
+              {programmes.map((prog) => (
                   <Card key={prog.id} variant="elevated" className="flex flex-col">
-                    <CardHeader className="border-none pb-0">
+                    <CardHeader className="border-none">
                       <div className="flex items-start justify-between gap-2">
-                        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-orange/10 text-2xl" aria-hidden>
-                          {prog.icon}
-                        </span>
                         <Badge variant="outline">{prog.level}</Badge>
                       </div>
                       <CardTitle className="mt-3">{prog.title}</CardTitle>
                       <CardDescription>
-                        {prog.duration} · {prog.seats} seats filled
+                        {prog.duration}
                       </CardDescription>
                       <span className="font-mono text-xs text-muted-foreground">{prog.id}</span>
                     </CardHeader>
-                    <CardFooter className="mt-auto border-none">
-                      <div className="w-full">
-                        <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-                          <span>Enrollment</span>
-                          <span>{Math.round(pct)}%</span>
-                        </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-warm-cream">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-brand-orange to-brand-gold transition-all duration-500"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-                    </CardFooter>
                   </Card>
-                );
-              })}
+              ))}
             </div>
           </div>
 
@@ -138,20 +106,8 @@ export default function TrainingPage() {
                   Register interest for upcoming training sessions.
                 </CardDescription>
               </CardHeader>
-              <CardBody className="space-y-4">
-                <Input label="Full Name" placeholder="Participant name" />
-                <Input label="Organisation" placeholder="Employer / agency" />
-                <Select
-                  label="Programme"
-                  placeholder="Select programme"
-                  options={programmes.map((p) => ({
-                    value: p.id,
-                    label: p.title,
-                  }))}
-                />
-                <Button variant="accent" className="w-full">
-                  Submit Enrollment
-                </Button>
+              <CardBody>
+                <ServiceInquiryForm compact initialServiceInterest="training" />
               </CardBody>
             </Card>
 
@@ -172,8 +128,8 @@ export default function TrainingPage() {
               </CardBody>
             </Card>
 
-            <Link href="/dashboard" className="block text-center text-sm font-medium text-brand-orange hover:underline">
-              Manage enrollments →
+            <Link href="/signup" className="block text-center text-sm font-medium text-brand-orange hover:underline">
+              Create an account →
             </Link>
           </div>
         </div>

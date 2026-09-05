@@ -1,15 +1,12 @@
 import Link from "next/link";
+import { DIVISION_LINKS, SITE_EXPANSION } from "@/lib/nav";
 
 const footerLinks = {
-  divisions: [
-    { href: "/consultancy", label: "Consultancy" },
-    { href: "/operations", label: "Operations" },
-    { href: "/training", label: "Training" },
-    { href: "/polygraph", label: "Polygraph Unit" },
-  ],
+  divisions: DIVISION_LINKS,
   company: [
     { href: "/get-started", label: "Get Started" },
-    { href: "/dashboard", label: "Client Portal" },
+    { href: "/signup", label: "Sign up" },
+    { href: "/login", label: "Sign in" },
   ],
   governance: [
     { href: "#", label: "Privacy Policy" },
@@ -58,9 +55,9 @@ export function SiteFooter() {
               </p>
               <div className="section-divider-duo mt-3" aria-hidden />
               <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/75">
-                Law Enforcement Assistance & Forensic Consultancy — delivering
-                investigative excellence and compliance solutions for public and
-                private sector clients worldwide.
+                {SITE_EXPANSION} — delivering investigative excellence and
+                compliance solutions for public and private sector clients
+                worldwide.
               </p>
             </div>
 

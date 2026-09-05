@@ -15,10 +15,9 @@ import { relations } from "drizzle-orm";
 
 export const userRoleEnum = pgEnum("user_role", [
   "admin",
-  "investigator",
-  "client",
-  "trainer",
-  "polygraph_examiner",
+  "senior_agent",
+  "agent",
+  "customer",
 ]);
 
 export const divisionTypeEnum = pgEnum("division_type", [
@@ -26,14 +25,6 @@ export const divisionTypeEnum = pgEnum("division_type", [
   "operations",
   "training",
   "polygraph",
-]);
-
-export const caseStatusEnum = pgEnum("case_status", [
-  "draft",
-  "active",
-  "on_hold",
-  "closed",
-  "archived",
 ]);
 
 export const casePriorityEnum = pgEnum("case_priority", [
@@ -56,6 +47,12 @@ export const enrollmentStatusEnum = pgEnum("enrollment_status", [
   "in_progress",
   "completed",
   "cancelled",
+]);
+
+export const trainingSessionStatusEnum = pgEnum("training_session_status", [
+  "scheduled",
+  "cancelled",
+  "completed",
 ]);
 
 export const polygraphSessionStatusEnum = pgEnum("polygraph_session_status", [
@@ -87,6 +84,11 @@ export const inquiryClientTypeEnum = pgEnum("inquiry_client_type", [
   "ngo",
 ]);
 
+export const customerKindEnum = pgEnum("customer_kind", [
+  "individual",
+  "organization",
+]);
+
 export const inquiryServiceInterestEnum = pgEnum("inquiry_service_interest", [
   "consultancy",
   "operations",
@@ -113,9 +115,12 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  role: userRoleEnum("role").notNull().default("client"),
+  role: userRoleEnum("role").notNull().default("customer"),
+  customerKind: customerKindEnum("customer_kind"),
+  organizationName: text("organization_name"),
   divisionId: integer("division_id").references(() => divisions.id),
   passwordHash: text("password_hash"),
+  avatarUrl: text("avatar_url"),
   isActive: boolean("is_active").notNull().default(true),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -129,7 +134,7 @@ export const cases = pgTable("cases", {
   referenceNumber: text("reference_number").notNull().unique(),
   title: text("title").notNull(),
   description: text("description"),
-  status: caseStatusEnum("status").notNull().default("draft"),
+  status: text("status").notNull().default("new"),
   priority: casePriorityEnum("priority").notNull().default("medium"),
   divisionId: integer("division_id")
     .references(() => divisions.id)
@@ -141,6 +146,36 @@ export const cases = pgTable("cases", {
   closedAt: timestamp("closed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const caseAssignments = pgTable(
+  "case_assignments",
+  {
+    id: serial("id").primaryKey(),
+    caseId: integer("case_id")
+      .references(() => cases.id)
+      .notNull(),
+    userId: integer("user_id")
+      .references(() => users.id)
+      .notNull(),
+    assignedById: integer("assigned_by_id").references(() => users.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("case_assignments_case_user_idx").on(table.caseId, table.userId),
+  ],
+);
+
+export const caseNotes = pgTable("case_notes", {
+  id: serial("id").primaryKey(),
+  caseId: integer("case_id")
+    .references(() => cases.id)
+    .notNull(),
+  authorId: integer("author_id")
+    .references(() => users.id)
+    .notNull(),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // ─── Documents ───────────────────────────────────────────────────────────────
@@ -205,6 +240,23 @@ export const enrollments = pgTable(
     ),
   ],
 );
+
+export const trainingSessions = pgTable("training_sessions", {
+  id: serial("id").primaryKey(),
+  programId: integer("program_id").references(() => trainingPrograms.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  scheduledAt: timestamp("scheduled_at").notNull(),
+  location: text("location"),
+  durationDays: integer("duration_days"),
+  maxSeats: integer("max_seats"),
+  status: trainingSessionStatusEnum("status").notNull().default("scheduled"),
+  createdById: integer("created_by_id")
+    .references(() => users.id)
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 // ─── Polygraph Sessions ────────────────────────────────────────────────────────
 
@@ -284,8 +336,11 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   assignedCases: many(cases, { relationName: "assignedCases" }),
   clientCases: many(cases, { relationName: "clientCases" }),
+  caseAssignments: many(caseAssignments),
+  caseNotes: many(caseNotes),
   documents: many(documents),
   enrollments: many(enrollments),
+  createdTrainingSessions: many(trainingSessions),
   polygraphSessions: many(polygraphSessions),
   riskAssessments: many(riskAssessments),
   auditLogs: many(auditLogs),
@@ -315,6 +370,33 @@ export const casesRelations = relations(cases, ({ one, many }) => ({
   documents: many(documents),
   polygraphSessions: many(polygraphSessions),
   riskAssessments: many(riskAssessments),
+  assignments: many(caseAssignments),
+  notes: many(caseNotes),
+}));
+
+export const caseAssignmentsRelations = relations(
+  caseAssignments,
+  ({ one }) => ({
+    case: one(cases, {
+      fields: [caseAssignments.caseId],
+      references: [cases.id],
+    }),
+    user: one(users, {
+      fields: [caseAssignments.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const caseNotesRelations = relations(caseNotes, ({ one }) => ({
+  case: one(cases, {
+    fields: [caseNotes.caseId],
+    references: [cases.id],
+  }),
+  author: one(users, {
+    fields: [caseNotes.authorId],
+    references: [users.id],
+  }),
 }));
 
 export const documentsRelations = relations(documents, ({ one }) => ({
@@ -336,6 +418,7 @@ export const trainingProgramsRelations = relations(
       references: [divisions.id],
     }),
     enrollments: many(enrollments),
+    sessions: many(trainingSessions),
   }),
 );
 
@@ -349,6 +432,20 @@ export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const trainingSessionsRelations = relations(
+  trainingSessions,
+  ({ one }) => ({
+    program: one(trainingPrograms, {
+      fields: [trainingSessions.programId],
+      references: [trainingPrograms.id],
+    }),
+    createdBy: one(users, {
+      fields: [trainingSessions.createdById],
+      references: [users.id],
+    }),
+  }),
+);
 
 export const polygraphSessionsRelations = relations(
   polygraphSessions,

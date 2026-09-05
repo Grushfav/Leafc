@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import {
   Card,
   CardBody,
@@ -8,16 +7,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { Textarea } from "@/components/ui/Textarea";
+import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
+import {
+  IconAlert,
+  IconBuilding,
+  IconClipboard,
+  IconFile,
+  IconSearch,
+} from "@/components/icons/MonoIcons";
 
 const services = [
-  { name: "Compliance framework design & gap analysis", icon: "📋" },
-  { name: "Governance audits & board advisory", icon: "🏛" },
-  { name: "Risk assessment & mitigation planning", icon: "⚠" },
-  { name: "Policy development & regulatory mapping", icon: "📜" },
-  { name: "Due diligence & integrity reviews", icon: "🔍" },
+  { name: "Compliance framework design & gap analysis", Icon: IconClipboard },
+  { name: "Governance audits & board advisory", Icon: IconBuilding },
+  { name: "Risk assessment & mitigation planning", Icon: IconAlert },
+  { name: "Policy development & regulatory mapping", Icon: IconFile },
+  { name: "Due diligence & integrity reviews", Icon: IconSearch },
 ];
 
 const processSteps = [
@@ -25,12 +29,6 @@ const processSteps = [
   { step: "02", title: "Assessment", desc: "Gap analysis against regulatory frameworks" },
   { step: "03", title: "Advisory", desc: "Recommendations and implementation roadmap" },
   { step: "04", title: "Review", desc: "Ongoing monitoring and compliance validation" },
-];
-
-const activeEngagements = [
-  { id: "CON-2026-018", client: "Regional Development Bank", status: "Active" },
-  { id: "CON-2026-015", client: "Ministry of Finance — TT", status: "Review" },
-  { id: "CON-2026-011", client: "National Telecom Group", status: "Active" },
 ];
 
 export default function ConsultancyPage() {
@@ -54,16 +52,6 @@ export default function ConsultancyPage() {
             Expert guidance on governance, regulatory compliance, and
             organisational integrity for public and private sector institutions.
           </p>
-          <div className="mt-8 flex gap-6 animate-fade-in-up animate-delay-3">
-            <div className="rounded-lg border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-sm">
-              <p className="font-heading text-2xl font-bold text-brand-orange">23</p>
-              <p className="text-xs uppercase tracking-wider text-white/60">Active Engagements</p>
-            </div>
-            <div className="rounded-lg border border-brand-navy/20 bg-brand-navy/10 px-5 py-3 backdrop-blur-sm">
-              <p className="font-heading text-2xl font-bold text-brand-gold">12</p>
-              <p className="text-xs uppercase tracking-wider text-white/60">Jurisdictions</p>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -96,44 +84,17 @@ export default function ConsultancyPage() {
               {services.map((service) => (
                 <Card key={service.name} variant="elevated">
                   <CardBody className="flex items-start gap-4">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-orange/10 text-lg" aria-hidden>
-                      {service.icon}
+                    <span
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
+                      aria-hidden
+                    >
+                      <service.Icon className="h-5 w-5" />
                     </span>
                     <span className="text-sm font-medium leading-relaxed">{service.name}</span>
                   </CardBody>
                 </Card>
               ))}
             </div>
-
-            <h2 className="mt-12 font-heading text-2xl font-bold text-brand-navy">
-              Active Engagements
-            </h2>
-            <Card variant="elevated" className="mt-6 overflow-hidden">
-              <CardBody className="overflow-x-auto p-0">
-                <table className="table-styled w-full text-sm">
-                  <thead>
-                    <tr>
-                      <th>Reference</th>
-                      <th>Client</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeEngagements.map((eng) => (
-                      <tr key={eng.id}>
-                        <td className="font-mono text-xs">{eng.id}</td>
-                        <td>{eng.client}</td>
-                        <td>
-                          <Badge variant={eng.status === "Active" ? "success" : "warning"}>
-                            {eng.status}
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </CardBody>
-            </Card>
           </div>
 
           <div className="space-y-6">
@@ -144,26 +105,8 @@ export default function ConsultancyPage() {
                   Submit an initial inquiry for consultancy services.
                 </CardDescription>
               </CardHeader>
-              <CardBody className="space-y-4">
-                <Input label="Organisation" placeholder="Your organisation" />
-                <Select
-                  label="Service Type"
-                  placeholder="Select service"
-                  options={[
-                    { value: "compliance", label: "Compliance Framework" },
-                    { value: "governance", label: "Governance Audit" },
-                    { value: "risk", label: "Risk Assessment" },
-                    { value: "policy", label: "Policy Development" },
-                  ]}
-                />
-                <Textarea
-                  label="Brief Description"
-                  placeholder="Describe your advisory needs..."
-                  rows={4}
-                />
-                <Button variant="accent" className="w-full">
-                  Submit Inquiry
-                </Button>
+              <CardBody>
+                <ServiceInquiryForm compact initialServiceInterest="consultancy" />
               </CardBody>
             </Card>
 
@@ -178,8 +121,8 @@ export default function ConsultancyPage() {
               </CardBody>
             </Card>
 
-            <Link href="/dashboard" className="block text-center text-sm font-medium text-brand-orange hover:underline">
-              Go to Dashboard →
+            <Link href="/signup" className="block text-center text-sm font-medium text-brand-orange hover:underline">
+              Create an account →
             </Link>
           </div>
         </div>

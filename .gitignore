@@ -15,6 +15,10 @@ build/
 # drizzle
 backend/drizzle/
 
+# user-uploaded avatars
+backend/uploads/avatars/*
+!backend/uploads/avatars/.gitkeep
+
 # logs
 *.log
 npm-debug.log*

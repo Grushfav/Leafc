@@ -278,5 +278,4 @@ Leafc/
 │   ├── api/            # Schema + endpoint specs
 │   ├── deployment/     # Infrastructure plan
 │   └── architecture/   # This document
-└── leafc_logo/         # Brand assets
 ```

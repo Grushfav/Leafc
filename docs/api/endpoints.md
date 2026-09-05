@@ -8,10 +8,11 @@ Planned REST API surface for the LEAF-C platform. All endpoints require authenti
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
+| POST | `/auth/register` | Public | Customer or LEAF-C member signup (members require `STAFF_INVITE_CODE`) |
 | POST | `/auth/login` | Public | Email + password → JWT |
-| POST | `/auth/refresh` | Bearer | Refresh access token |
-| POST | `/auth/logout` | Bearer | Invalidate refresh token |
 | GET | `/auth/me` | Bearer | Current user profile |
+| PATCH | `/auth/me` | Bearer | Update name, organisation, or password |
+| POST | `/auth/me/avatar` | Bearer | Upload JPEG/PNG/WebP avatar (multipart `avatar`, max 2MB) |
 
 ## Users & RBAC
 
@@ -25,15 +26,15 @@ Planned REST API surface for the LEAF-C platform. All endpoints require authenti
 
 ### Role Permissions Matrix
 
-| Resource | admin | investigator | client | trainer | polygraph_examiner |
-|----------|-------|-------------|--------|---------|-------------------|
-| All cases | CRUD | CRUD (assigned) | Read (own) | — | Read (linked) |
-| Documents | CRUD | CRUD (case) | Read (own case) | — | Read (linked) |
-| Training programmes | CRUD | Read | Read | CRUD | — |
-| Enrollments | CRUD | — | Create/Read (self) | CRUD | — |
-| Polygraph sessions | CRUD | Read (linked) | Create/Read (own) | — | CRUD |
-| Risk assessments | CRUD | CRUD | Read (own case) | — | — |
-| Audit logs | Read | — | — | — | — |
+| Resource | admin | senior_agent | agent | customer |
+|----------|-------|--------------|-------|----------|
+| All cases | CRUD | CRUD (assigned) | CRUD (assigned) | Read (own) |
+| Documents | CRUD | CRUD (case) | CRUD (case) | Read (own case) |
+| Training programmes | CRUD | Read | Read | Read |
+| Enrollments | CRUD | CRUD | Read | Create/Read (self) |
+| Polygraph sessions | CRUD | Read (linked) | Read (linked) | Create/Read (own) |
+| Risk assessments | CRUD | CRUD | CRUD | Read (own case) |
+| Audit logs | Read | — | — | — |
 
 ---
 
@@ -73,14 +74,17 @@ Planned REST API surface for the LEAF-C platform. All endpoints require authenti
 
 | Method | Path | Roles | Description |
 |--------|------|-------|-------------|
-| GET | `/training/programmes` | all authenticated | List active programmes |
-| POST | `/training/programmes` | admin, trainer | Create programme |
-| GET | `/training/programmes/:id` | all authenticated | Programme detail |
-| PATCH | `/training/programmes/:id` | admin, trainer | Update programme |
-| GET | `/training/programmes/:id/enrollments` | admin, trainer | List enrollments |
-| POST | `/training/enrollments` | client, admin | Submit enrollment request |
-| PATCH | `/training/enrollments/:id` | admin, trainer | Update enrollment status |
-| POST | `/training/enrollments/:id/certificate` | admin, trainer | Issue certificate |
+| GET | `/training/sessions` | admin, senior_agent, agent | List sessions (upcoming first, then past) |
+| POST | `/training/sessions` | admin | Create a session and schedule a date |
+| PATCH | `/training/sessions/:id` | admin | Update title, scheduled date, location, or status |
+| GET | `/training/programmes` | all authenticated | List active programmes (planned) |
+| POST | `/training/programmes` | admin, trainer | Create programme (planned) |
+| GET | `/training/programmes/:id` | all authenticated | Programme detail (planned) |
+| PATCH | `/training/programmes/:id` | admin, trainer | Update programme (planned) |
+| GET | `/training/programmes/:id/enrollments` | admin, trainer | List enrollments (planned) |
+| POST | `/training/enrollments` | client, admin | Submit enrollment request (planned) |
+| PATCH | `/training/enrollments/:id` | admin, trainer | Update enrollment status (planned) |
+| POST | `/training/enrollments/:id/certificate` | admin, trainer | Issue certificate (planned) |
 
 ---
 
@@ -105,7 +109,8 @@ Planned REST API surface for the LEAF-C platform. All endpoints require authenti
 | Method | Path | Roles | Description |
 |--------|------|-------|-------------|
 | GET | `/divisions` | all authenticated | List divisions |
-| GET | `/dashboard/stats` | admin, investigator, trainer, polygraph_examiner | KPI aggregates |
+| GET | `/dashboard/summary` | all authenticated | Workspace counts (staff: open cases, inquiries, members, training sessions with `status != cancelled`; customers: own inquiries) |
+| GET | `/dashboard/stats` | admin, senior_agent, agent | KPI aggregates (planned) |
 | GET | `/audit-logs` | admin | Paginated audit trail |
 | GET | `/health` | Public | Health check (existing) |
 | GET | `/documents/:id` | role-based | Document metadata |

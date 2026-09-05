@@ -8,8 +8,6 @@ const variants = {
     "bg-charcoal text-white hover:bg-charcoal-light shadow-sm hover:shadow-md",
   outline:
     "border-2 border-charcoal bg-transparent text-charcoal hover:bg-charcoal hover:text-white",
-  ghost:
-    "bg-transparent text-charcoal hover:bg-warm-cream hover:text-heading",
   accent:
     "bg-gradient-to-r from-brand-orange to-brand-gold text-white font-bold shadow-sm hover:shadow-glow hover:brightness-105",
 } as const;

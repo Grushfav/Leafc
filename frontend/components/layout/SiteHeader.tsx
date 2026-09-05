@@ -6,26 +6,16 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-
-const divisions = [
-  { href: "/consultancy", label: "Consultancy" },
-  { href: "/operations", label: "Operations" },
-  { href: "/training", label: "Training" },
-  { href: "/polygraph", label: "Polygraph & Integrity" },
-];
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/get-started", label: "Get Started" },
-  { href: "/dashboard", label: "Dashboard" },
-];
+import { DIVISION_LINKS, PRIMARY_NAV_LINKS, SITE_EXPANSION } from "@/lib/nav";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const { user, isReady, logout } = useAuth();
   const [divisionsOpen, setDivisionsOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isDivisionActive = divisions.some((d) => pathname.startsWith(d.href));
+  const isDivisionActive = DIVISION_LINKS.some((d) => pathname.startsWith(d.href));
 
   return (
     <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface/95 backdrop-blur-md">
@@ -33,7 +23,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          aria-label="LEAF-C — Law Enforcement Against Financial Crimes"
+          aria-label={`LEAF-C — ${SITE_EXPANSION}`}
           className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-90 sm:gap-3"
         >
           <Image
@@ -64,7 +54,7 @@ export function SiteHeader() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
-          {navLinks.map((link) => (
+          {PRIMARY_NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -104,7 +94,7 @@ export function SiteHeader() {
                 role="menu"
               >
                 <div className="h-0.5 bg-gradient-to-r from-brand-navy to-brand-orange" aria-hidden />
-                {divisions.map((item) => (
+                {DIVISION_LINKS.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -125,11 +115,31 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Link href="/dashboard">
-            <Button variant="accent" size="sm">
-              Client Portal
-            </Button>
-          </Link>
+          {isReady && user ? (
+            <>
+              <Link href="/dashboard">
+                <Button variant="outline" size="sm">
+                  Workspace
+                </Button>
+              </Link>
+              <Button variant="accent" size="sm" onClick={logout}>
+                Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="outline" size="sm">
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button variant="accent" size="sm">
+                  Sign up
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu toggle */}
@@ -149,7 +159,7 @@ export function SiteHeader() {
           className="border-t border-border-subtle bg-surface px-4 py-4 md:hidden"
           aria-label="Mobile"
         >
-          {navLinks.map((link) => (
+          {PRIMARY_NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -162,7 +172,7 @@ export function SiteHeader() {
           <p className="mt-3 px-3 font-heading text-xs font-semibold uppercase tracking-wider text-brand-orange">
             Divisions
           </p>
-          {divisions.map((item) => (
+          {DIVISION_LINKS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -172,11 +182,43 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="mt-3 block">
-            <Button variant="accent" size="sm" className="w-full">
-              Client Portal
-            </Button>
-          </Link>
+          {isReady && user ? (
+            <>
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileOpen(false)}
+                className="mt-3 block"
+              >
+                <Button variant="outline" size="sm" className="w-full">
+                  Workspace
+                </Button>
+              </Link>
+              <Button
+                variant="accent"
+                size="sm"
+                className="mt-2 w-full"
+                onClick={() => {
+                  setMobileOpen(false);
+                  logout();
+                }}
+              >
+                Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" onClick={() => setMobileOpen(false)} className="mt-3 block">
+                <Button variant="outline" size="sm" className="w-full">
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/signup" onClick={() => setMobileOpen(false)} className="mt-2 block">
+                <Button variant="accent" size="sm" className="w-full">
+                  Sign up
+                </Button>
+              </Link>
+            </>
+          )}
         </nav>
       )}
     </header>

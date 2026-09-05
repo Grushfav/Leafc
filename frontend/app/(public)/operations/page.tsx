@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import {
   Card,
   CardBody,
@@ -8,23 +7,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-
-const casePipeline = [
-  { id: "INV-2026-0412", title: "Cross-border financial fraud investigation", priority: "High", status: "Active" },
-  { id: "INV-2026-0398", title: "Procurement irregularities", priority: "Medium", status: "Active" },
-  { id: "INV-2026-0387", title: "Asset tracing — offshore entities", priority: "High", status: "On Hold" },
-  { id: "INV-2026-0371", title: "Internal misconduct review", priority: "Low", status: "Closed" },
-];
+import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
+import {
+  IconGlobe,
+  IconLock,
+  IconMonitor,
+  IconPulse,
+  IconSearch,
+  IconUser,
+} from "@/components/icons/MonoIcons";
 
 const capabilities = [
-  { name: "Field investigations & surveillance", icon: "🎯" },
-  { name: "Digital forensics & evidence recovery", icon: "💻" },
-  { name: "Intelligence analysis & reporting", icon: "📊" },
-  { name: "Witness interview coordination", icon: "🗣" },
-  { name: "Cross-jurisdictional liaison", icon: "🌐" },
-  { name: "Covert operations support", icon: "🔒" },
+  { name: "Field investigations & surveillance", Icon: IconSearch },
+  { name: "Digital forensics & evidence recovery", Icon: IconMonitor },
+  { name: "Intelligence analysis & reporting", Icon: IconPulse },
+  { name: "Witness interview coordination", Icon: IconUser },
+  { name: "Cross-jurisdictional liaison", Icon: IconGlobe },
+  { name: "Covert operations support", Icon: IconLock },
 ];
 
 const processSteps = [
@@ -75,77 +74,21 @@ export default function OperationsPage() {
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="space-y-8 lg:col-span-2">
             <div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="section-divider-duo shrink-0" aria-hidden />
-                  <h2 className="font-heading text-2xl font-bold text-brand-navy">
-                    Case Pipeline
-                  </h2>
-                </div>
-                <Button variant="accent" size="sm">
-                  + New Case
-                </Button>
+              <div className="flex items-center gap-3">
+                <div className="section-divider-duo shrink-0" aria-hidden />
+                <h2 className="font-heading text-2xl font-bold text-brand-navy">
+                  Operational Capabilities
+                </h2>
               </div>
-              <Card variant="elevated" className="mt-6 overflow-hidden">
-                <CardBody className="overflow-x-auto p-0">
-                  <table className="table-styled w-full text-sm">
-                    <thead>
-                      <tr>
-                        <th>Case ID</th>
-                        <th>Title</th>
-                        <th>Priority</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {casePipeline.map((c) => (
-                        <tr key={c.id}>
-                          <td className="font-mono text-xs">{c.id}</td>
-                          <td>{c.title}</td>
-                          <td>
-                            <Badge
-                              variant={
-                                c.priority === "High"
-                                  ? "accent"
-                                  : c.priority === "Medium"
-                                    ? "warning"
-                                    : "muted"
-                              }
-                            >
-                              {c.priority}
-                            </Badge>
-                          </td>
-                          <td>
-                            <Badge
-                              variant={
-                                c.status === "Active"
-                                  ? "success"
-                                  : c.status === "On Hold"
-                                    ? "warning"
-                                    : "muted"
-                              }
-                            >
-                              {c.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </CardBody>
-              </Card>
-            </div>
-
-            <div>
-              <h2 className="font-heading text-2xl font-bold text-brand-navy">
-                Operational Capabilities
-              </h2>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 {capabilities.map((cap) => (
                   <Card key={cap.name} variant="elevated">
                     <CardBody className="flex items-center gap-4">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-orange/10 text-lg" aria-hidden>
-                        {cap.icon}
+                      <span
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
+                        aria-hidden
+                      >
+                        <cap.Icon className="h-5 w-5" />
                       </span>
                       <span className="text-sm font-medium">{cap.name}</span>
                     </CardBody>
@@ -163,30 +106,8 @@ export default function OperationsPage() {
                   Register a new investigation request.
                 </CardDescription>
               </CardHeader>
-              <CardBody className="space-y-4">
-                <Input label="Case Title" placeholder="Brief case title" />
-                <Select
-                  label="Priority"
-                  options={[
-                    { value: "low", label: "Low" },
-                    { value: "medium", label: "Medium" },
-                    { value: "high", label: "High" },
-                    { value: "critical", label: "Critical" },
-                  ]}
-                />
-                <Select
-                  label="Jurisdiction"
-                  placeholder="Select jurisdiction"
-                  options={[
-                    { value: "na", label: "North America" },
-                    { value: "eu", label: "Europe" },
-                    { value: "latam", label: "Latin America" },
-                    { value: "multi", label: "Multi-jurisdictional" },
-                  ]}
-                />
-                <Button variant="accent" className="w-full">
-                  Submit Case
-                </Button>
+              <CardBody>
+                <ServiceInquiryForm compact initialServiceInterest="operations" />
               </CardBody>
             </Card>
 
@@ -203,8 +124,8 @@ export default function OperationsPage() {
               </CardBody>
             </Card>
 
-            <Link href="/dashboard" className="block text-center text-sm font-medium text-brand-orange hover:underline">
-              View all cases in Dashboard →
+            <Link href="/signup" className="block text-center text-sm font-medium text-brand-orange hover:underline">
+              Create an account →
             </Link>
           </div>
         </div>

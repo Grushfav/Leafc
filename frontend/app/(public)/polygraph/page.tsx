@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import {
   Card,
   CardBody,
@@ -8,37 +7,35 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { Textarea } from "@/components/ui/Textarea";
+import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
+import {
+  IconPulse,
+  IconScale,
+  IconSearch,
+  IconUser,
+} from "@/components/icons/MonoIcons";
 
 const sessionTypes = [
   {
     title: "Pre-Employment Screening",
     description: "Background verification and integrity assessment for new hires in sensitive roles.",
-    icon: "👤",
+    Icon: IconUser,
   },
   {
     title: "Internal Affairs Support",
     description: "Examinations supporting misconduct investigations and disciplinary proceedings.",
-    icon: "⚖",
+    Icon: IconScale,
   },
   {
     title: "Periodic Integrity Assessment",
     description: "Scheduled re-examinations for personnel in high-trust positions.",
-    icon: "🔄",
+    Icon: IconPulse,
   },
   {
     title: "Specific Issue Examination",
     description: "Targeted testing related to a defined allegation or incident.",
-    icon: "🎯",
+    Icon: IconSearch,
   },
-];
-
-const upcomingSessions = [
-  { id: "PLG-2026-0033", examinee: "Redacted — Case A", date: "2026-08-22", examiner: "Dr. S. Baptiste" },
-  { id: "PLG-2026-0031", examinee: "Redacted — Case B", date: "2026-08-25", examiner: "Dr. S. Baptiste" },
-  { id: "PLG-2026-0029", examinee: "Redacted — Case C", date: "2026-08-28", examiner: "M. Joseph" },
 ];
 
 const protocols = [
@@ -68,7 +65,9 @@ export default function PolygraphPage() {
             chain-of-custody protocols.
           </p>
           <div className="mt-8 inline-flex items-center gap-3 rounded-xl border border-brand-navy/30 bg-brand-navy/10 px-5 py-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-navy text-lg text-white" aria-hidden>◉</span>
+            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-brand-navy text-white" aria-hidden>
+              <IconScale className="h-5 w-5" />
+            </span>
             <div>
               <p className="text-sm font-semibold">Certified Examiners</p>
               <p className="text-xs text-white/60">American Polygraph Association standards</p>
@@ -91,8 +90,11 @@ export default function PolygraphPage() {
                 {sessionTypes.map((type) => (
                   <Card key={type.title} variant="elevated">
                     <CardBody>
-                      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-orange/10 text-xl" aria-hidden>
-                        {type.icon}
+                      <span
+                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
+                        aria-hidden
+                      >
+                        <type.Icon className="h-5 w-5" />
                       </span>
                       <h3 className="mt-3 font-heading font-semibold text-heading">
                         {type.title}
@@ -104,36 +106,6 @@ export default function PolygraphPage() {
                   </Card>
                 ))}
               </div>
-            </div>
-
-            <div>
-              <h2 className="font-heading text-2xl font-bold text-brand-navy">
-                Scheduled Sessions
-              </h2>
-              <Card variant="elevated" className="mt-6 overflow-hidden">
-                <CardBody className="overflow-x-auto p-0">
-                  <table className="table-styled w-full text-sm">
-                    <thead>
-                      <tr>
-                        <th>Session ID</th>
-                        <th>Subject</th>
-                        <th>Date</th>
-                        <th>Examiner</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {upcomingSessions.map((s) => (
-                        <tr key={s.id}>
-                          <td className="font-mono text-xs">{s.id}</td>
-                          <td>{s.examinee}</td>
-                          <td>{s.date}</td>
-                          <td>{s.examiner}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </CardBody>
-              </Card>
             </div>
 
             <Card variant="callout">
@@ -162,25 +134,8 @@ export default function PolygraphPage() {
                   Submit a booking request for polygraph services.
                 </CardDescription>
               </CardHeader>
-              <CardBody className="space-y-4">
-                <Input label="Requesting Agency" placeholder="Organisation name" />
-                <Select
-                  label="Examination Type"
-                  placeholder="Select type"
-                  options={sessionTypes.map((t) => ({
-                    value: t.title.toLowerCase().replace(/\s+/g, "-"),
-                    label: t.title,
-                  }))}
-                />
-                <Input label="Preferred Date" type="date" />
-                <Textarea
-                  label="Purpose & Context"
-                  placeholder="Brief description of examination purpose..."
-                  rows={3}
-                />
-                <Button variant="accent" className="w-full">
-                  Submit Request
-                </Button>
+              <CardBody>
+                <ServiceInquiryForm compact initialServiceInterest="polygraph" />
               </CardBody>
             </Card>
 
@@ -196,8 +151,8 @@ export default function PolygraphPage() {
               </CardBody>
             </Card>
 
-            <Link href="/dashboard" className="block text-center text-sm font-medium text-brand-orange hover:underline">
-              View session calendar →
+            <Link href="/signup" className="block text-center text-sm font-medium text-brand-orange hover:underline">
+              Create an account →
             </Link>
           </div>
         </div>

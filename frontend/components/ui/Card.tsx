@@ -6,18 +6,18 @@ const cardVariants = {
     "rounded-xl border border-border-subtle bg-surface shadow-sm transition-shadow duration-200 hover:shadow-md",
   featured:
     [
-      "relative overflow-hidden rounded-xl border border-border-subtle bg-surface shadow-card hover-lift",
+      "relative overflow-hidden rounded-3xl border border-border-subtle bg-surface shadow-card hover-lift",
       "before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-1 before:bg-gradient-to-r before:from-brand-orange before:to-brand-gold",
       "after:pointer-events-none after:absolute after:inset-y-0 after:left-0 after:w-1 after:bg-gradient-to-b after:from-brand-orange after:via-brand-orange/60 after:to-brand-orange/20",
     ].join(" "),
   elevated:
-    "rounded-xl border border-border-subtle bg-surface shadow-card hover-lift",
+    "rounded-3xl border border-border-subtle bg-surface shadow-card hover-lift ring-1 ring-black/[0.04]",
   dark:
-    "rounded-xl border border-charcoal-light bg-charcoal text-white shadow-lg",
+    "rounded-3xl border border-charcoal-light bg-charcoal text-white shadow-lg",
   kpi:
-    "rounded-xl border border-border-subtle bg-surface shadow-sm hover-lift overflow-hidden",
+    "rounded-3xl border border-border-subtle bg-surface shadow-card hover-lift overflow-hidden",
   callout:
-    "rounded-xl border border-brand-orange/25 bg-gradient-to-br from-warm-cream to-surface shadow-sm",
+    "rounded-3xl border border-brand-orange/25 bg-gradient-to-br from-warm-cream to-surface shadow-sm",
 } as const;
 
 export type CardVariant = keyof typeof cardVariants;

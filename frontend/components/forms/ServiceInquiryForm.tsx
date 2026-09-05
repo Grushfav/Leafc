@@ -83,6 +83,7 @@ type ServiceInquiryFormProps = {
   id?: string;
   className?: string;
   compact?: boolean;
+  initialServiceInterest?: ServiceInterest;
 };
 
 function FormProgressBar({
@@ -178,9 +179,13 @@ export function ServiceInquiryForm({
   id,
   className,
   compact = false,
+  initialServiceInterest,
 }: ServiceInquiryFormProps) {
-  const [step, setStep] = useState(1);
-  const [fields, setFields] = useState<FormFields>(initialFields);
+  const [step, setStep] = useState(initialServiceInterest ? 2 : 1);
+  const [fields, setFields] = useState<FormFields>({
+    ...initialFields,
+    serviceInterest: initialServiceInterest ?? "",
+  });
   const [errors, setErrors] = useState<Partial<Record<keyof FormFields, string>>>(
     {},
   );
@@ -269,9 +274,12 @@ export function ServiceInquiryForm({
       });
 
       setReferenceNumber(response.referenceNumber);
-      setFields(initialFields);
+      setFields({
+        ...initialFields,
+        serviceInterest: initialServiceInterest ?? "",
+      });
       setErrors({});
-      setStep(1);
+      setStep(initialServiceInterest ? 2 : 1);
     } catch (error) {
       const apiError = error as { error?: string; fields?: Record<string, string> };
       if (apiError.fields) {
@@ -312,7 +320,7 @@ export function ServiceInquiryForm({
             className="mt-6"
             onClick={() => {
               setReferenceNumber(null);
-              setStep(1);
+              setStep(initialServiceInterest ? 2 : 1);
             }}
           >
             Submit another inquiry
@@ -339,10 +347,7 @@ export function ServiceInquiryForm({
             Choose the division that best matches your request.
           </p>
           <div
-            className={cn(
-              "mt-5 grid gap-3",
-              compact ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2",
-            )}
+            className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2"
             role="radiogroup"
             aria-label="Service selection"
           >
