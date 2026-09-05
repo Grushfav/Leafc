@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
+import { CollapsibleInquiry } from "@/components/forms/CollapsibleInquiry";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 
 const programmes = [
@@ -109,16 +110,20 @@ export default function TrainingPage() {
             methods with confidence and integrity.
           </p>
         </div>
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {programmes.map((prog) => (
             <Card key={prog.id} variant="elevated" className="flex flex-col">
-              <CardHeader className="border-none">
-                <div className="flex items-start justify-between gap-2">
-                  <Badge variant="outline">{prog.level}</Badge>
-                </div>
-                <CardTitle className="mt-3">{prog.title}</CardTitle>
-                <CardDescription>{prog.duration}</CardDescription>
-                <span className="font-mono text-xs text-muted-foreground">
+              <CardHeader className="border-none px-4 py-3">
+                <Badge variant="outline" className="px-2 py-0 text-[10px]">
+                  {prog.level}
+                </Badge>
+                <CardTitle className="mt-1.5 text-sm leading-snug">
+                  {prog.title}
+                </CardTitle>
+                <CardDescription className="mt-1 text-xs">
+                  {prog.duration}
+                </CardDescription>
+                <span className="mt-0.5 font-mono text-xs text-muted-foreground">
                   {prog.id}
                 </span>
               </CardHeader>
@@ -127,17 +132,13 @@ export default function TrainingPage() {
         </div>
 
         <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
-          <Card variant="featured" className="lg:col-span-8">
-            <CardHeader>
-              <CardTitle>Enroll in a Programme</CardTitle>
-              <CardDescription>
-                Register interest for upcoming training sessions.
-              </CardDescription>
-            </CardHeader>
-            <CardBody>
-              <ServiceInquiryForm initialServiceInterest="training" />
-            </CardBody>
-          </Card>
+          <CollapsibleInquiry
+            title="Enroll in a Programme"
+            description="Register interest for upcoming training sessions."
+            className="lg:col-span-8"
+          >
+            <ServiceInquiryForm initialServiceInterest="training" />
+          </CollapsibleInquiry>
 
           <div className="space-y-6 lg:col-span-4">
             <Card variant="callout">

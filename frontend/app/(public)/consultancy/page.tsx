@@ -1,13 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import {
-  Card,
-  CardBody,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/Card";
+import { CollapsibleInquiry } from "@/components/forms/CollapsibleInquiry";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 import {
   IconAlert,
@@ -91,12 +86,12 @@ export default function ConsultancyPage() {
               and regulated landscapes.
             </p>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
             {processSteps.map((s) => (
-              <div key={s.step} className="relative rounded-xl border border-border-subtle bg-surface p-5 hover-lift">
-                <span className="font-heading text-3xl font-bold text-brand-orange/30">{s.step}</span>
-                <h3 className="mt-2 font-heading font-semibold text-heading">{s.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+              <div key={s.step} className="relative min-w-0 rounded-xl border border-border-subtle bg-surface p-2.5 sm:p-4 lg:p-5 hover-lift">
+                <span className="font-heading text-lg font-bold text-brand-orange/30 sm:text-2xl lg:text-3xl">{s.step}</span>
+                <h3 className="mt-1 font-heading text-xs font-semibold text-heading sm:mt-2 sm:text-sm lg:text-base">{s.title}</h3>
+                <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground sm:mt-1 sm:text-xs lg:text-sm">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -127,17 +122,13 @@ export default function ConsultancyPage() {
         </div>
 
         <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
-          <Card variant="featured" className="lg:col-span-8">
-            <CardHeader>
-              <CardTitle>Request Advisory</CardTitle>
-              <CardDescription>
-                Submit an initial inquiry for consultancy services.
-              </CardDescription>
-            </CardHeader>
-            <CardBody>
-              <ServiceInquiryForm initialServiceInterest="consultancy" />
-            </CardBody>
-          </Card>
+          <CollapsibleInquiry
+            title="Request Advisory"
+            description="Submit an initial inquiry for consultancy services."
+            className="lg:col-span-8"
+          >
+            <ServiceInquiryForm initialServiceInterest="consultancy" />
+          </CollapsibleInquiry>
 
           <div className="space-y-6 lg:col-span-4">
             <Card variant="callout">

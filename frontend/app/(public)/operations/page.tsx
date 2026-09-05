@@ -1,13 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import {
-  Card,
-  CardBody,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/Card";
+import { CollapsibleInquiry } from "@/components/forms/CollapsibleInquiry";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 
 const capabilities = [
@@ -112,17 +107,13 @@ export default function OperationsPage() {
         </div>
 
         <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
-          <Card variant="featured" className="lg:col-span-8">
-            <CardHeader>
-              <CardTitle>Case Intake</CardTitle>
-              <CardDescription>
-                Register a new investigation request.
-              </CardDescription>
-            </CardHeader>
-            <CardBody>
-              <ServiceInquiryForm initialServiceInterest="operations" />
-            </CardBody>
-          </Card>
+          <CollapsibleInquiry
+            title="Case Intake"
+            description="Register a new investigation request."
+            className="lg:col-span-8"
+          >
+            <ServiceInquiryForm initialServiceInterest="operations" />
+          </CollapsibleInquiry>
 
           <div className="space-y-6 lg:col-span-4">
             <Card variant="dark">
