@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 
 const VIDEO_SRC = "/Lady_justice_Video.mp4";
 const POSTER_SRC = "/hero-justice.svg";
+const HERO_MEDIA_CLASS =
+  "object-cover object-[55%_center] sm:object-[center_right]";
 const SLIDE_LEAD_SECONDS = 1.25;
 const INTRO_FALLBACK_MS = 16000;
 
@@ -79,14 +81,15 @@ export function HomeHero() {
           alt=""
           fill
           priority
-          className="object-cover object-[center_right]"
+          className={HERO_MEDIA_CLASS}
           sizes="100vw"
         />
       ) : (
         <video
           ref={videoRef}
           className={cn(
-            "pointer-events-none absolute inset-0 h-full w-full object-cover object-[center_right]",
+            "pointer-events-none absolute inset-0 h-full w-full",
+            HERO_MEDIA_CLASS,
             videoReady ? "opacity-100" : "opacity-0",
           )}
           autoPlay
