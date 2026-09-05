@@ -356,7 +356,7 @@ export function ServiceInquiryForm({
             Choose the division that best matches your request.
           </p>
           <div
-            className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2"
+            className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2"
             role="radiogroup"
             aria-label="Service selection"
           >
@@ -371,29 +371,29 @@ export function ServiceInquiryForm({
                   aria-checked={isSelected}
                   onClick={() => updateField("serviceInterest", option.value)}
                   className={cn(
-                    "group flex items-start gap-4 rounded-2xl border p-4 text-left transition-all duration-300",
-                    "hover:-translate-y-0.5 hover:shadow-md",
+                    "group flex items-center gap-2.5 rounded-xl border px-2.5 py-2 text-left transition-all duration-200",
+                    "hover:shadow-sm",
                     isSelected
-                      ? "border-brand-orange bg-gradient-to-br from-brand-orange/15 to-brand-gold/10 shadow-glow ring-2 ring-brand-orange/40"
+                      ? "border-brand-orange bg-gradient-to-br from-brand-orange/15 to-brand-gold/10 shadow-sm ring-1 ring-brand-orange/40"
                       : "border-border-subtle bg-warm-white hover:border-brand-orange/40",
                   )}
                 >
                   <span
                     className={cn(
-                      "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition-colors",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
                       isSelected
                         ? "border-brand-orange/30 bg-brand-orange text-white"
                         : "border-brand-navy/15 bg-warm-cream text-brand-navy group-hover:border-brand-orange/30",
                     )}
                     aria-hidden
                   >
-                    <option.Icon className="h-6 w-6" />
+                    <option.Icon className="h-4 w-4" />
                   </span>
-                  <span>
-                    <span className="block font-heading font-semibold text-heading">
+                  <span className="min-w-0">
+                    <span className="block font-heading text-sm font-semibold leading-tight text-heading">
                       {option.label}
                     </span>
-                    <span className="mt-1 block text-sm text-muted-foreground">
+                    <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
                       {option.description}
                     </span>
                   </span>

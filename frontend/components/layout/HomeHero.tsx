@@ -12,6 +12,7 @@ const POSTER_SRC = "/hero-justice.svg";
 const HERO_MEDIA_CLASS =
   "object-cover object-[64%_center] sm:object-[center_right]";
 const SLIDE_LEAD_SECONDS = 0.7;
+const PLAYBACK_RATE = 1.2;
 const INTRO_FALLBACK_MS = 16000;
 
 export function HomeHero() {
@@ -102,6 +103,7 @@ export function HomeHero() {
           onPlaying={() => setVideoReady(true)}
           onPlay={(event) => {
             const video = event.currentTarget;
+            video.playbackRate = PLAYBACK_RATE;
             const tick = () => {
               syncIntro();
               if (frozenRef.current || revealedRef.current) return;
@@ -114,6 +116,7 @@ export function HomeHero() {
             }
           }}
           onLoadedData={(event) => {
+            event.currentTarget.playbackRate = PLAYBACK_RATE;
             if (!event.currentTarget.paused) {
               setVideoReady(true);
             }
@@ -162,11 +165,6 @@ export function HomeHero() {
             <Link href="/get-started">
               <Button variant="accent" size="md">
                 Get Started
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="secondary" size="md">
-                Sign in
               </Button>
             </Link>
             <Link href="/consultancy">

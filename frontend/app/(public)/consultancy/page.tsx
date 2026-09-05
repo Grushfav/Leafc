@@ -81,44 +81,42 @@ export default function ConsultancyPage() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3">
-              <div className="section-divider-duo shrink-0" aria-hidden />
-              <h2 className="font-heading text-2xl font-bold text-brand-navy">
-                Core Services
-              </h2>
-            </div>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {services.map((service) => (
-                <Card key={service.name} variant="elevated">
-                  <CardBody className="flex items-start gap-4">
-                    <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
-                      aria-hidden
-                    >
-                      <service.Icon className="h-5 w-5" />
-                    </span>
-                    <span className="text-sm font-medium leading-relaxed">{service.name}</span>
-                  </CardBody>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <Card variant="featured">
-              <CardHeader>
-                <CardTitle>Request Advisory</CardTitle>
-                <CardDescription>
-                  Submit an initial inquiry for consultancy services.
-                </CardDescription>
-              </CardHeader>
-              <CardBody>
-                <ServiceInquiryForm compact initialServiceInterest="consultancy" />
+        <div className="flex items-center gap-3">
+          <div className="section-divider-duo shrink-0" aria-hidden />
+          <h2 className="font-heading text-2xl font-bold text-brand-navy">
+            Core Services
+          </h2>
+        </div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {services.map((service) => (
+            <Card key={service.name} variant="elevated">
+              <CardBody className="flex items-start gap-4">
+                <span
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
+                  aria-hidden
+                >
+                  <service.Icon className="h-5 w-5" />
+                </span>
+                <span className="text-sm font-medium leading-relaxed">{service.name}</span>
               </CardBody>
             </Card>
+          ))}
+        </div>
 
+        <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
+          <Card variant="featured" className="lg:col-span-8">
+            <CardHeader>
+              <CardTitle>Request Advisory</CardTitle>
+              <CardDescription>
+                Submit an initial inquiry for consultancy services.
+              </CardDescription>
+            </CardHeader>
+            <CardBody>
+              <ServiceInquiryForm initialServiceInterest="consultancy" />
+            </CardBody>
+          </Card>
+
+          <div className="space-y-6 lg:col-span-4">
             <Card variant="callout">
               <CardBody>
                 <Badge variant="accent" className="mb-3">Why LEAF-C</Badge>

@@ -9,22 +9,14 @@ import {
   CardTitle,
 } from "@/components/ui/Card";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
-import {
-  IconGlobe,
-  IconLock,
-  IconMonitor,
-  IconPulse,
-  IconSearch,
-  IconUser,
-} from "@/components/icons/MonoIcons";
 
 const capabilities = [
-  { name: "Field investigations & surveillance", Icon: IconSearch },
-  { name: "Digital forensics & evidence recovery", Icon: IconMonitor },
-  { name: "Intelligence analysis & reporting", Icon: IconPulse },
-  { name: "Witness interview coordination", Icon: IconUser },
-  { name: "Cross-jurisdictional liaison", Icon: IconGlobe },
-  { name: "Covert operations support", Icon: IconLock },
+  "Field investigations & surveillance",
+  "Digital forensics & evidence recovery",
+  "Intelligence analysis & reporting",
+  "Witness interview coordination",
+  "Cross-jurisdictional liaison",
+  "Covert operations support",
 ];
 
 const processSteps = [
@@ -80,46 +72,36 @@ export default function OperationsPage() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="space-y-8 lg:col-span-2">
-            <div>
-              <div className="flex items-center gap-3">
-                <div className="section-divider-duo shrink-0" aria-hidden />
-                <h2 className="font-heading text-2xl font-bold text-brand-navy">
-                  Operational Capabilities
-                </h2>
-              </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {capabilities.map((cap) => (
-                  <Card key={cap.name} variant="elevated">
-                    <CardBody className="flex items-center gap-4">
-                      <span
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
-                        aria-hidden
-                      >
-                        <cap.Icon className="h-5 w-5" />
-                      </span>
-                      <span className="text-sm font-medium">{cap.name}</span>
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <Card variant="featured">
-              <CardHeader>
-                <CardTitle>Case Intake</CardTitle>
-                <CardDescription>
-                  Register a new investigation request.
-                </CardDescription>
-              </CardHeader>
-              <CardBody>
-                <ServiceInquiryForm compact initialServiceInterest="operations" />
+        <div className="flex items-center gap-3">
+          <div className="section-divider-duo shrink-0" aria-hidden />
+          <h2 className="font-heading text-2xl font-bold text-brand-navy">
+            Operational Capabilities
+          </h2>
+        </div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {capabilities.map((name) => (
+            <Card key={name} variant="elevated">
+              <CardBody className="py-4">
+                <span className="text-sm font-medium">{name}</span>
               </CardBody>
             </Card>
+          ))}
+        </div>
 
+        <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
+          <Card variant="featured" className="lg:col-span-8">
+            <CardHeader>
+              <CardTitle>Case Intake</CardTitle>
+              <CardDescription>
+                Register a new investigation request.
+              </CardDescription>
+            </CardHeader>
+            <CardBody>
+              <ServiceInquiryForm initialServiceInterest="operations" />
+            </CardBody>
+          </Card>
+
+          <div className="space-y-6 lg:col-span-4">
             <Card variant="dark">
               <CardBody>
                 <p className="font-heading text-xs font-semibold uppercase tracking-wider text-brand-orange">

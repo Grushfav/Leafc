@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -49,13 +50,21 @@ export default function PolygraphPage() {
   return (
     <>
       <section className="relative overflow-hidden bg-charcoal text-white">
-        <div className="pattern-diamonds absolute inset-0 opacity-25" aria-hidden />
+        <Image
+          src="/polygraph_background.jpeg"
+          alt=""
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-charcoal/65" aria-hidden />
         <div
-          className="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal-light to-brand-orange/25"
+          className="absolute inset-0 bg-gradient-to-r from-charcoal/80 via-charcoal/45 to-transparent"
           aria-hidden
         />
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <Badge variant="outline-navy" className="mb-4">Specialised Unit</Badge>
+          <Badge variant="accent" className="mb-4">Specialised Unit</Badge>
           <h1 className="hero-heading text-4xl font-bold sm:text-5xl">
             Polygraph & Integrity Testing Unit
           </h1>
@@ -77,68 +86,64 @@ export default function PolygraphPage() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="space-y-8 lg:col-span-2">
-            <div>
-              <div className="flex items-center gap-3">
-                <div className="section-divider-duo shrink-0" aria-hidden />
-                <h2 className="font-heading text-2xl font-bold text-brand-navy">
-                  Examination Types
-                </h2>
-              </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {sessionTypes.map((type) => (
-                  <Card key={type.title} variant="elevated">
-                    <CardBody>
-                      <span
-                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
-                        aria-hidden
-                      >
-                        <type.Icon className="h-5 w-5" />
-                      </span>
-                      <h3 className="mt-3 font-heading font-semibold text-heading">
-                        {type.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {type.description}
-                      </p>
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            <Card variant="callout">
+        <div className="flex items-center gap-3">
+          <div className="section-divider-duo shrink-0" aria-hidden />
+          <h2 className="font-heading text-2xl font-bold text-brand-navy">
+            Examination Types
+          </h2>
+        </div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {sessionTypes.map((type) => (
+            <Card key={type.title} variant="elevated">
               <CardBody>
-                <h3 className="font-heading font-semibold text-heading">
-                  Protocol & Confidentiality
+                <span
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
+                  aria-hidden
+                >
+                  <type.Icon className="h-5 w-5" />
+                </span>
+                <h3 className="mt-3 font-heading font-semibold text-heading">
+                  {type.title}
                 </h3>
-                <div className="section-divider-duo mt-2" aria-hidden />
-                <ul className="mt-4 space-y-3">
-                  {protocols.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-sm text-muted-foreground">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[10px] font-bold text-white" aria-hidden>✓</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {type.description}
+                </p>
               </CardBody>
             </Card>
-          </div>
+          ))}
+        </div>
 
-          <div className="space-y-6">
-            <Card variant="featured">
-              <CardHeader>
-                <CardTitle>Request Examination</CardTitle>
-                <CardDescription>
-                  Submit a booking request for polygraph services.
-                </CardDescription>
-              </CardHeader>
-              <CardBody>
-                <ServiceInquiryForm compact initialServiceInterest="polygraph" />
-              </CardBody>
-            </Card>
+        <Card variant="callout" className="mt-8">
+          <CardBody>
+            <h3 className="font-heading font-semibold text-heading">
+              Protocol & Confidentiality
+            </h3>
+            <div className="section-divider-duo mt-2" aria-hidden />
+            <ul className="mt-4 space-y-3">
+              {protocols.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[10px] font-bold text-white" aria-hidden>✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </CardBody>
+        </Card>
 
+        <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
+          <Card variant="featured" className="lg:col-span-8">
+            <CardHeader>
+              <CardTitle>Request Examination</CardTitle>
+              <CardDescription>
+                Submit a booking request for polygraph services.
+              </CardDescription>
+            </CardHeader>
+            <CardBody>
+              <ServiceInquiryForm initialServiceInterest="polygraph" />
+            </CardBody>
+          </Card>
+
+          <div className="space-y-6 lg:col-span-4">
             <Card variant="dark">
               <CardBody>
                 <p className="font-heading text-xs font-semibold uppercase tracking-wider text-brand-orange">
