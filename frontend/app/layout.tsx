@@ -16,32 +16,33 @@ const montserrat = Montserrat({
   weight: ["500", "600", "700", "800"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://leafc.pages.dev";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://leafc.net";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "LEAF-C | Investigative & Compliance Agency",
+    default: "LEAF-C | Law Enforcement Against Financial Crimes",
     template: "%s | LEAF-C",
   },
   description:
-    "Multidisciplinary investigative, compliance, and training services for public and private sector clients.",
+    "LEAF-C — Law Enforcement Against Financial Crimes. Multidisciplinary investigative, compliance, and training services for public and private sector clients.",
   icons: {
     icon: "/favicon.svg",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
+    url: "/",
     siteName: "LEAF-C",
-    title: "LEAF-C | Investigative & Compliance Agency",
+    title: "LEAF-C | Law Enforcement Against Financial Crimes",
     description:
-      "Multidisciplinary investigative, compliance, and training services for public and private sector clients.",
+      "LEAF-C — Law Enforcement Against Financial Crimes. Multidisciplinary investigative, compliance, and training services for public and private sector clients.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "LEAF-C | Investigative & Compliance Agency",
+    title: "LEAF-C | Law Enforcement Against Financial Crimes",
     description:
-      "Multidisciplinary investigative, compliance, and training services for public and private sector clients.",
+      "LEAF-C — Law Enforcement Against Financial Crimes. Multidisciplinary investigative, compliance, and training services for public and private sector clients.",
   },
 };
 
