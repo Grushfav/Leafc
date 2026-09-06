@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-const VIDEO_SRC = "/Lady_justice_Video.mp4";
+const VIDEO_SRC = "/Lady_justice_Video.webm";
 const POSTER_SRC = "/hero-justice.svg";
 const HERO_MEDIA_CLASS =
   "object-cover object-[64%_center] sm:object-[center_right]";
@@ -83,28 +83,49 @@ export function HomeHero() {
     const video = videoRef.current;
     if (!video || reduceMotion) return;
 
-    const reveal = () => {
-      video.playbackRate = PLAYBACK_RATE;
-      setVideoReady(true);
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+    video.playbackRate = PLAYBACK_RATE;
+
+    const showIfPlaying = () => {
+      if (!video.paused && !video.ended) {
+        setVideoReady(true);
+      }
     };
 
-    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-      reveal();
-    }
+    const tryPlay = () => {
+      if (frozenRef.current) return;
+      video.muted = true;
+      video.playbackRate = PLAYBACK_RATE;
+      void video.play().then(showIfPlaying).catch(() => {
+        if (!frozenRef.current) {
+          revealCard();
+        }
+      });
+    };
 
     if (video.ended || (video.paused && video.currentTime > 0)) {
       freezeLastFrame();
+      return;
     }
 
-    video.addEventListener("loadeddata", reveal);
-    video.addEventListener("canplay", reveal);
-    video.addEventListener("playing", reveal);
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      tryPlay();
+    }
+
+    video.addEventListener("loadeddata", tryPlay);
+    video.addEventListener("canplay", tryPlay);
+    video.addEventListener("playing", showIfPlaying);
     return () => {
-      video.removeEventListener("loadeddata", reveal);
-      video.removeEventListener("canplay", reveal);
-      video.removeEventListener("playing", reveal);
+      video.removeEventListener("loadeddata", tryPlay);
+      video.removeEventListener("canplay", tryPlay);
+      video.removeEventListener("playing", showIfPlaying);
     };
-  }, [reduceMotion, freezeLastFrame]);
+  }, [reduceMotion, freezeLastFrame, revealCard]);
 
   return (
     <section className="relative min-h-[442px] overflow-hidden bg-charcoal sm:min-h-[493px]">
@@ -133,9 +154,9 @@ export function HomeHero() {
           onEnded={freezeLastFrame}
           onError={freezeLastFrame}
           onPlaying={showVideoFrame}
-          onCanPlay={showVideoFrame}
           onPlay={(event) => {
             const video = event.currentTarget;
+            video.muted = true;
             video.playbackRate = PLAYBACK_RATE;
             showVideoFrame();
             const tick = () => {
@@ -150,8 +171,8 @@ export function HomeHero() {
             }
           }}
           onLoadedData={(event) => {
+            event.currentTarget.muted = true;
             event.currentTarget.playbackRate = PLAYBACK_RATE;
-            showVideoFrame();
           }}
           onLoadedMetadata={(event) => {
             const duration = event.currentTarget.duration;
@@ -164,7 +185,7 @@ export function HomeHero() {
           }}
           onTimeUpdate={syncIntro}
         >
-          <source src={VIDEO_SRC} type="video/mp4" />
+          <source src={VIDEO_SRC} type="video/webm" />
         </video>
       )}
 
