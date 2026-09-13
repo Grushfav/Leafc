@@ -9,8 +9,8 @@ const footerLinks = {
     { href: "/login", label: "Sign in" },
   ],
   governance: [
-    { href: "#", label: "Privacy Policy" },
-    { href: "#", label: "Data Protection" },
+    { href: "/privacy", label: "Privacy Policy" },
+    { href: "/data-protection", label: "Data Protection" },
     { href: "#", label: "Ethics & Compliance" },
     { href: "#", label: "Audit Standards" },
   ],

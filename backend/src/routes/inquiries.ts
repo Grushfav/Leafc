@@ -2,6 +2,7 @@ import { Router } from "express";
 import { desc, eq } from "drizzle-orm";
 import { serviceInquiries } from "../db/schema.js";
 import { db } from "../db/index.js";
+import { sendInquiryEmails } from "../lib/inquiry-mail.js";
 import { isStaffRole, requireAuth } from "../middleware/auth.js";
 
 export const inquiriesRouter = Router();
@@ -119,6 +120,21 @@ inquiriesRouter.post("/", async (req, res) => {
         referenceNumber: serviceInquiries.referenceNumber,
         createdAt: serviceInquiries.createdAt,
       });
+
+    try {
+      await sendInquiryEmails({
+        referenceNumber: inquiry.referenceNumber,
+        fullName: body.fullName!.trim(),
+        email: body.email!.trim().toLowerCase(),
+        phone: body.phone?.trim() || null,
+        organization: body.organization?.trim() || null,
+        clientType: body.clientType as ClientType,
+        serviceInterest: body.serviceInterest as ServiceInterest,
+        message: body.message!.trim(),
+      });
+    } catch (error) {
+      console.error("Failed to send inquiry email:", error);
+    }
 
     res.status(201).json({
       message: "Inquiry submitted successfully.",

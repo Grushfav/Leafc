@@ -26,8 +26,16 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
+export interface RegisterResult {
+  requiresVerification: boolean;
+  email?: string;
+  token?: string;
+  user?: AuthUser;
+}
+
 export interface AuthError {
   error: string;
+  code?: string;
   fields?: Record<string, string>;
 }
 
@@ -140,13 +148,33 @@ function authHeaders(token?: string | null): HeadersInit {
 
 export async function registerAccount(
   payload: RegisterPayload,
-): Promise<AuthResponse> {
+): Promise<RegisterResult> {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(payload),
   });
-  return parseJson<AuthResponse>(response);
+  return parseJson<RegisterResult>(response);
+}
+
+export async function verifyEmail(token: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/auth/verify-email`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ token }),
+  });
+  return parseJson<{ message: string }>(response);
+}
+
+export async function resendVerification(
+  email: string,
+): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/auth/resend-verification`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ email }),
+  });
+  return parseJson<{ message: string }>(response);
 }
 
 export async function loginAccount(

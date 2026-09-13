@@ -23,6 +23,7 @@ import {
 } from "@/components/dashboard/WorkQueue";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/Badge";
+import { PageLoader } from "@/components/ui/LogoLoader";
 import { useAuth } from "@/components/auth/AuthProvider";
 import {
   fetchDashboardSummary,
@@ -151,6 +152,14 @@ export default function DashboardPage() {
     });
   }, [token, user]);
 
+  useEffect(() => {
+    if (inquiries === null) return;
+    if (window.location.hash !== "#incoming-inquiries") return;
+    document
+      .getElementById("incoming-inquiries")
+      ?.scrollIntoView({ behavior: "smooth" });
+  }, [inquiries]);
+
   const caseSnapshot = useMemo(
     () => (cases ? selectOpenCasesSnapshot(cases) : []),
     [cases],
@@ -169,11 +178,7 @@ export default function DashboardPage() {
   );
 
   if (!isReady || !user) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-12 text-sm text-muted-foreground">
-        Loading workspace…
-      </div>
-    );
+    return <PageLoader label="Loading workspace…" />;
   }
 
   const staff = isStaffRole(user.role);

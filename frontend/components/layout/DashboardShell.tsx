@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -22,6 +23,17 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [hash, setHash] = useState("");
+
+  useEffect(() => {
+    const sync = () => setHash(window.location.hash);
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, [pathname]);
+
+  const onOverview = pathname === "/dashboard" && hash !== "#incoming-inquiries";
+  const onInquiries = pathname === "/dashboard" && hash === "#incoming-inquiries";
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] bg-warm-white">
@@ -36,9 +48,10 @@ export function DashboardShell({
           <nav className="mt-3 space-y-1">
             <Link
               href="/dashboard"
+              onClick={() => setHash("")}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
-                pathname === "/dashboard"
+                onOverview
                   ? "border-l-2 border-brand-orange bg-gradient-to-r from-brand-orange/15 to-brand-gold/10 text-charcoal shadow-sm"
                   : "text-muted-foreground hover:bg-warm-cream hover:text-brand-navy",
               )}
@@ -83,10 +96,22 @@ export function DashboardShell({
               </>
             ) : null}
             <Link
-              href="/get-started"
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-warm-cream hover:text-brand-navy"
+              href="/dashboard#incoming-inquiries"
+              onClick={() => {
+                setHash("#incoming-inquiries");
+                window.location.hash = "incoming-inquiries";
+                document
+                  .getElementById("incoming-inquiries")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
+                onInquiries
+                  ? "border-l-2 border-brand-orange bg-gradient-to-r from-brand-orange/15 to-brand-gold/10 text-charcoal shadow-sm"
+                  : "text-muted-foreground hover:bg-warm-cream hover:text-brand-navy",
+              )}
             >
-              Service inquiry
+              Service inquiries
             </Link>
           </nav>
 
@@ -113,20 +138,17 @@ export function DashboardShell({
         {(title || description || toolbar) && (
           <div className="border-b border-border-subtle bg-surface px-5 py-4 sm:px-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="flex items-start gap-4">
-                <div className="section-divider-duo mt-2 shrink-0" aria-hidden />
-                <div>
-                  {title && (
-                    <h1 className="font-heading text-2xl font-bold text-heading">
-                      {title}
-                    </h1>
-                  )}
-                  {description && (
-                    <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                      {description}
-                    </p>
-                  )}
-                </div>
+              <div>
+                {title && (
+                  <h1 className="font-heading text-2xl font-bold text-heading">
+                    {title}
+                  </h1>
+                )}
+                {description && (
+                  <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+                    {description}
+                  </p>
+                )}
               </div>
               {toolbar ? <div className="lg:pt-0.5">{toolbar}</div> : null}
             </div>

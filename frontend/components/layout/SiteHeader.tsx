@@ -114,33 +114,18 @@ export function SiteHeader() {
           </div>
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
-          {isReady && user ? (
-            <>
-              <Link href="/dashboard">
-                <Button variant="outline" size="sm">
-                  Workspace
-                </Button>
-              </Link>
-              <Button variant="accent" size="sm" onClick={logout}>
-                Sign out
+        {isReady && user ? (
+          <div className="hidden items-center gap-3 md:flex">
+            <Link href="/dashboard">
+              <Button variant="outline" size="sm">
+                Workspace
               </Button>
-            </>
-          ) : (
-            <>
-              <Link href="/login">
-                <Button variant="outline" size="sm">
-                  Sign in
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button variant="accent" size="sm">
-                  Sign up
-                </Button>
-              </Link>
-            </>
-          )}
-        </div>
+            </Link>
+            <Button variant="accent" size="sm" onClick={logout}>
+              Sign out
+            </Button>
+          </div>
+        ) : null}
 
         {/* Mobile menu toggle */}
         <button
@@ -205,20 +190,7 @@ export function SiteHeader() {
                 Sign out
               </Button>
             </>
-          ) : (
-            <>
-              <Link href="/login" onClick={() => setMobileOpen(false)} className="mt-3 block">
-                <Button variant="outline" size="sm" className="w-full">
-                  Sign in
-                </Button>
-              </Link>
-              <Link href="/signup" onClick={() => setMobileOpen(false)} className="mt-2 block">
-                <Button variant="accent" size="sm" className="w-full">
-                  Sign up
-                </Button>
-              </Link>
-            </>
-          )}
+          ) : null}
         </nav>
       )}
     </header>

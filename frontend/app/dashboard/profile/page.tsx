@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
+import { PageLoader } from "@/components/ui/LogoLoader";
 import { ProfileForm } from "@/components/auth/ProfileForm";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -16,11 +17,7 @@ export default function ProfilePage() {
   }, [isReady, user, router]);
 
   if (!isReady || !user) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-12 text-sm text-muted-foreground">
-        Loading profile…
-      </div>
-    );
+    return <PageLoader label="Loading profile…" />;
   }
 
   return (

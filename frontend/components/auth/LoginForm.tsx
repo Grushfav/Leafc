@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/components/auth/AuthProvider";
-import type { AuthError } from "@/lib/auth";
+import { resendVerification, type AuthError } from "@/lib/auth";
 
 export function LoginForm() {
   const router = useRouter();
@@ -13,7 +13,10 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [unverified, setUnverified] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
     if (isReady && user) {
@@ -30,6 +33,8 @@ export function LoginForm() {
 
     setIsSubmitting(true);
     setError(null);
+    setUnverified(false);
+    setResendMessage(null);
 
     try {
       await login(email.trim(), password);
@@ -37,6 +42,7 @@ export function LoginForm() {
     } catch (caught) {
       const apiError = caught as AuthError;
       setError(apiError.error ?? "Unable to sign in.");
+      setUnverified(apiError.code === "email_unverified");
     } finally {
       setIsSubmitting(false);
     }
@@ -68,6 +74,36 @@ export function LoginForm() {
           role="alert"
         >
           {error}
+        </p>
+      ) : null}
+      {unverified ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="md"
+          className="w-full"
+          disabled={isResending || !email.trim()}
+          onClick={async () => {
+            setIsResending(true);
+            setResendMessage(null);
+            try {
+              const result = await resendVerification(email.trim());
+              setResendMessage(result.message);
+            } catch (caught) {
+              setResendMessage(
+                (caught as AuthError).error ?? "Unable to send another email.",
+              );
+            } finally {
+              setIsResending(false);
+            }
+          }}
+        >
+          {isResending ? "Sending..." : "Resend confirmation email"}
+        </Button>
+      ) : null}
+      {resendMessage ? (
+        <p className="text-sm text-heading" role="status">
+          {resendMessage}
         </p>
       ) : null}
       <Button

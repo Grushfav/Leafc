@@ -5,6 +5,11 @@ import { eq } from "drizzle-orm";
 import { users } from "../db/schema.js";
 import { db } from "../db/index.js";
 import {
+  createEmailVerificationToken,
+  hashEmailVerificationToken,
+  sendMemberVerificationEmail,
+} from "../lib/verification.js";
+import {
   isStaffRole,
   requireAuth,
   signToken,
@@ -180,6 +185,9 @@ authRouter.post("/register", async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(body.password!, 12);
+    const memberVerification =
+      body.accountType === "member" ? createEmailVerificationToken() : null;
+
     const [created] = await db
       .insert(users)
       .values({
@@ -189,8 +197,35 @@ authRouter.post("/register", async (req, res) => {
         customerKind,
         organizationName,
         passwordHash,
+        emailVerifiedAt: memberVerification ? null : new Date(),
+        emailVerificationToken: memberVerification?.hash ?? null,
+        emailVerificationExpiresAt: memberVerification?.expiresAt ?? null,
       })
       .returning(publicUserColumns);
+
+    if (memberVerification) {
+      try {
+        await sendMemberVerificationEmail({
+          to: created.email,
+          name: created.name,
+          token: memberVerification.raw,
+        });
+      } catch (error) {
+        await db.delete(users).where(eq(users.id, created.id));
+        console.error("Failed to send member verification email:", error);
+        res.status(503).json({
+          error:
+            "Account could not be created because the confirmation email could not be sent. Try again shortly.",
+        });
+        return;
+      }
+
+      res.status(201).json({
+        requiresVerification: true,
+        email: created.email,
+      });
+      return;
+    }
 
     const token = signToken({
       id: created.id,
@@ -199,6 +234,7 @@ authRouter.post("/register", async (req, res) => {
     });
 
     res.status(201).json({
+      requiresVerification: false,
       token,
       user: publicUser(created),
     });
@@ -236,6 +272,15 @@ authRouter.post("/login", async (req, res) => {
       return;
     }
 
+    if (isStaffRole(user.role) && !user.emailVerifiedAt) {
+      res.status(403).json({
+        error:
+          "Verify your email before signing in. Check your inbox for a confirmation link from LEAF-C.",
+        code: "email_unverified",
+      });
+      return;
+    }
+
     const [updated] = await db
       .update(users)
       .set({ lastLoginAt: new Date(), updatedAt: new Date() })
@@ -252,6 +297,108 @@ authRouter.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Failed to sign in:", error);
     res.status(500).json({ error: "Unable to sign in right now." });
+  }
+});
+
+authRouter.post("/verify-email", async (req, res) => {
+  const raw =
+    typeof req.body?.token === "string" ? req.body.token.trim() : "";
+
+  if (!raw) {
+    res.status(400).json({ error: "Verification link is missing or invalid." });
+    return;
+  }
+
+  try {
+    const hash = hashEmailVerificationToken(raw);
+    const [user] = await db
+      .select({
+        id: users.id,
+        emailVerifiedAt: users.emailVerifiedAt,
+        emailVerificationExpiresAt: users.emailVerificationExpiresAt,
+      })
+      .from(users)
+      .where(eq(users.emailVerificationToken, hash))
+      .limit(1);
+
+    if (!user) {
+      res.status(400).json({ error: "This verification link is invalid or has already been used." });
+      return;
+    }
+
+    if (
+      !user.emailVerificationExpiresAt ||
+      user.emailVerificationExpiresAt.getTime() < Date.now()
+    ) {
+      res.status(400).json({
+        error: "This verification link has expired. Sign up again or request a new link from sign in.",
+      });
+      return;
+    }
+
+    await db
+      .update(users)
+      .set({
+        emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, user.id));
+
+    res.json({ message: "Email verified. You can now sign in." });
+  } catch (error) {
+    console.error("Failed to verify email:", error);
+    res.status(500).json({ error: "Unable to verify your email right now." });
+  }
+});
+
+authRouter.post("/resend-verification", async (req, res) => {
+  const email =
+    typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+
+  if (!email || !EMAIL_PATTERN.test(email)) {
+    res.status(400).json({ error: "Enter a valid email address." });
+    return;
+  }
+
+  try {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (
+      user &&
+      user.isActive &&
+      isStaffRole(user.role) &&
+      !user.emailVerifiedAt
+    ) {
+      const next = createEmailVerificationToken();
+      await db
+        .update(users)
+        .set({
+          emailVerificationToken: next.hash,
+          emailVerificationExpiresAt: next.expiresAt,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, user.id));
+
+      await sendMemberVerificationEmail({
+        to: user.email,
+        name: user.name,
+        token: next.raw,
+      });
+    }
+
+    res.json({
+      message:
+        "If that email has a pending member account, we sent a new confirmation link.",
+    });
+  } catch (error) {
+    console.error("Failed to resend verification email:", error);
+    res.status(500).json({ error: "Unable to send a confirmation email right now." });
   }
 });
 

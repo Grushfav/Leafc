@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/Badge";
+import { PageLoader } from "@/components/ui/LogoLoader";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -160,11 +161,7 @@ function CaseWorkspace() {
   }
 
   if (!isReady || !user || !isStaffRole(user.role)) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-12 text-sm text-muted-foreground">
-        Loading case…
-      </div>
-    );
+    return <PageLoader label="Loading case…" />;
   }
 
   if (loadError) {
@@ -184,11 +181,7 @@ function CaseWorkspace() {
   }
 
   if (!record) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-12 text-sm text-muted-foreground">
-        Loading case…
-      </div>
-    );
+    return <PageLoader label="Loading case…" />;
   }
 
   const assignedIds = new Set(record.agents.map((agent) => agent.id));
@@ -440,9 +433,7 @@ export default function CaseWorkspacePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-1 items-center justify-center p-12 text-sm text-muted-foreground">
-          Loading case…
-        </div>
+        <PageLoader label="Loading case…" />
       }
     >
       <CaseWorkspace />

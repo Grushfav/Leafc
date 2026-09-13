@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -518,7 +519,15 @@ export function ServiceInquiryForm({
             />
             <span>
               I agree that LEAF-C may contact me about this inquiry and handle my
-              information in accordance with its data protection standards.
+              information in accordance with its{" "}
+              <Link href="/privacy" className="font-medium text-brand-navy underline underline-offset-2">
+                Privacy Policy
+              </Link>{" "}
+              and{" "}
+              <Link href="/data-protection" className="font-medium text-brand-navy underline underline-offset-2">
+                Data Protection Policy
+              </Link>
+              .
             </span>
           </label>
           {errors.consent && (

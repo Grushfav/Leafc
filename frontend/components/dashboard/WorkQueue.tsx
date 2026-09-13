@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { LogoLoader } from "@/components/ui/LogoLoader";
 import { cn } from "@/lib/utils";
 
 interface WorkQueueEmpty {
@@ -86,9 +87,9 @@ export function WorkQueue({
 
       <div className="border-t border-border-subtle">
         {loading ? (
-          <p className="px-5 py-8 text-sm text-muted-foreground sm:px-6">
-            {loadingLabel}
-          </p>
+          <div className="px-5 py-8 sm:px-6">
+            <LogoLoader label={loadingLabel} size={64} />
+          </div>
         ) : empty ? (
           <div className="px-5 py-8 sm:px-6">
             <p className="text-sm text-muted-foreground">{empty.message}</p>

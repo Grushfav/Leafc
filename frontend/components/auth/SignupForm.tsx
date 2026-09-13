@@ -6,12 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { useAuth } from "@/components/auth/AuthProvider";
-import type {
-  AccountType,
-  AuthError,
-  CustomerKind,
-  StaffRole,
-} from "@/lib/auth";
+import { resendVerification, type AccountType, type AuthError, type CustomerKind, type StaffRole } from "@/lib/auth";
 
 const MEMBER_ROLES: { value: StaffRole; label: string }[] = [
   { value: "admin", label: "Admin" },
@@ -33,6 +28,9 @@ export function SignupForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
     if (isReady && user) {
@@ -73,7 +71,7 @@ export function SignupForm() {
     setErrors({});
 
     try {
-      await register({
+      const result = await register({
         accountType,
         name: name.trim(),
         email: email.trim(),
@@ -87,6 +85,10 @@ export function SignupForm() {
             ? organizationName.trim()
             : undefined,
       });
+      if (result.requiresVerification) {
+        setPendingEmail(email.trim().toLowerCase());
+        return;
+      }
       router.push("/dashboard");
     } catch (error) {
       const apiError = error as AuthError;
@@ -95,6 +97,46 @@ export function SignupForm() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (pendingEmail) {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          We sent a confirmation link to{" "}
+          <span className="font-medium text-heading">{pendingEmail}</span>. Open
+          that email to verify your address, then sign in.
+        </p>
+        {resendMessage ? (
+          <p className="text-sm text-heading" role="status">
+            {resendMessage}
+          </p>
+        ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          size="md"
+          className="w-full"
+          disabled={isResending}
+          onClick={async () => {
+            setIsResending(true);
+            setResendMessage(null);
+            try {
+              const result = await resendVerification(pendingEmail);
+              setResendMessage(result.message);
+            } catch (error) {
+              setResendMessage(
+                (error as AuthError).error ?? "Unable to send another email.",
+              );
+            } finally {
+              setIsResending(false);
+            }
+          }}
+        >
+          {isResending ? "Sending..." : "Resend confirmation email"}
+        </Button>
+      </div>
+    );
   }
 
   return (

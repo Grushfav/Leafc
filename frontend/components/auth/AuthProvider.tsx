@@ -28,7 +28,7 @@ interface AuthContextValue {
   token: string | null;
   isReady: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (payload: RegisterPayload) => Promise<void>;
+  register: (payload: RegisterPayload) => Promise<{ requiresVerification: boolean }>;
   updateUser: (payload: ProfileUpdatePayload) => Promise<void>;
   uploadUserAvatar: (file: File) => Promise<void>;
   logout: () => void;
@@ -70,9 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (payload: RegisterPayload) => {
     const result = await registerAccount(payload);
+    if (result.requiresVerification || !result.token || !result.user) {
+      return { requiresVerification: true };
+    }
     storeToken(result.token);
     setToken(result.token);
     setUser(result.user);
+    return { requiresVerification: false };
   }, []);
 
   const updateUser = useCallback(async (payload: ProfileUpdatePayload) => {

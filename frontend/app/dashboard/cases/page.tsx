@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/Badge";
+import { PageLoader } from "@/components/ui/LogoLoader";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -169,11 +170,7 @@ export default function CasesPage() {
   }
 
   if (!isReady || !user || !isStaffRole(user.role)) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-12 text-sm text-muted-foreground">
-        Loading cases…
-      </div>
-    );
+    return <PageLoader label="Loading cases…" />;
   }
 
   return (

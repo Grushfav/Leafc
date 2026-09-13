@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/Badge";
+import { PageLoader } from "@/components/ui/LogoLoader";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -156,11 +157,7 @@ export default function TrainingPage() {
   }
 
   if (!isReady || !user || !isStaffRole(user.role)) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-12 text-sm text-muted-foreground">
-        Loading training…
-      </div>
-    );
+    return <PageLoader label="Loading training…" />;
   }
 
   return (
