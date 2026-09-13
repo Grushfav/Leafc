@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-const VIDEO_SRC_WEBM = "/Lady_justice_Video.webm";
+const VIDEO_SRC = "/Lady_justice_Video.webm";
 const VIDEO_SRC_MP4 = "/Lady_justice_Video.mp4";
 const POSTER_SRC = "/hero-justice.svg";
 const HERO_MEDIA_CLASS =
@@ -45,20 +45,6 @@ export function HomeHero() {
     setVideoReady(true);
     revealCard();
   }, [revealCard]);
-
-  const useMp4Fallback = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || video.dataset.mp4Fallback === "1") {
-      freezeLastFrame();
-      return;
-    }
-    video.dataset.mp4Fallback = "1";
-    video.src = VIDEO_SRC_MP4;
-    video.load();
-    void video.play().then(() => setVideoReady(true)).catch(() => {
-      freezeLastFrame();
-    });
-  }, [freezeLastFrame]);
 
   const syncIntro = useCallback(() => {
     const video = videoRef.current;
@@ -118,7 +104,7 @@ export function HomeHero() {
       video.playbackRate = PLAYBACK_RATE;
       void video.play().then(showIfPlaying).catch(() => {
         if (!frozenRef.current) {
-          useMp4Fallback();
+          revealCard();
         }
       });
     };
@@ -140,7 +126,7 @@ export function HomeHero() {
       video.removeEventListener("canplay", tryPlay);
       video.removeEventListener("playing", showIfPlaying);
     };
-  }, [reduceMotion, freezeLastFrame, useMp4Fallback]);
+  }, [reduceMotion, freezeLastFrame, revealCard]);
 
   return (
     <section className="relative min-h-[442px] overflow-hidden bg-charcoal sm:min-h-[493px]">
@@ -167,7 +153,7 @@ export function HomeHero() {
           preload="auto"
           aria-hidden
           onEnded={freezeLastFrame}
-          onError={useMp4Fallback}
+          onError={freezeLastFrame}
           onPlaying={showVideoFrame}
           onPlay={(event) => {
             const video = event.currentTarget;
@@ -200,7 +186,7 @@ export function HomeHero() {
           }}
           onTimeUpdate={syncIntro}
         >
-          <source src={VIDEO_SRC_WEBM} type="video/webm" />
+          <source src={VIDEO_SRC} type="video/webm" />
           <source src={VIDEO_SRC_MP4} type="video/mp4" />
         </video>
       )}
