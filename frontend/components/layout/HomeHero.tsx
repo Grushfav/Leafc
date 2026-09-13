@@ -99,7 +99,7 @@ export function HomeHero() {
     };
 
     const tryPlay = () => {
-      if (frozenRef.current) return;
+      if (frozenRef.current || document.visibilityState === "hidden") return;
       video.muted = true;
       video.playbackRate = PLAYBACK_RATE;
       void video.play().then(showIfPlaying).catch(() => {
@@ -109,7 +109,24 @@ export function HomeHero() {
       });
     };
 
-    if (video.ended || (video.paused && video.currentTime > 0)) {
+    const restoreAfterReturn = () => {
+      if (document.visibilityState !== "visible") return;
+      if (frozenRef.current || video.ended) {
+        const duration = video.duration;
+        if (Number.isFinite(duration) && duration > 0) {
+          try {
+            video.currentTime = Math.max(0, duration - 0.05);
+          } catch {
+            /* ignore seek errors after a decoder reset */
+          }
+        }
+        setVideoReady(true);
+        return;
+      }
+      tryPlay();
+    };
+
+    if (video.ended) {
       freezeLastFrame();
       return;
     }
@@ -121,25 +138,28 @@ export function HomeHero() {
     video.addEventListener("loadeddata", tryPlay);
     video.addEventListener("canplay", tryPlay);
     video.addEventListener("playing", showIfPlaying);
+    document.addEventListener("visibilitychange", restoreAfterReturn);
+    window.addEventListener("pageshow", restoreAfterReturn);
     return () => {
       video.removeEventListener("loadeddata", tryPlay);
       video.removeEventListener("canplay", tryPlay);
       video.removeEventListener("playing", showIfPlaying);
+      document.removeEventListener("visibilitychange", restoreAfterReturn);
+      window.removeEventListener("pageshow", restoreAfterReturn);
     };
   }, [reduceMotion, freezeLastFrame, revealCard]);
 
   return (
     <section className="relative min-h-[442px] overflow-hidden bg-charcoal sm:min-h-[493px]">
-      {reduceMotion ? (
-        <Image
-          src={POSTER_SRC}
-          alt=""
-          fill
-          priority
-          className={HERO_MEDIA_CLASS}
-          sizes="100vw"
-        />
-      ) : (
+      <Image
+        src={POSTER_SRC}
+        alt=""
+        fill
+        priority
+        className={HERO_MEDIA_CLASS}
+        sizes="100vw"
+      />
+      {reduceMotion ? null : (
         <video
           ref={videoRef}
           className={cn(
@@ -153,7 +173,10 @@ export function HomeHero() {
           preload="auto"
           aria-hidden
           onEnded={freezeLastFrame}
-          onError={freezeLastFrame}
+          onError={() => {
+            if (document.visibilityState !== "visible") return;
+            freezeLastFrame();
+          }}
           onPlaying={showVideoFrame}
           onPlay={(event) => {
             const video = event.currentTarget;
