@@ -27,7 +27,11 @@ export const metadata: Metadata = {
   description:
     "LEAF-C — Law Enforcement Against Financial Crimes. Multidisciplinary investigative, compliance, and training services for public and private sector clients.",
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
   },
   openGraph: {
     type: "website",
