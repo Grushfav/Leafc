@@ -16,12 +16,37 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 const port = Number(process.env.PORT) || 4000;
-const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://localhost:3000";
 const uploadsRoot = path.join(process.cwd(), "uploads");
+
+function parseOrigins(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+}
+
+const allowedOrigins = new Set([
+  "http://localhost:3000",
+  "https://leafc.net",
+  "https://www.leafc.net",
+  "https://leafc.co",
+  "https://www.leafc.co",
+  ...parseOrigins(process.env.FRONTEND_ORIGIN),
+]);
 
 mkdirSync(path.join(uploadsRoot, "avatars"), { recursive: true });
 
-app.use(cors({ origin: frontendOrigin }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    },
+  }),
+);
 app.use(express.json());
 app.use("/uploads", express.static(uploadsRoot));
 

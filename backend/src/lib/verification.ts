@@ -25,10 +25,10 @@ export async function sendMemberVerificationEmail(options: {
   name: string;
   token: string;
 }): Promise<void> {
-  const origin = (process.env.FRONTEND_ORIGIN ?? "http://localhost:3000").replace(
-    /\/$/,
-    "",
-  );
+  const origin = (process.env.FRONTEND_ORIGIN ?? "http://localhost:3000")
+    .split(",")[0]
+    .trim()
+    .replace(/\/$/, "");
   const verifyUrl = `${origin}/verify-email?token=${encodeURIComponent(options.token)}`;
   const firstName = options.name.trim().split(/\s+/)[0] || "there";
 

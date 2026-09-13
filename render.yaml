@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: leafc
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: FRONTEND_ORIGIN
+        value: https://leafc.net,https://www.leafc.net,https://leafc.co,https://www.leafc.co
+      - key: SES_FROM_EMAIL
+        value: info@leafc.net
+      - key: SES_FROM_NAME
+        value: LEAF-C
+      - key: SES_NOTIFY_EMAIL
+        value: info@leafc.net
+      - key: AWS_SES_REGION
+        value: us-east-1
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STAFF_INVITE_CODE
+        sync: false
+      - key: SES_SMTP_USER
+        sync: false
+      - key: SES_SMTP_PASSWORD
+        sync: false
