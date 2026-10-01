@@ -4,6 +4,8 @@ import { DIVISION_LINKS, SITE_EXPANSION } from "@/lib/nav";
 const footerLinks = {
   divisions: DIVISION_LINKS,
   company: [
+    { href: "/insights", label: "Insights" },
+    { href: "/experts", label: "Our Experts" },
     { href: "/get-started", label: "Get Started" },
     { href: "/signup", label: "Sign up" },
     { href: "/login", label: "Sign in" },

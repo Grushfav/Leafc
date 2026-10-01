@@ -60,7 +60,7 @@ export function SiteHeader() {
               href={link.href}
               className={cn(
                 "rounded-lg px-3 py-2 font-heading text-sm font-medium transition-all duration-150",
-                pathname === link.href
+                pathname === link.href || pathname.startsWith(`${link.href}/`)
                   ? "bg-accent text-accent-foreground shadow-sm"
                   : "text-brand-navy/70 hover:bg-warm-cream hover:text-brand-navy",
               )}

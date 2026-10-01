@@ -7,6 +7,9 @@ import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 import { Card } from "@/components/ui/Card";
 import { IconBriefcase, IconGlobe, IconGraduationCap, IconLock, IconPulse, IconScale, IconSearch } from "@/components/icons/MonoIcons";
 import { cn } from "@/lib/utils";
+import { INSIGHTS, getCategoryLabel } from "@/lib/insights";
+import { EXPERTS } from "@/lib/experts";
+import { ExpertPhotoPlaceholder } from "@/components/experts/ExpertPhotoPlaceholder";
 
 const services = [
   {
@@ -138,10 +141,138 @@ const polygraphServices = [
   "Expert witness & report preparation",
 ];
 
+const polygraphCredentials = [
+  "UK Polygraph Association",
+  "American Polygraph Association (APA)",
+  "Canadian Polygraph Association (CPA)",
+];
+
+const academyCourses = [
+  {
+    code: "LCA-101",
+    title: "Financial Crime Investigations",
+    format: "In-person workshop",
+    duration: "5 days",
+    dates: "12–16 Oct 2026",
+    level: "Foundation",
+  },
+  {
+    code: "LCA-204",
+    title: "Fraud and Corruption Investigations",
+    format: "Virtual training",
+    duration: "3 days",
+    dates: "4–6 Nov 2026",
+    level: "Intermediate",
+  },
+  {
+    code: "LCA-310",
+    title: "Cybercrime and Digital Evidence",
+    format: "In-person workshop",
+    duration: "4 days",
+    dates: "18–21 Nov 2026",
+    level: "Intermediate",
+  },
+  {
+    code: "LCA-415",
+    title: "Interviewing and Interrogation",
+    format: "Executive briefing",
+    duration: "2 days",
+    dates: "3–4 Dec 2026",
+    level: "Advanced",
+  },
+];
+
 export default function HomePage() {
   return (
     <>
       <HomeHero />
+
+      <section className="relative overflow-hidden bg-warm-cream py-16 sm:py-20">
+        <div className="pattern-grid-warm absolute inset-0 opacity-30" aria-hidden />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid items-start gap-8 lg:grid-cols-12 lg:gap-10">
+            <div className="lg:col-span-6">
+              <Badge variant="accent" className="w-fit">
+                About
+              </Badge>
+              <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">
+                About LEAF-C
+              </h2>
+              <div className="section-divider-duo mt-4" aria-hidden />
+              <div className="mt-6 max-w-xl space-y-4 text-[15px] leading-relaxed text-muted-foreground">
+                <p>
+                  LEAF-C — Law Enforcement Against Financial Crimes — provides
+                  advisory, investigative, and professional training services
+                  for governments, enterprises, and justice partners. Work is
+                  scoped, confidential, and evidence-led.
+                </p>
+                <p>
+                  The practice is built around consultancy and programme
+                  design, investigations and integrity testing, and
+                  capacity-building for teams operating to international
+                  standards in the Caribbean.
+                </p>
+                <p>
+                  The Polygraph Department is a core unit of that work, with
+                  more than 25 combined years of examiner experience and over
+                  1,000 examinations completed. Examinations follow documented
+                  protocol from preparation through analysis and reporting.
+                </p>
+              </div>
+              <Link href="/polygraph" className="mt-8 inline-block">
+                <Button variant="outline" size="md">
+                  Polygraph & Integrity Unit
+                </Button>
+              </Link>
+            </div>
+
+            <div className="lg:col-span-6">
+              <div className="overflow-hidden rounded-2xl bg-surface shadow-card ring-1 ring-border-subtle">
+                <div className="grid sm:grid-cols-2">
+                  <div className="border-b border-border-subtle p-5 sm:border-b-0 sm:border-r">
+                    <p className="font-heading text-4xl font-extrabold tracking-tight text-brand-navy">
+                      1,000+
+                    </p>
+                    <p className="mt-2 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-orange">
+                      Polygraph examinations
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      Screening, investigation, and integrity assignments.
+                    </p>
+                  </div>
+                  <div className="p-5">
+                    <p className="font-heading text-4xl font-extrabold tracking-tight text-brand-navy">
+                      25+
+                    </p>
+                    <p className="mt-2 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-orange">
+                      Combined years of experience
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      Examiner experience pooled across the Polygraph
+                      Department.
+                    </p>
+                  </div>
+                </div>
+                <div className="border-t border-white/10 bg-charcoal px-5 py-4">
+                  <p className="font-heading text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-gold">
+                    Certified examiners
+                  </p>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {polygraphCredentials.map((item) => (
+                      <li
+                        key={item}
+                        className="rounded-full border border-white/15 px-3 py-1 text-xs font-medium text-white/90"
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Services offered — photo cards */}
       <section className="relative overflow-hidden bg-background py-20 sm:py-24">
@@ -366,6 +497,139 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="relative overflow-hidden bg-charcoal py-20 text-white sm:py-24">
+        <Image
+          src="/training_background.jpeg"
+          alt=""
+          fill
+          className="object-cover object-center opacity-25"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/90 to-charcoal/70" aria-hidden />
+        <div
+          className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold"
+          aria-hidden
+        />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <Badge variant="accent" className="shadow-sm">
+                Training & Capacity Building
+              </Badge>
+              <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                LEAF-C Academy
+              </h2>
+              <div className="section-divider-duo mt-4" aria-hidden />
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
+                Upcoming courses in investigations, integrity, and financial
+                crime. Dates below are sample listings.
+              </p>
+            </div>
+            <Link href="/training">
+              <Button variant="accent" size="md">
+                View all programmes
+              </Button>
+            </Link>
+          </div>
+
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {academyCourses.map((course) => (
+              <article
+                key={course.code}
+                className="flex flex-col rounded-2xl bg-warm-white p-5 text-brand-navy shadow-lg ring-1 ring-white/10"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-mono text-[11px] font-semibold tracking-wide text-brand-orange">
+                    {course.code}
+                  </p>
+                  <span className="rounded-full bg-brand-navy/10 px-2 py-0.5 font-heading text-[10px] font-semibold uppercase tracking-wide text-brand-navy">
+                    {course.level}
+                  </span>
+                </div>
+                <h3 className="mt-3 font-heading text-base font-bold leading-snug">
+                  {course.title}
+                </h3>
+                <dl className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                  <div className="flex justify-between gap-3">
+                    <dt>Dates</dt>
+                    <dd className="font-medium text-brand-navy/80">{course.dates}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt>Duration</dt>
+                    <dd className="font-medium text-brand-navy/80">{course.duration}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt>Format</dt>
+                    <dd className="text-right font-medium text-brand-navy/80">
+                      {course.format}
+                    </dd>
+                  </div>
+                </dl>
+                <Link href="/get-started" className="mt-5">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Register interest
+                  </Button>
+                </Link>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-background py-20 sm:py-24">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <Badge variant="accent">Practical guidance</Badge>
+              <h2 className="mt-4 font-heading text-3xl font-bold text-brand-navy sm:text-4xl">
+                Insights
+              </h2>
+              <div className="section-divider-duo mt-4" aria-hidden />
+              <p className="mt-6 max-w-2xl text-muted-foreground">
+                Practical guidance for operators. Short briefings on fraud,
+                integrity testing, digital evidence, and financial-crime risk
+                for boards, counsel, and investigators.
+              </p>
+            </div>
+            <Link href="/insights">
+              <Button variant="outline" size="md">
+                View all insights
+              </Button>
+            </Link>
+          </div>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+            {INSIGHTS.slice(0, 3).map((article) => (
+              <article
+                key={article.slug}
+                className="flex flex-col rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <p className="font-heading text-[11px] font-semibold uppercase tracking-wide text-brand-orange">
+                  {getCategoryLabel(article.category)}
+                </p>
+                <h3 className="mt-3 font-heading text-lg font-bold leading-snug text-brand-navy">
+                  <Link
+                    href={`/insights/${article.slug}`}
+                    className="hover:underline decoration-brand-orange/50 underline-offset-4"
+                  >
+                    {article.title}
+                  </Link>
+                </h3>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                  {article.description}
+                </p>
+                <Link
+                  href={`/insights/${article.slug}`}
+                  className="mt-5 text-sm font-semibold text-brand-orange hover:text-brand-orange-dark"
+                >
+                  Read article →
+                </Link>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Industries we serve */}
       <section className="relative overflow-hidden py-20 sm:py-24">
         <div
@@ -448,6 +712,50 @@ export default function HomePage() {
                 Request services
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-background py-20 sm:py-24">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <Badge variant="accent">Leadership</Badge>
+              <h2 className="mt-4 font-heading text-3xl font-bold text-brand-navy sm:text-4xl">
+                Our Experts
+              </h2>
+              <div className="section-divider-duo mt-4" aria-hidden />
+              <p className="mt-6 max-w-2xl text-muted-foreground">
+                The professionals who lead LEAF-C’s investigations, training,
+                and integrity work. Photographs are placeholders until
+                approved portraits are in place.
+              </p>
+            </div>
+            <Link href="/experts">
+              <Button variant="outline" size="md">
+                View experts
+              </Button>
+            </Link>
+          </div>
+
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {EXPERTS.map((expert) => (
+              <article
+                key={expert.slug}
+                className="flex h-full flex-col items-center rounded-2xl bg-surface px-6 py-8 text-center"
+              >
+                <ExpertPhotoPlaceholder
+                  name={expert.name}
+                  portrait={expert.portrait}
+                />
+                <h3 className="mt-5 font-heading text-lg font-bold text-brand-navy">
+                  {expert.name}
+                </h3>
+                <p className="mt-1 text-sm font-medium text-brand-orange">
+                  {expert.title}
+                </p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

@@ -231,7 +231,7 @@ export function HomeHero() {
             Integrity & Excellence
           </Badge>
           <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-brand-navy sm:text-4xl lg:text-5xl">
-            Integrity. Insight. Innovation.
+            Specialist Investigations, Compliance and Professional Training
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-brand-navy/80 sm:text-lg">
             LEAF‑C provides multidisciplinary investigative, compliance, and

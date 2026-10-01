@@ -9,5 +9,7 @@ export const DIVISION_LINKS = [
 ] as const;
 
 export const PRIMARY_NAV_LINKS = [
+  { href: "/insights", label: "Insights" },
+  { href: "/experts", label: "Experts" },
   { href: "/get-started", label: "Get Started" },
 ] as const;
