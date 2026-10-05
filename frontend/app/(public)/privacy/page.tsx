@@ -68,8 +68,8 @@ export default function PrivacyPolicyPage() {
           <li>Deliver the services you request and keep an audit trail of case work.</li>
           <li>
             Send transactional email from{" "}
-            <a href="mailto:info@leafc.net">info@leafc.net</a>, including
-            inquiry receipts and follow-up from our team.
+            <a href={`mailto:${SITE_CONTACT.email}`}>{SITE_CONTACT.email}</a>,
+            including inquiry receipts and follow-up from our team.
           </li>
           <li>Protect the security and integrity of our systems and engagements.</li>
         </ul>
@@ -120,7 +120,8 @@ export default function PrivacyPolicyPage() {
           You may request access to the personal information we hold about you,
           ask us to correct it, or ask us to delete it where we are not required
           to keep it. Contact{" "}
-          <a href="mailto:info@leafc.net">info@leafc.net</a> and include enough
+          <a href={`mailto:${SITE_CONTACT.email}`}>{SITE_CONTACT.email}</a> and
+          include enough
           detail for us to locate the record (for example an inquiry reference
           number).
         </p>

@@ -1,6 +1,6 @@
 import { sendMail } from "./mailer.js";
 
-const notifyAddress = process.env.SES_NOTIFY_EMAIL ?? "info@leafc.net";
+const notifyAddress = process.env.SES_NOTIFY_EMAIL ?? "support@leafc.net";
 
 const CLIENT_LABELS: Record<string, string> = {
   private: "Private individual",

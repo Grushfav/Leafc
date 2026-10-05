@@ -106,7 +106,7 @@ export default function DataProtectionPage() {
           and email delivery. Those processors act on our instructions and
           must not use LEAF-C data for their own purposes. Inquiry notices
           and receipts are sent from{" "}
-          <a href="mailto:info@leafc.net">info@leafc.net</a>.
+          <a href={`mailto:${SITE_CONTACT.email}`}>{SITE_CONTACT.email}</a>.
         </p>
       </PolicySection>
 

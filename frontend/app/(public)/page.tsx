@@ -572,12 +572,33 @@ export default function HomePage() {
               </h2>
               <div className="section-divider-duo mt-4" aria-hidden />
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
-                Upcoming courses in investigations, integrity, and financial
-                crime.
+                Structured programmes in investigations, integrity, and
+                financial crime, with case work and a LEAF-C certificate.
               </p>
+              <ul className="mt-5 flex flex-wrap gap-2">
+                {[
+                  { label: "Investigate", detail: "Financial crime, fraud, and digital evidence" },
+                  { label: "Examine", detail: "Interviewing, integrity testing, and case documentation" },
+                  { label: "Certify", detail: "LEAF-C certificates; CPE on select courses" },
+                ].map((item) => (
+                  <li
+                    key={item.label}
+                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-heading text-[11px] font-semibold uppercase tracking-[0.12em] text-white/90"
+                    title={item.detail}
+                  >
+                    {item.label}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/get-started"
+                className="mt-6 inline-block font-heading text-2xl font-extrabold tracking-tight text-brand-gold drop-shadow-[0_0_18px_rgba(212,175,55,0.45)] transition-all hover:text-brand-orange hover:drop-shadow-[0_0_24px_rgba(232,140,48,0.55)] sm:text-3xl"
+              >
+                Get started!
+              </Link>
             </div>
             <Button href="/training" variant="accent" size="md">
-              View all programmes
+              View upcoming programmes
             </Button>
           </div>
 

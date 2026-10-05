@@ -2,7 +2,7 @@ import { IconLinkedIn, IconMail } from "@/components/icons/MonoIcons";
 import type { ExpertProfile } from "@/lib/experts";
 import { cn } from "@/lib/utils";
 
-const DEFAULT_EMAIL = "info@leafc.net";
+const DEFAULT_EMAIL = "support@leafc.net";
 
 export function ExpertContactLinks({
   expert,

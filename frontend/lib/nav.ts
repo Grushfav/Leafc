@@ -5,7 +5,7 @@ export const SITE_CONTACT = {
   location: "Kingston, Jamaica",
   phoneDisplay: "(876) 484-7802",
   phoneHref: "tel:+18764847802",
-  email: "info@leafc.net",
+  email: "support@leafc.net",
 } as const;
 
 export const DIVISION_LINKS = [
@@ -19,7 +19,6 @@ export const PRIMARY_NAV_LINKS = [
   { href: "/insights", label: "Insights" },
   { href: "/experts", label: "Experts" },
   { href: "/training", label: "Courses" },
-  { href: "/get-started", label: "Get Started" },
 ] as const;
 
 export const SOCIAL_LINKS = [

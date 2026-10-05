@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-const fromAddress = process.env.SES_FROM_EMAIL ?? "info@leafc.net";
+const fromAddress = process.env.SES_FROM_EMAIL ?? "support@leafc.net";
 const fromName = process.env.SES_FROM_NAME ?? "LEAF-C";
 const region = process.env.AWS_SES_REGION ?? "us-east-1";
 const host =
