@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { verifyEmail, type AuthError } from "@/lib/auth";
@@ -52,11 +51,9 @@ function VerifyEmailStatus() {
         {message}
       </p>
       {status !== "working" ? (
-        <Link href="/login">
-          <Button variant="accent" size="md" className="w-full">
-            Sign in
-          </Button>
-        </Link>
+        <Button href="/login" variant="accent" size="md" className="w-full">
+          Sign in
+        </Button>
       ) : null}
     </div>
   );

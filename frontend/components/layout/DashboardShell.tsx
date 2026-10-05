@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { UserAvatar } from "@/components/auth/UserAvatar";
-import { isStaffRole, roleLabel } from "@/lib/auth";
+import { isAdminRole, isStaffRole, roleLabel } from "@/lib/auth";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -34,6 +34,70 @@ export function DashboardShell({
 
   const onOverview = pathname === "/dashboard" && hash !== "#incoming-inquiries";
   const onInquiries = pathname === "/dashboard" && hash === "#incoming-inquiries";
+  const staff = Boolean(user && isStaffRole(user.role));
+  const admin = Boolean(user && isAdminRole(user.role));
+
+  const links = [
+    { href: "/dashboard", label: "Overview", active: onOverview, onClick: () => setHash("") },
+    { href: "/dashboard/profile", label: "Profile", active: pathname === "/dashboard/profile" },
+    staff
+      ? {
+          href: "/dashboard/cases",
+          label: "Cases",
+          active: pathname.startsWith("/dashboard/cases"),
+        }
+      : null,
+    staff
+      ? {
+          href: "/dashboard/training",
+          label: "Training",
+          active: pathname.startsWith("/dashboard/training"),
+        }
+      : null,
+    admin
+      ? {
+          href: "/dashboard/insights",
+          label: "Insights",
+          active: pathname.startsWith("/dashboard/insights"),
+        }
+      : null,
+    admin
+      ? {
+          href: "/dashboard/academy",
+          label: "Academy",
+          active: pathname.startsWith("/dashboard/academy"),
+        }
+      : null,
+    {
+      href: "/dashboard#incoming-inquiries",
+      label: "Service inquiries",
+      active: onInquiries,
+      onClick: () => {
+        setHash("#incoming-inquiries");
+        window.location.hash = "incoming-inquiries";
+        document
+          .getElementById("incoming-inquiries")
+          ?.scrollIntoView({ behavior: "smooth" });
+      },
+    },
+  ].filter((item): item is NonNullable<typeof item> => item !== null);
+
+  function linkClass(active: boolean, compact = false) {
+    if (compact) {
+      return cn(
+        "shrink-0 rounded-full px-3 py-2 text-sm font-medium",
+        active
+          ? "bg-brand-navy text-white"
+          : "bg-warm-cream text-brand-navy hover:bg-brand-orange/15",
+      );
+    }
+    return cn(
+      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
+      active
+        ? "border-l-2 border-brand-orange bg-gradient-to-r from-brand-orange/15 to-brand-gold/10 text-charcoal shadow-sm"
+        : "text-muted-foreground hover:bg-warm-cream hover:text-brand-navy",
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] bg-warm-white">
@@ -46,73 +110,16 @@ export function DashboardShell({
             Workspace
           </p>
           <nav className="mt-3 space-y-1">
-            <Link
-              href="/dashboard"
-              onClick={() => setHash("")}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
-                onOverview
-                  ? "border-l-2 border-brand-orange bg-gradient-to-r from-brand-orange/15 to-brand-gold/10 text-charcoal shadow-sm"
-                  : "text-muted-foreground hover:bg-warm-cream hover:text-brand-navy",
-              )}
-            >
-              Overview
-            </Link>
-            <Link
-              href="/dashboard/profile"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
-                pathname === "/dashboard/profile"
-                  ? "border-l-2 border-brand-orange bg-gradient-to-r from-brand-orange/15 to-brand-gold/10 text-charcoal shadow-sm"
-                  : "text-muted-foreground hover:bg-warm-cream hover:text-brand-navy",
-              )}
-            >
-              Profile
-            </Link>
-            {user && isStaffRole(user.role) ? (
-              <>
-                <Link
-                  href="/dashboard/cases"
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
-                    pathname.startsWith("/dashboard/cases")
-                      ? "border-l-2 border-brand-orange bg-gradient-to-r from-brand-orange/15 to-brand-gold/10 text-charcoal shadow-sm"
-                      : "text-muted-foreground hover:bg-warm-cream hover:text-brand-navy",
-                  )}
-                >
-                  Cases
-                </Link>
-                <Link
-                  href="/dashboard/training"
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
-                    pathname.startsWith("/dashboard/training")
-                      ? "border-l-2 border-brand-orange bg-gradient-to-r from-brand-orange/15 to-brand-gold/10 text-charcoal shadow-sm"
-                      : "text-muted-foreground hover:bg-warm-cream hover:text-brand-navy",
-                  )}
-                >
-                  Training
-                </Link>
-              </>
-            ) : null}
-            <Link
-              href="/dashboard#incoming-inquiries"
-              onClick={() => {
-                setHash("#incoming-inquiries");
-                window.location.hash = "incoming-inquiries";
-                document
-                  .getElementById("incoming-inquiries")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
-                onInquiries
-                  ? "border-l-2 border-brand-orange bg-gradient-to-r from-brand-orange/15 to-brand-gold/10 text-charcoal shadow-sm"
-                  : "text-muted-foreground hover:bg-warm-cream hover:text-brand-navy",
-              )}
-            >
-              Service inquiries
-            </Link>
+            {links.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={item.onClick}
+                className={linkClass(item.active)}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
 
           {user ? (
@@ -135,6 +142,23 @@ export function DashboardShell({
       </aside>
 
       <div className="min-w-0 flex-1">
+        <nav
+          className="border-b border-border-subtle bg-surface px-4 py-2 lg:hidden"
+          aria-label="Dashboard"
+        >
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1">
+            {links.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={item.onClick}
+                className={linkClass(item.active, true)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
         {(title || description || toolbar) && (
           <div className="border-b border-border-subtle bg-surface px-5 py-4 sm:px-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

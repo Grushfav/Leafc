@@ -1,20 +1,31 @@
 import Link from "next/link";
-import { DIVISION_LINKS, SITE_EXPANSION } from "@/lib/nav";
+import { DIVISION_LINKS, SITE_CONTACT, SITE_EXPANSION, SOCIAL_LINKS } from "@/lib/nav";
+import {
+  IconFacebook,
+  IconInstagram,
+  IconLinkedIn,
+  IconTikTok,
+} from "@/components/icons/MonoIcons";
+
+const socialIcons = {
+  Instagram: IconInstagram,
+  TikTok: IconTikTok,
+  LinkedIn: IconLinkedIn,
+  Facebook: IconFacebook,
+} as const;
 
 const footerLinks = {
   divisions: DIVISION_LINKS,
   company: [
     { href: "/insights", label: "Insights" },
     { href: "/experts", label: "Our Experts" },
+    { href: "/training", label: "Courses" },
     { href: "/get-started", label: "Get Started" },
-    { href: "/signup", label: "Sign up" },
-    { href: "/login", label: "Sign in" },
+    { href: "/login", label: "Staff sign in" },
   ],
   governance: [
     { href: "/privacy", label: "Privacy Policy" },
     { href: "/data-protection", label: "Data Protection" },
-    { href: "#", label: "Ethics & Compliance" },
-    { href: "#", label: "Audit Standards" },
   ],
 };
 
@@ -61,6 +72,43 @@ export function SiteFooter() {
                 compliance solutions for public and private sector clients
                 worldwide.
               </p>
+              <address className="mt-5 not-italic text-sm text-white/75">
+                <p>{SITE_CONTACT.location}</p>
+                <p className="mt-1">
+                  <a
+                    href={SITE_CONTACT.phoneHref}
+                    className="transition-colors hover:text-white hover:underline underline-offset-2"
+                  >
+                    {SITE_CONTACT.phoneDisplay}
+                  </a>
+                </p>
+                <p className="mt-1">
+                  <a
+                    href={`mailto:${SITE_CONTACT.email}`}
+                    className="transition-colors hover:text-white hover:underline underline-offset-2"
+                  >
+                    {SITE_CONTACT.email}
+                  </a>
+                </p>
+              </address>
+              <ul className="mt-5 flex items-center gap-2">
+                {SOCIAL_LINKS.map((item) => {
+                  const Icon = socialIcons[item.label];
+                  return (
+                    <li key={item.label}>
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={item.label}
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/80 transition-colors hover:border-brand-gold/50 hover:text-brand-gold"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
 
             <div>

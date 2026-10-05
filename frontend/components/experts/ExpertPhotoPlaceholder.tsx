@@ -1,8 +1,10 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type ExpertPhotoPlaceholderProps = {
   name: string;
   portrait: "male" | "female";
+  photoSrc?: string;
   className?: string;
 };
 
@@ -37,8 +39,28 @@ function FemaleHeadshot() {
 export function ExpertPhotoPlaceholder({
   name,
   portrait,
+  photoSrc,
   className,
 }: ExpertPhotoPlaceholderProps) {
+  if (photoSrc) {
+    return (
+      <div
+        className={cn(
+          "relative h-28 w-28 shrink-0 overflow-hidden rounded-full bg-warm-cream ring-1 ring-brand-navy/10",
+          className,
+        )}
+      >
+        <Image
+          src={photoSrc}
+          alt={name}
+          fill
+          className="object-cover object-[center_18%]"
+          sizes="208px"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       role="img"

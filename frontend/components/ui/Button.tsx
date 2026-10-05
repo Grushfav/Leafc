@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
-import type { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, MouseEventHandler } from "react";
 
 const variants = {
   primary:
@@ -24,6 +25,23 @@ export type ButtonSize = keyof typeof sizes;
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  href?: string;
+}
+
+function buttonClassName(
+  variant: ButtonVariant,
+  size: ButtonSize,
+  className?: string,
+) {
+  return cn(
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-heading font-semibold",
+    "transition-all duration-200 ease-out",
+    "disabled:pointer-events-none disabled:opacity-50",
+    "active:scale-[0.98]",
+    variants[variant],
+    sizes[size],
+    className,
+  );
 }
 
 export function Button({
@@ -31,21 +49,37 @@ export function Button({
   variant = "primary",
   size = "md",
   type = "button",
+  href,
+  disabled,
+  children,
+  onClick,
   ...props
 }: ButtonProps) {
+  const classes = buttonClassName(variant, size, className);
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cn(classes, disabled && "pointer-events-none opacity-50")}
+        aria-disabled={disabled || undefined}
+        tabIndex={disabled ? -1 : undefined}
+        onClick={onClick as MouseEventHandler<HTMLAnchorElement> | undefined}
+      >
+        {children}
+      </Link>
+    );
+  }
+
   return (
     <button
       type={type}
-      className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg font-heading font-semibold",
-        "transition-all duration-200 ease-out",
-        "disabled:pointer-events-none disabled:opacity-50",
-        "active:scale-[0.98]",
-        variants[variant],
-        sizes[size],
-        className,
-      )}
+      className={classes}
+      disabled={disabled}
+      onClick={onClick}
       {...props}
-    />
+    >
+      {children}
+    </button>
   );
 }

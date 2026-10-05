@@ -15,7 +15,9 @@ export function SiteHeader() {
   const [divisionsOpen, setDivisionsOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isDivisionActive = DIVISION_LINKS.some((d) => pathname.startsWith(d.href));
+  const isDivisionActive = DIVISION_LINKS.some(
+    (d) => d.href !== "/training" && pathname.startsWith(d.href),
+  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface/95 backdrop-blur-md">
@@ -114,29 +116,36 @@ export function SiteHeader() {
           </div>
         </nav>
 
-        {isReady && user ? (
-          <div className="hidden items-center gap-3 md:flex">
-            <Link href="/dashboard">
-              <Button variant="outline" size="sm">
+        <div className="hidden items-center gap-3 md:flex">
+          <Button href="/get-started" variant="accent" size="sm">
+            Contact us
+          </Button>
+          {isReady && user ? (
+            <>
+              <Button href="/dashboard" variant="outline" size="sm">
                 Workspace
               </Button>
-            </Link>
-            <Button variant="accent" size="sm" onClick={logout}>
-              Sign out
-            </Button>
-          </div>
-        ) : null}
+              <Button variant="outline" size="sm" onClick={logout}>
+                Sign out
+              </Button>
+            </>
+          ) : null}
+        </div>
 
-        {/* Mobile menu toggle */}
-        <button
-          type="button"
-          className="rounded-lg p-2 text-heading md:hidden"
-          onClick={() => setMobileOpen((o) => !o)}
-          aria-expanded={mobileOpen}
-          aria-label="Toggle navigation menu"
-        >
-          {mobileOpen ? "✕" : "☰"}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <Button href="/get-started" variant="accent" size="sm">
+            Contact us
+          </Button>
+          <button
+            type="button"
+            className="rounded-lg p-2 text-heading"
+            onClick={() => setMobileOpen((o) => !o)}
+            aria-expanded={mobileOpen}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileOpen ? "✕" : "☰"}
+          </button>
+        </div>
       </div>
 
       {mobileOpen && (
@@ -169,15 +178,15 @@ export function SiteHeader() {
           ))}
           {isReady && user ? (
             <>
-              <Link
+              <Button
                 href="/dashboard"
+                variant="outline"
+                size="sm"
+                className="mt-3 w-full"
                 onClick={() => setMobileOpen(false)}
-                className="mt-3 block"
               >
-                <Button variant="outline" size="sm" className="w-full">
-                  Workspace
-                </Button>
-              </Link>
+                Workspace
+              </Button>
               <Button
                 variant="accent"
                 size="sm"

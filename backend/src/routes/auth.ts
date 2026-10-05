@@ -12,6 +12,7 @@ import {
 import {
   isStaffRole,
   requireAuth,
+  requireStaff,
   signToken,
   type AccountRole,
   type StaffRole,
@@ -98,10 +99,9 @@ authRouter.post("/register", async (req, res) => {
   const body = req.body as RegisterBody;
   const errors: Record<string, string> = {};
 
-  if (!isNonEmptyString(body.accountType)) {
-    errors.accountType = "Choose member or customer signup.";
-  } else if (body.accountType !== "member" && body.accountType !== "customer") {
-    errors.accountType = "Invalid account type.";
+  if (body.accountType && body.accountType !== "member") {
+    errors.accountType =
+      "Customer accounts are no longer used. Request services from the Get Started form.";
   }
 
   if (!isNonEmptyString(body.name)) {
@@ -120,46 +120,24 @@ authRouter.post("/register", async (req, res) => {
     errors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
   }
 
-  let role: AccountRole = "customer";
-  let customerKind: CustomerKind | null = null;
-  let organizationName: string | null = null;
+  let role: AccountRole = "agent";
+  const customerKind: CustomerKind | null = null;
+  const organizationName: string | null = null;
 
-  if (body.accountType === "member") {
-    if (!isNonEmptyString(body.role) || !isStaffRole(body.role)) {
-      errors.role = "Select admin, senior agent, or agent.";
-    } else {
-      role = body.role as StaffRole;
-    }
-
-    const expected = process.env.STAFF_INVITE_CODE ?? "";
-    if (!expected) {
-      errors.inviteCode =
-        "Member signup is not configured. Contact a LEAF-C administrator.";
-    } else if (!isNonEmptyString(body.inviteCode)) {
-      errors.inviteCode = "Member invite code is required.";
-    } else if (!inviteCodeMatches(body.inviteCode.trim(), expected)) {
-      errors.inviteCode = "Invalid invite code.";
-    }
+  if (!isNonEmptyString(body.role) || !isStaffRole(body.role)) {
+    errors.role = "Select admin, senior agent, or agent.";
+  } else {
+    role = body.role as StaffRole;
   }
 
-  if (body.accountType === "customer") {
-    role = "customer";
-    if (
-      !isNonEmptyString(body.customerKind) ||
-      !CUSTOMER_KINDS.includes(body.customerKind as CustomerKind)
-    ) {
-      errors.customerKind = "Select individual or organisation.";
-    } else {
-      customerKind = body.customerKind as CustomerKind;
-    }
-
-    if (customerKind === "organization") {
-      if (!isNonEmptyString(body.organizationName)) {
-        errors.organizationName = "Organisation name is required.";
-      } else {
-        organizationName = body.organizationName.trim();
-      }
-    }
+  const expected = process.env.STAFF_INVITE_CODE ?? "";
+  if (!expected) {
+    errors.inviteCode =
+      "Member signup is not configured. Contact a LEAF-C administrator.";
+  } else if (!isNonEmptyString(body.inviteCode)) {
+    errors.inviteCode = "Member invite code is required.";
+  } else if (!inviteCodeMatches(body.inviteCode.trim(), expected)) {
+    errors.inviteCode = "Invalid invite code.";
   }
 
   if (Object.keys(errors).length > 0) {
@@ -185,8 +163,7 @@ authRouter.post("/register", async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(body.password!, 12);
-    const memberVerification =
-      body.accountType === "member" ? createEmailVerificationToken() : null;
+    const memberVerification = createEmailVerificationToken();
 
     const [created] = await db
       .insert(users)
@@ -272,7 +249,16 @@ authRouter.post("/login", async (req, res) => {
       return;
     }
 
-    if (isStaffRole(user.role) && !user.emailVerifiedAt) {
+    if (!isStaffRole(user.role)) {
+      res.status(403).json({
+        error:
+          "This portal is for LEAF-C staff. Request services from the Get Started form — a customer account is not required.",
+        code: "staff_only",
+      });
+      return;
+    }
+
+    if (!user.emailVerifiedAt) {
       res.status(403).json({
         error:
           "Verify your email before signing in. Check your inbox for a confirmation link from LEAF-C.",
@@ -402,7 +388,7 @@ authRouter.post("/resend-verification", async (req, res) => {
   }
 });
 
-authRouter.get("/me", requireAuth, async (req, res) => {
+authRouter.get("/me", requireAuth, requireStaff, async (req, res) => {
   try {
     const [user] = await db
       .select({
@@ -432,7 +418,7 @@ interface ProfileBody {
   newPassword?: string;
 }
 
-authRouter.patch("/me", requireAuth, async (req, res) => {
+authRouter.patch("/me", requireAuth, requireStaff, async (req, res) => {
   const body = req.body as ProfileBody;
   const errors: Record<string, string> = {};
 
@@ -530,7 +516,7 @@ authRouter.patch("/me", requireAuth, async (req, res) => {
   }
 });
 
-authRouter.post("/me/avatar", requireAuth, parseAvatarUpload, async (req, res) => {
+authRouter.post("/me/avatar", requireAuth, requireStaff, parseAvatarUpload, async (req, res) => {
   const file = req.file;
   if (!file) {
     res.status(400).json({ error: "Choose an image to upload." });

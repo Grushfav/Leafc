@@ -316,6 +316,43 @@ export const auditLogs = pgTable("audit_logs", {
 
 // ─── Service Inquiries (public intake) ───────────────────────────────────────
 
+export const insights = pgTable("insights", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  body: text("body").notNull(),
+  sections: jsonb("sections")
+    .$type<{ heading: string; paragraphs?: string[]; bullets?: string[] }[]>()
+    .notNull(),
+  takeaways: jsonb("takeaways").$type<string[]>().notNull(),
+  relatedHref: text("related_href"),
+  relatedLabel: text("related_label"),
+  readMinutes: integer("read_minutes").notNull().default(5),
+  published: boolean("published").notNull().default(false),
+  publishedAt: timestamp("published_at"),
+  createdById: integer("created_by_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const academyCourses = pgTable("academy_courses", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description"),
+  format: text("format").notNull(),
+  duration: text("duration").notNull(),
+  dates: text("dates").notNull(),
+  level: text("level").notNull(),
+  published: boolean("published").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdById: integer("created_by_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const serviceInquiries = pgTable("service_inquiries", {
   id: serial("id").primaryKey(),
   referenceNumber: text("reference_number").notNull().unique(),
@@ -347,6 +384,22 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   polygraphSessions: many(polygraphSessions),
   riskAssessments: many(riskAssessments),
   auditLogs: many(auditLogs),
+  insights: many(insights),
+  academyCourses: many(academyCourses),
+}));
+
+export const insightsRelations = relations(insights, ({ one }) => ({
+  createdBy: one(users, {
+    fields: [insights.createdById],
+    references: [users.id],
+  }),
+}));
+
+export const academyCoursesRelations = relations(academyCourses, ({ one }) => ({
+  createdBy: one(users, {
+    fields: [academyCourses.createdById],
+    references: [users.id],
+  }),
 }));
 
 export const divisionsRelations = relations(divisions, ({ many }) => ({

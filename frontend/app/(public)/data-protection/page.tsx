@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PolicyPage, PolicySection } from "@/components/layout/PolicyPage";
+import { SITE_CONTACT } from "@/lib/nav";
 
 export const metadata: Metadata = {
   title: "Data Protection Policy",
@@ -131,7 +132,10 @@ export default function DataProtectionPage() {
         <p>
           Data-subject and client requests — including access, correction, and
           deletion — should be sent to{" "}
-          <a href="mailto:info@leafc.net">info@leafc.net</a>. We may need to
+          <a href={`mailto:${SITE_CONTACT.email}`}>{SITE_CONTACT.email}</a>{" "}
+          or by telephone to{" "}
+          <a href={SITE_CONTACT.phoneHref}>{SITE_CONTACT.phoneDisplay}</a>.
+          LEAF-C’s public location is {SITE_CONTACT.location}. We may need to
           verify identity before releasing or changing a record. If you are
           not satisfied with our response, you may raise the matter with the
           supervisory authority that applies to you.

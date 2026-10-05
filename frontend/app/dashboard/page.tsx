@@ -114,7 +114,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!isReady) return;
-    if (!user || !token) {
+    if (!user || !token || !isStaffRole(user.role)) {
       router.replace("/login");
     }
   }, [isReady, user, token, router]);

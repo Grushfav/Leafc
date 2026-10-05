@@ -1,99 +1,19 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import {
-  INSIGHTS,
-  getCategoryLabel,
-  getInsight,
-  relatedInsights,
-} from "@/lib/insights";
+import { getCategoryLabel, type InsightArticle } from "@/lib/insights";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://leafc.net";
-
-export const dynamic = "force-static";
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return INSIGHTS.map((article) => ({ slug: article.slug }));
-}
-
-export async function generateMetadata({
-  params,
+export function InsightArticleView({
+  article,
+  related = [],
 }: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const article = getInsight(slug);
-  if (!article) {
-    return { title: "Insight" };
-  }
-
-  const url = `/insights/${article.slug}`;
-
-  return {
-    title: article.title,
-    description: article.description,
-    alternates: { canonical: url },
-    openGraph: {
-      type: "article",
-      url,
-      title: article.title,
-      description: article.description,
-      publishedTime: article.isoDate,
-      modifiedTime: article.isoDate,
-      section: getCategoryLabel(article.category),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: article.title,
-      description: article.description,
-    },
-  };
-}
-
-export default async function InsightArticlePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
+  article: InsightArticle;
+  related?: InsightArticle[];
 }) {
-  const { slug } = await params;
-  const article = getInsight(slug);
-  if (!article) notFound();
-
   const categoryLabel = getCategoryLabel(article.category);
-  const related = relatedInsights(article);
-  const canonical = new URL(`/insights/${article.slug}`, siteUrl).toString();
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    description: article.description,
-    datePublished: article.isoDate,
-    dateModified: article.isoDate,
-    author: {
-      "@type": "Organization",
-      name: "LEAF-C",
-      url: siteUrl,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "LEAF-C",
-      url: siteUrl,
-    },
-    mainEntityOfPage: canonical,
-    articleSection: categoryLabel,
-  };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-
       <article>
         <header className="border-b border-border-subtle bg-warm-cream">
           <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
@@ -143,24 +63,26 @@ export default async function InsightArticlePage({
             </section>
           ))}
 
-          <section className="rounded-2xl border border-brand-orange/20 bg-warm-cream/80 p-6">
-            <h2 className="font-heading text-lg font-bold text-brand-navy">
-              Key takeaways
-            </h2>
-            <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              {article.takeaways.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <span
-                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[10px] font-bold text-white"
-                    aria-hidden
-                  >
-                    ✓
-                  </span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {article.takeaways.length > 0 ? (
+            <section className="rounded-2xl border border-brand-orange/20 bg-warm-cream/80 p-6">
+              <h2 className="font-heading text-lg font-bold text-brand-navy">
+                Key takeaways
+              </h2>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                {article.takeaways.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span
+                      className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[10px] font-bold text-white"
+                      aria-hidden
+                    >
+                      ✓
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           <p className="text-xs leading-relaxed text-muted-foreground">
             This article is practical guidance for organisations. It is not

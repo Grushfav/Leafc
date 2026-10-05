@@ -9,6 +9,14 @@ import { authRouter } from "./routes/auth.js";
 import { dashboardRouter } from "./routes/dashboard.js";
 import { casesRouter } from "./routes/cases.js";
 import { trainingRouter } from "./routes/training.js";
+import {
+  academyAdminRouter,
+  academyPublicRouter,
+} from "./routes/academy.js";
+import {
+  insightsAdminRouter,
+  insightsPublicRouter,
+} from "./routes/insights.js";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");
@@ -60,6 +68,10 @@ app.use("/inquiries", inquiriesRouter);
 app.use("/dashboard", dashboardRouter);
 app.use("/cases", casesRouter);
 app.use("/training", trainingRouter);
+app.use("/insights", insightsPublicRouter);
+app.use("/admin/insights", insightsAdminRouter);
+app.use("/academy/courses", academyPublicRouter);
+app.use("/admin/academy/courses", academyAdminRouter);
 
 app.listen(port, () => {
   console.log(`API listening on http://localhost:${port}`);

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PolicyPage, PolicySection } from "@/components/layout/PolicyPage";
+import { SITE_CONTACT } from "@/lib/nav";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -26,8 +27,10 @@ export default function PrivacyPolicyPage() {
           workspace.
         </p>
         <p>
+          Public location: {SITE_CONTACT.location}. Telephone:{" "}
+          <a href={SITE_CONTACT.phoneHref}>{SITE_CONTACT.phoneDisplay}</a>.
           Questions about this policy:{" "}
-          <a href="mailto:info@leafc.net">info@leafc.net</a>.
+          <a href={`mailto:${SITE_CONTACT.email}`}>{SITE_CONTACT.email}</a>.
         </p>
       </PolicySection>
 

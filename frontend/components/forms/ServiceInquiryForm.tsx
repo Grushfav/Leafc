@@ -99,23 +99,40 @@ function FormProgressBar({
   const progress = Math.round((currentStep / totalSteps) * 100);
 
   return (
-    <div className="mb-8">
+    <div className={compact ? "mb-5" : "mb-8"}>
       <div className="mb-3 flex items-end justify-between gap-4">
         <div>
           <p className="font-heading text-xs font-bold uppercase tracking-[0.2em] text-brand-orange">
             Step {currentStep} of {totalSteps}
           </p>
-          <p className="mt-1 font-heading text-lg font-bold text-heading">
+          <p
+            className={cn(
+              "mt-1 font-heading font-bold text-heading",
+              compact ? "text-base" : "text-lg",
+            )}
+          >
             {STEPS[currentStep - 1]?.label}
           </p>
         </div>
-        <p className="font-heading text-3xl font-extrabold tabular-nums text-brand-navy drop-shadow-sm">
+        <p
+          className={cn(
+            "font-heading font-extrabold tabular-nums text-brand-navy drop-shadow-sm",
+            compact ? "text-2xl" : "text-3xl",
+          )}
+        >
           {progress}
-          <span className="text-lg text-brand-orange/70">%</span>
+          <span className={cn("text-brand-orange/70", compact ? "text-base" : "text-lg")}>
+            %
+          </span>
         </p>
       </div>
 
-      <div className="relative h-3 overflow-hidden rounded-full bg-warm-cream ring-1 ring-brand-orange/20">
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-full bg-warm-cream ring-1 ring-brand-orange/20",
+          compact ? "h-2" : "h-3",
+        )}
+      >
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-orange via-brand-gold to-brand-orange-light shadow-glow transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
@@ -547,12 +564,17 @@ export function ServiceInquiryForm({
         </div>
       )}
 
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <div
+        className={cn(
+          "flex flex-wrap items-center justify-center gap-3",
+          compact ? "mt-5" : "mt-8",
+        )}
+      >
         {step > 1 && (
           <Button
             type="button"
             variant="outline"
-            size="lg"
+            size={compact ? "md" : "lg"}
             onClick={() => setStep((current) => current - 1)}
           >
             Back
@@ -562,7 +584,7 @@ export function ServiceInquiryForm({
           <Button
             type="button"
             variant="accent"
-            size="lg"
+            size={compact ? "md" : "lg"}
             className="min-w-[140px] flex-1 sm:flex-none"
             onClick={() => goToStep(step + 1)}
           >
@@ -572,8 +594,8 @@ export function ServiceInquiryForm({
           <Button
             type="submit"
             variant="accent"
-            size="lg"
-            className="min-w-[180px] flex-1 sm:flex-none shadow-glow"
+            size={compact ? "md" : "lg"}
+            className="min-w-[180px] flex-1 shadow-glow sm:flex-none"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Start your engagement"}

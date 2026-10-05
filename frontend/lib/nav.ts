@@ -1,6 +1,13 @@
 export const SITE_EXPANSION =
   "Law Enforcement Against Financial Crimes";
 
+export const SITE_CONTACT = {
+  location: "Kingston, Jamaica",
+  phoneDisplay: "(876) 484-7802",
+  phoneHref: "tel:+18764847802",
+  email: "info@leafc.net",
+} as const;
+
 export const DIVISION_LINKS = [
   { href: "/consultancy", label: "Consultancy" },
   { href: "/operations", label: "Operations" },
@@ -11,5 +18,13 @@ export const DIVISION_LINKS = [
 export const PRIMARY_NAV_LINKS = [
   { href: "/insights", label: "Insights" },
   { href: "/experts", label: "Experts" },
+  { href: "/training", label: "Courses" },
   { href: "/get-started", label: "Get Started" },
+] as const;
+
+export const SOCIAL_LINKS = [
+  { href: "https://www.instagram.com/leafc", label: "Instagram" },
+  { href: "https://www.tiktok.com/@leafc", label: "TikTok" },
+  { href: "https://www.linkedin.com/company/leaf-c", label: "LinkedIn" },
+  { href: "https://www.facebook.com/leafc", label: "Facebook" },
 ] as const;

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageHero } from "@/components/layout/PageHero";
 import { Button } from "@/components/ui/Button";
 import { VerifyEmailForm } from "@/components/auth/VerifyEmailForm";
@@ -19,11 +18,9 @@ export default function VerifyEmailPage() {
         imageSrc="/hero-justice.svg"
         imageClassName="object-cover object-[center_right]"
         actions={
-          <Link href="/login">
-            <Button variant="outline" size="md">
-              Sign in
-            </Button>
-          </Link>
+          <Button href="/login" variant="outline" size="md">
+            Sign in
+          </Button>
         }
       />
 

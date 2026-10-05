@@ -4,19 +4,20 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HomeHero } from "@/components/layout/HomeHero";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
-import { Card } from "@/components/ui/Card";
-import { IconBriefcase, IconGlobe, IconGraduationCap, IconLock, IconPulse, IconScale, IconSearch } from "@/components/icons/MonoIcons";
+import { IconAlert, IconBriefcase, IconBuilding, IconClipboard, IconGlobe, IconGraduationCap, IconLock, IconMonitor, IconPulse, IconScale, IconSearch, IconUser } from "@/components/icons/MonoIcons";
 import { cn } from "@/lib/utils";
-import { INSIGHTS, getCategoryLabel } from "@/lib/insights";
-import { EXPERTS } from "@/lib/experts";
+import { INSIGHTS, categoriesWithArticles, getCategoryLabel } from "@/lib/insights";
+import { getPublishedExperts } from "@/lib/experts";
 import { ExpertPhotoPlaceholder } from "@/components/experts/ExpertPhotoPlaceholder";
+import { ExpertContactLinks } from "@/components/experts/ExpertContactLinks";
+import { AcademyCourseGrid } from "@/components/academy/AcademyCourseGrid";
+import { SITE_CONTACT } from "@/lib/nav";
 
 const services = [
   {
-    title: "Consultancy",
+    title: "Consultancy and Advisory",
     href: "/consultancy",
-    badge: "Advisory",
-    image: "/services-consulting.jpeg",
+    image: "/services-consulting.png",
     imageAlt: "Professional consultants in a partnership meeting",
     accent: "navy" as const,
     Icon: IconBriefcase,
@@ -28,9 +29,8 @@ const services = [
     ],
   },
   {
-    title: "Investigations",
+    title: "Investigations and Operations",
     href: "/operations",
-    badge: "Operations",
     image: "/services-investigation.jpeg",
     imageAlt: "Investigator reviewing evidence and intelligence in an operations center",
     accent: "orange" as const,
@@ -43,10 +43,9 @@ const services = [
     ],
   },
   {
-    title: "Training",
+    title: "Training and Capacity Building",
     href: "/training",
-    badge: "Capacity Building",
-    image: "/services-training.jpeg",
+    image: "/services-training.png",
     imageAlt: "Professional training session with instructors and participants",
     accent: "bronze" as const,
     Icon: IconGraduationCap,
@@ -65,121 +64,100 @@ const serviceAccentStyles = {
     panel: "from-brand-navy/[0.06] to-warm-cream",
     icon: "border-brand-navy/20 bg-brand-navy/10 text-brand-navy",
     check: "bg-brand-navy",
-    row: "hover:border-brand-navy/20 hover:bg-brand-navy/[0.04]",
   },
   orange: {
     bar: "from-brand-orange via-brand-gold to-brand-orange-light",
     panel: "from-brand-orange/[0.08] to-warm-cream",
     icon: "border-brand-orange/25 bg-brand-orange/10 text-brand-orange",
     check: "bg-brand-orange",
-    row: "hover:border-brand-orange/25 hover:bg-brand-orange/[0.05]",
   },
   bronze: {
     bar: "from-brand-gold via-brand-orange to-brand-gold",
     panel: "from-brand-gold/[0.1] to-warm-cream",
     icon: "border-brand-gold/30 bg-brand-gold/15 text-brand-gold",
     check: "bg-brand-gold",
-    row: "hover:border-brand-gold/30 hover:bg-brand-gold/[0.06]",
   },
 } as const;
 
-const trustItems = [
+const industries = [
   {
-    title: "Governance & Ethics",
-    body: "Independent oversight boards, conflict-of-interest protocols, and ISO-aligned quality management.",
+    title: "Financial services and insurance",
+    body: "Fraud investigations, claims enquiries, due diligence, compliance reviews, financial crime training and integrity screening",
     Icon: IconScale,
   },
   {
-    title: "Data Protection",
-    body: "End-to-end encryption, role-based access, and comprehensive audit trails for all case materials.",
+    title: "Government and public bodies",
+    body: "Procurement integrity, anti-corruption controls, investigations training, policy advisory and institutional capacity building",
+    Icon: IconBuilding,
+  },
+  {
+    title: "Law enforcement and security",
+    body: "Specialist training, intelligence analysis, polygraph support, interviewing and digital evidence awareness",
     Icon: IconLock,
   },
   {
-    title: "International Compliance",
-    body: "Aligned with international standards, local data sovereignty requirements, and industry best practice.",
+    title: "Telecommunications and technology",
+    body: "Fraud risk, digital evidence, cybercrime training, due diligence and ethics advisory",
+    Icon: IconMonitor,
+  },
+  {
+    title: "Transportation, logistics and construction",
+    body: "Accident and incident investigations, loss enquiries, background checks and integrity controls",
+    Icon: IconAlert,
+  },
+  {
+    title: "Hospitality, tourism and gaming",
+    body: "Fraud prevention, integrity screening, background checks, incident enquiries and staff training",
+    Icon: IconUser,
+  },
+  {
+    title: "Legal and professional services",
+    body: "Specialist investigative support, due diligence, forensic review and expert training",
+    Icon: IconClipboard,
+  },
+  {
+    title: "Education and training institutions",
+    body: "Joint programmes, professional development, ethics education and curriculum support",
+    Icon: IconGraduationCap,
+  },
+  {
+    title: "NGOs and international organizations",
+    body: "Governance reviews, integrity systems, due diligence, investigations support and capacity building",
     Icon: IconGlobe,
   },
 ];
 
-const industries = [
+const polygraphDisciplines = [
   {
-    title: "Insurance & Financial Services",
-    body: "Risk assessment, fraud detection, and compliance audits.",
-    accent: "navy" as const,
+    title: "Pre-Employment & Security Clearance",
+    body: "Integrity assessment for new hires and sensitive public-sector, enforcement, and financial roles.",
+    tag: "Pre-placement",
+    Icon: IconUser,
   },
   {
-    title: "Banking & Investment Firms",
-    body: "Integrity screening, internal investigations, and governance reviews.",
-    accent: "orange" as const,
+    title: "Internal Affairs & Misconduct",
+    body: "Examinations supporting misconduct investigations, internal fraud, and breach-of-trust allegations.",
+    tag: "Confidential inquiry",
+    Icon: IconSearch,
   },
   {
-    title: "Auditing & Accounting Firms",
-    body: "Due diligence support and forensic verification.",
-    accent: "navy" as const,
+    title: "Periodic Integrity Assessments",
+    body: "Scheduled re-examinations for personnel in high-trust posts and classified environments.",
+    tag: "Recertification",
+    Icon: IconPulse,
   },
   {
-    title: "Business Process Outsourcing",
-    body: "Workforce integrity testing and operational compliance.",
-    accent: "orange" as const,
+    title: "Expert Witness & Reporting",
+    body: "Documented analysis and reporting prepared for tribunals, hearings, and court of law.",
+    tag: "Legal admissibility",
+    Icon: IconScale,
   },
-  {
-    title: "Corporate Enterprises",
-    body: "Executive vetting, security audits, and training programs.",
-    accent: "navy" as const,
-  },
-  {
-    title: "Government Agencies",
-    body: "Regulatory compliance, polygraph examinations, and confidential investigations.",
-    accent: "orange" as const,
-  },
-];
-
-const polygraphServices = [
-  "Pre-employment & security clearance screening",
-  "Internal affairs & misconduct investigations",
-  "Periodic integrity assessments",
-  "Expert witness & report preparation",
 ];
 
 const polygraphCredentials = [
   "UK Polygraph Association",
   "American Polygraph Association (APA)",
   "Canadian Polygraph Association (CPA)",
-];
-
-const academyCourses = [
-  {
-    code: "LCA-101",
-    title: "Financial Crime Investigations",
-    format: "In-person workshop",
-    duration: "5 days",
-    dates: "12–16 Oct 2026",
-    level: "Foundation",
-  },
-  {
-    code: "LCA-204",
-    title: "Fraud and Corruption Investigations",
-    format: "Virtual training",
-    duration: "3 days",
-    dates: "4–6 Nov 2026",
-    level: "Intermediate",
-  },
-  {
-    code: "LCA-310",
-    title: "Cybercrime and Digital Evidence",
-    format: "In-person workshop",
-    duration: "4 days",
-    dates: "18–21 Nov 2026",
-    level: "Intermediate",
-  },
-  {
-    code: "LCA-415",
-    title: "Interviewing and Interrogation",
-    format: "Executive briefing",
-    duration: "2 days",
-    dates: "3–4 Dec 2026",
-    level: "Advanced",
-  },
 ];
 
 export default function HomePage() {
@@ -196,34 +174,29 @@ export default function HomePage() {
                 About
               </Badge>
               <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">
-                About LEAF-C
+                Who we are
               </h2>
               <div className="section-divider-duo mt-4" aria-hidden />
               <div className="mt-6 max-w-xl space-y-4 text-[15px] leading-relaxed text-muted-foreground">
                 <p>
-                  LEAF-C — Law Enforcement Against Financial Crimes — provides
-                  advisory, investigative, and professional training services
-                  for governments, enterprises, and justice partners. Work is
-                  scoped, confidential, and evidence-led.
+                  LEAF-C brings together experience in investigations,
+                  financial crime, compliance, intelligence, polygraph, digital
+                  forensics and professional education. The company was
+                  established to help organizations strengthen prevention,
+                  improve investigative readiness and make defensible decisions
+                  based on reliable information.
                 </p>
                 <p>
-                  The practice is built around consultancy and programme
-                  design, investigations and integrity testing, and
-                  capacity-building for teams operating to international
-                  standards in the Caribbean.
-                </p>
-                <p>
-                  The Polygraph Department is a core unit of that work, with
-                  more than 25 combined years of examiner experience and over
-                  1,000 examinations completed. Examinations follow documented
-                  protocol from preparation through analysis and reporting.
+                  Our work serves organizations that require specialist
+                  capability without maintaining every discipline internally.
+                  We define the scope of each engagement, assign appropriate
+                  expertise and communicate findings through clear reports,
+                  briefings or training outcomes.
                 </p>
               </div>
-              <Link href="/polygraph" className="mt-8 inline-block">
-                <Button variant="outline" size="md">
-                  Polygraph & Integrity Unit
-                </Button>
-              </Link>
+              <Button href="/polygraph" variant="outline" size="md" className="mt-8">
+                Polygraph & Integrity Unit
+              </Button>
             </div>
 
             <div className="lg:col-span-6">
@@ -296,9 +269,9 @@ export default function HomePage() {
           <div className="text-center">
             <div className="section-divider-duo section-divider-center" aria-hidden />
             <h2 className="mt-4 font-heading text-3xl font-bold text-brand-navy sm:text-4xl">
-              Core Expertise
+              Our Divisions
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-brand-navy">
               Multidisciplinary investigative, advisory, and training solutions
               for public and private sector clients worldwide.
             </p>
@@ -330,14 +303,8 @@ export default function HomePage() {
                     className="absolute inset-0 bg-gradient-to-t from-charcoal/85 via-charcoal/20 to-transparent"
                     aria-hidden
                   />
-                  <Badge
-                    variant="outline-accent"
-                    className="absolute left-5 top-5 z-10 border-white/25 bg-white/95 shadow-sm backdrop-blur-md"
-                  >
-                    {service.badge}
-                  </Badge>
                   <div className="absolute inset-x-0 bottom-0 z-10 p-5 sm:p-6">
-                    <h3 className="font-heading text-xl font-bold tracking-tight text-white sm:text-2xl">
+                    <h3 className="font-heading text-lg font-bold leading-snug tracking-tight text-white sm:text-xl">
                       {service.title}
                     </h3>
                   </div>
@@ -368,7 +335,7 @@ export default function HomePage() {
                       <service.Icon className="h-4 w-4" />
                     </span>
                     <p className="font-heading text-[11px] font-bold uppercase tracking-[0.16em] text-brand-navy">
-                      Core services
+                      Services
                     </p>
                   </div>
 
@@ -376,10 +343,7 @@ export default function HomePage() {
                     {service.items.map((item) => (
                       <li
                         key={item}
-                        className={cn(
-                          "flex items-center gap-2 rounded-lg border border-border-subtle/80 bg-surface/90 px-2.5 py-1.5 text-xs font-medium leading-snug text-charcoal transition-colors",
-                          accent.row,
-                        )}
+                        className="flex items-center gap-2 py-1 text-xs font-medium leading-snug text-charcoal"
                       >
                         <span
                           className={cn(
@@ -414,11 +378,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Polygraph CTA */}
-      <section className="relative overflow-hidden bg-warm-cream py-20 sm:py-24">
-        <div className="pattern-grid-warm absolute inset-0 opacity-40" aria-hidden />
+      <section className="relative overflow-hidden bg-background py-20 sm:py-24">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-10">
+          <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-5">
               <Badge variant="default" className="mb-4 bg-charcoal">
                 Specialised Unit
@@ -427,23 +389,70 @@ export default function HomePage() {
                 Polygraph & Integrity Testing Unit
               </h2>
               <div className="section-divider-duo mt-4" aria-hidden />
-              <p className="mt-6 leading-relaxed text-muted-foreground">
+              <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">
                 Certified examiners conduct scientifically validated polygraph
-                examinations under rigorously enforced chain of custody and
-                confidentiality protocols. Every stage of the process, from
-                subject preparation through data analysis and reporting, follows
-                standardized procedures designed to eliminate bias, preserve
-                evidentiary integrity, and ensure legal admissibility. Examiners
-                are credentialed professionals whose methods are benchmarked
-                against international standards, and all documentation is
-                securely maintained to guarantee accuracy, transparency, and
+                examinations under chain of custody and confidentiality
+                protocols. Every stage, from subject preparation through
+                analysis and reporting, follows documented procedure so the
+                work can stand up to later review.
+              </p>
+              <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+                Examiners are credentialed to UKPA, APA, and CPA standards.
+                Documentation is held securely to protect accuracy and
                 confidentiality.
               </p>
+
+              <div className="mt-8 grid grid-cols-3 gap-3 rounded-2xl border border-border-subtle bg-surface px-4 py-4">
+                <div>
+                  <p className="font-heading text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">
+                    1,000+
+                  </p>
+                  <p className="mt-1 font-heading text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-orange">
+                    Examinations
+                  </p>
+                </div>
+                <div>
+                  <p className="font-heading text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">
+                    25+
+                  </p>
+                  <p className="mt-1 font-heading text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-orange">
+                    Combined years
+                  </p>
+                </div>
+                <div>
+                  <p className="font-heading text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">
+                    APA
+                  </p>
+                  <p className="mt-1 font-heading text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-orange">
+                    UKPA and CPA
+                  </p>
+                </div>
+              </div>
+
+              <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
+                {[
+                  "Documented protocol from preparation through reporting",
+                  "Confidential examination environments",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <span
+                      className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[8px] font-bold text-white"
+                      aria-hidden
+                    >
+                      ✓
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div className="lg:col-span-7">
-              <div className="relative min-h-[280px] overflow-hidden rounded-3xl bg-surface shadow-card ring-1 ring-black/[0.04] sm:min-h-[360px] lg:min-h-[480px]">
-                <div className="absolute inset-x-0 top-0 z-10 h-1 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold" aria-hidden />
+              <div className="relative min-h-[280px] overflow-hidden rounded-3xl bg-charcoal shadow-card sm:min-h-[380px] lg:min-h-[520px]">
+                <div
+                  className="absolute inset-x-0 top-0 z-10 h-1 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold"
+                  aria-hidden
+                />
                 <Image
                   src="/polygraph-lie-detector.jpeg"
                   alt="Certified polygraph lie detector examination equipment"
@@ -451,47 +460,89 @@ export default function HomePage() {
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 58vw"
                 />
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-brand-orange/20 bg-surface/90 p-3 shadow-sm sm:p-4 lg:col-span-12">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                <div className="flex shrink-0 items-center gap-2">
-                  <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-brand-orange/25 bg-brand-orange/10 text-brand-orange"
-                    aria-hidden
-                  >
-                    <IconPulse className="h-4 w-4" />
-                  </span>
-                  <p className="font-heading text-[11px] font-bold uppercase tracking-[0.16em] text-brand-navy">
-                    Services offered
+                <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-charcoal via-charcoal/80 to-transparent px-5 pb-5 pt-16 sm:px-6">
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-medium text-white/90">
+                      Computerised examination instrumentation
+                    </span>
+                    <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-medium text-white/90">
+                      Chain of custody verified
+                    </span>
+                  </div>
+                  <p className="mt-3 text-[11px] text-white/65">
+                    Controlled examination environment · APA-aligned protocol
                   </p>
                 </div>
-                <ul className="grid flex-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                  {polygraphServices.map((item) => (
-                    <li
-                      key={item}
-                      className="flex items-center gap-2 rounded-lg border border-border-subtle/80 bg-warm-cream/60 px-2.5 py-2 text-xs font-medium leading-snug text-charcoal transition-colors hover:border-brand-orange/25 hover:bg-brand-orange/[0.05]"
-                    >
-                      <span
-                        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[8px] font-bold text-white"
-                        aria-hidden
-                      >
-                        ✓
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
               </div>
             </div>
+          </div>
 
-            <div className="flex justify-center lg:col-span-12">
-              <Link href="/polygraph" className="block w-full sm:w-auto">
-                <Button variant="accent" size="lg" className="w-full sm:w-auto">
+          <div className="mt-16">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="font-heading text-[11px] font-bold uppercase tracking-[0.16em] text-brand-orange">
+                  Examination & assessment disciplines
+                </p>
+                <h3 className="mt-2 font-heading text-2xl font-bold text-brand-navy">
+                  How the unit is used
+                </h3>
+              </div>
+              <p className="text-xs font-medium text-muted-foreground">
+                {polygraphDisciplines.length} documented examination types
+              </p>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {polygraphDisciplines.map((item) => (
+                <article
+                  key={item.title}
+                  className="rounded-xl bg-surface px-4 py-4 shadow-sm"
+                >
+                  <span
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-navy/15 bg-warm-cream text-brand-navy"
+                    aria-hidden
+                  >
+                    <item.Icon className="h-3.5 w-3.5" />
+                  </span>
+                  <h4 className="mt-3 font-heading text-[13px] font-bold leading-snug text-brand-navy">
+                    {item.title}
+                  </h4>
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                    {item.body}
+                  </p>
+                  <p className="mt-3 font-heading text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-orange">
+                    {item.tag}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-12 overflow-hidden rounded-3xl bg-charcoal px-6 py-8 text-white sm:px-10 sm:py-10">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-xl">
+                <p className="font-heading text-[11px] font-bold uppercase tracking-[0.16em] text-brand-gold">
+                  Confidential scheduling
+                </p>
+                <h3 className="mt-3 font-heading text-2xl font-bold sm:text-3xl">
+                  Require confidential screening or assessment?
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/70">
+                  Examinations are scoped discreetly, with chain of custody
+                  and examiner-only access to results.
+                </p>
+              </div>
+              <div className="flex w-full shrink-0 flex-col gap-3 sm:max-w-xs">
+                <Button href="/polygraph" variant="accent" size="lg" className="w-full">
                   Request Examination
                 </Button>
-              </Link>
+                <Link
+                  href="/polygraph"
+                  className="inline-flex h-12 w-full items-center justify-center whitespace-nowrap rounded-lg border border-white/30 px-7 font-heading text-base font-semibold text-white transition-colors hover:bg-white hover:text-brand-navy"
+                >
+                  View the unit
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -522,110 +573,183 @@ export default function HomePage() {
               <div className="section-divider-duo mt-4" aria-hidden />
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
                 Upcoming courses in investigations, integrity, and financial
-                crime. Dates below are sample listings.
+                crime.
               </p>
             </div>
-            <Link href="/training">
-              <Button variant="accent" size="md">
-                View all programmes
-              </Button>
-            </Link>
+            <Button href="/training" variant="accent" size="md">
+              View all programmes
+            </Button>
           </div>
 
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {academyCourses.map((course) => (
-              <article
-                key={course.code}
-                className="flex flex-col rounded-2xl bg-warm-white p-5 text-brand-navy shadow-lg ring-1 ring-white/10"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-mono text-[11px] font-semibold tracking-wide text-brand-orange">
-                    {course.code}
-                  </p>
-                  <span className="rounded-full bg-brand-navy/10 px-2 py-0.5 font-heading text-[10px] font-semibold uppercase tracking-wide text-brand-navy">
-                    {course.level}
-                  </span>
-                </div>
-                <h3 className="mt-3 font-heading text-base font-bold leading-snug">
-                  {course.title}
-                </h3>
-                <dl className="mt-4 space-y-1.5 text-xs text-muted-foreground">
-                  <div className="flex justify-between gap-3">
-                    <dt>Dates</dt>
-                    <dd className="font-medium text-brand-navy/80">{course.dates}</dd>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <dt>Duration</dt>
-                    <dd className="font-medium text-brand-navy/80">{course.duration}</dd>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <dt>Format</dt>
-                    <dd className="text-right font-medium text-brand-navy/80">
-                      {course.format}
-                    </dd>
-                  </div>
-                </dl>
-                <Link href="/get-started" className="mt-5">
-                  <Button variant="outline" size="sm" className="w-full">
-                    Register interest
-                  </Button>
-                </Link>
-              </article>
-            ))}
-          </div>
+          <AcademyCourseGrid />
         </div>
       </section>
 
       <section className="relative overflow-hidden bg-background py-20 sm:py-24">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
+          <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-5">
               <Badge variant="accent">Practical guidance</Badge>
               <h2 className="mt-4 font-heading text-3xl font-bold text-brand-navy sm:text-4xl">
                 Insights
               </h2>
               <div className="section-divider-duo mt-4" aria-hidden />
-              <p className="mt-6 max-w-2xl text-muted-foreground">
-                Practical guidance for operators. Short briefings on fraud,
-                integrity testing, digital evidence, and financial-crime risk
-                for boards, counsel, and investigators.
+              <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">
+                Short briefings on fraud, integrity testing, digital evidence,
+                and financial-crime risk for boards, counsel, and
+                investigators. Written to be used, not to advertise a product.
               </p>
+
+              <div className="mt-8 grid grid-cols-3 gap-3 rounded-2xl border border-border-subtle bg-surface px-4 py-4">
+                <div>
+                  <p className="font-heading text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">
+                    {INSIGHTS.length}
+                  </p>
+                  <p className="mt-1 font-heading text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-orange">
+                    Published articles
+                  </p>
+                </div>
+                <div>
+                  <p className="font-heading text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">
+                    {categoriesWithArticles().length}
+                  </p>
+                  <p className="mt-1 font-heading text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-orange">
+                    Active topics
+                  </p>
+                </div>
+                <div>
+                  <p className="font-heading text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">
+                    {INSIGHTS[0]?.readMinutes ?? 8}
+                  </p>
+                  <p className="mt-1 font-heading text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-orange">
+                    Min. typical read
+                  </p>
+                </div>
+              </div>
+
+              <ul className="mt-6 flex flex-wrap gap-2">
+                {categoriesWithArticles().map((category) => (
+                  <li
+                    key={category.id}
+                    className="rounded-full bg-warm-cream px-3 py-1 font-heading text-[11px] font-semibold text-brand-navy"
+                  >
+                    {category.label}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <Link href="/insights">
-              <Button variant="outline" size="md">
-                View all insights
-              </Button>
-            </Link>
+
+            <div className="lg:col-span-7">
+              {INSIGHTS[0] ? (
+                <Link
+                  href={`/insights/${INSIGHTS[0].slug}`}
+                  className="group relative block min-h-[280px] overflow-hidden rounded-3xl bg-charcoal sm:min-h-[380px] lg:min-h-[480px]"
+                >
+                  <div
+                    className="absolute inset-x-0 top-0 z-10 h-1 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold"
+                    aria-hidden
+                  />
+                  <Image
+                    src="/consulting_backgroung.jpeg"
+                    alt=""
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 1024px) 100vw, 58vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/55 to-transparent" aria-hidden />
+                  <div className="absolute inset-x-0 bottom-0 z-10 p-6 sm:p-8">
+                    <p className="font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-gold">
+                      {getCategoryLabel(INSIGHTS[0].category)} · {INSIGHTS[0].readMinutes} min read
+                    </p>
+                    <h3 className="mt-3 font-heading text-2xl font-bold leading-snug text-white sm:text-3xl">
+                      {INSIGHTS[0].title}
+                    </h3>
+                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75">
+                      {INSIGHTS[0].description}
+                    </p>
+                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-gold">
+                      Read article
+                      <span aria-hidden>→</span>
+                    </span>
+                  </div>
+                </Link>
+              ) : null}
+            </div>
           </div>
 
-          <div className="mt-12 grid gap-5 md:grid-cols-3">
-            {INSIGHTS.slice(0, 3).map((article) => (
-              <article
-                key={article.slug}
-                className="flex flex-col rounded-2xl border border-border-subtle bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <p className="font-heading text-[11px] font-semibold uppercase tracking-wide text-brand-orange">
-                  {getCategoryLabel(article.category)}
+          <div className="mt-16">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="font-heading text-[11px] font-bold uppercase tracking-[0.16em] text-brand-orange">
+                  Published briefings
                 </p>
-                <h3 className="mt-3 font-heading text-lg font-bold leading-snug text-brand-navy">
+                <h3 className="mt-2 font-heading text-2xl font-bold text-brand-navy">
+                  More from Insights
+                </h3>
+              </div>
+              <Link
+                href="/insights"
+                className="text-sm font-semibold text-brand-orange hover:text-brand-orange-dark"
+              >
+                View all insights →
+              </Link>
+            </div>
+
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {INSIGHTS.slice(1, 4).map((article) => (
+                <article key={article.slug} className="rounded-2xl bg-surface px-5 py-6 shadow-sm">
+                  <p className="font-heading text-[11px] font-semibold uppercase tracking-wide text-brand-orange">
+                    {getCategoryLabel(article.category)}
+                  </p>
+                  <h3 className="mt-3 font-heading text-base font-bold leading-snug text-brand-navy">
+                    <Link
+                      href={`/insights/${article.slug}`}
+                      className="hover:underline decoration-brand-orange/50 underline-offset-4"
+                    >
+                      {article.title}
+                    </Link>
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    {article.description}
+                  </p>
                   <Link
                     href={`/insights/${article.slug}`}
-                    className="hover:underline decoration-brand-orange/50 underline-offset-4"
+                    className="mt-4 inline-block text-xs font-semibold text-brand-orange hover:text-brand-orange-dark"
                   >
-                    {article.title}
+                    Read article →
                   </Link>
-                </h3>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
-                  {article.description}
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-12 overflow-hidden rounded-3xl bg-charcoal px-6 py-8 text-white sm:px-10 sm:py-10">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-xl">
+                <p className="font-heading text-[11px] font-bold uppercase tracking-[0.16em] text-brand-gold">
+                  Confidential consultation
                 </p>
+                <h3 className="mt-3 font-heading text-2xl font-bold sm:text-3xl">
+                  Need advice on a live matter?
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/70">
+                  These articles are general guidance. For a suspected fraud,
+                  integrity issue, or evidence problem, speak with LEAF-C
+                  confidentially.
+                </p>
+              </div>
+              <div className="flex w-full shrink-0 flex-col gap-3 sm:max-w-xs">
+                <Button href="/get-started" variant="accent" size="lg" className="w-full">
+                  Request a consultation
+                </Button>
                 <Link
-                  href={`/insights/${article.slug}`}
-                  className="mt-5 text-sm font-semibold text-brand-orange hover:text-brand-orange-dark"
+                  href="/insights"
+                  className="inline-flex h-12 w-full items-center justify-center whitespace-nowrap rounded-lg border border-white/30 px-7 font-heading text-base font-semibold text-white transition-colors hover:bg-white hover:text-brand-navy"
                 >
-                  Read article →
+                  All insights
                 </Link>
-              </article>
-            ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -644,8 +768,7 @@ export default function HomePage() {
         <div className="pattern-grid-warm absolute inset-0 opacity-50" aria-hidden />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
-          <div className="text-left lg:col-span-5">
+          <div className="max-w-3xl">
             <Badge variant="accent" className="mb-4 shadow-sm">
               Who We Serve
             </Badge>
@@ -659,7 +782,7 @@ export default function HomePage() {
               across sectors, and to international standards of accuracy,
               confidentiality, and accountability.
             </p>
-            <div className="mt-6 flex flex-wrap justify-start gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <span className="rounded-full border border-brand-navy/15 bg-surface/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-brand-navy">
                 Private clients
               </span>
@@ -669,49 +792,32 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:col-span-7">
-            {industries.map((industry, index) => {
-              const accent = serviceAccentStyles[industry.accent];
-
-              return (
-                <article
-                  key={industry.title}
-                  className={[
-                    "group relative overflow-hidden rounded-2xl border bg-surface shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md",
-                    industry.accent === "navy"
-                      ? "border-brand-navy/15 hover:border-brand-navy/30"
-                      : "border-brand-orange/20 hover:border-brand-orange/40",
-                  ].join(" ")}
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {industries.map((industry) => (
+              <article
+                key={industry.title}
+                className="flex h-full flex-col rounded-xl border border-border-subtle bg-surface px-4 py-4 shadow-sm"
+              >
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-navy/10 bg-warm-cream text-brand-navy"
+                  aria-hidden
                 >
-                  <div
-                    className={cn("h-1 w-full bg-gradient-to-r", accent.bar)}
-                    aria-hidden
-                  />
-                  <div className={cn("bg-gradient-to-br p-4", accent.panel)}>
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-heading text-sm font-bold leading-snug text-brand-navy">
-                        {industry.title}
-                      </h3>
-                      <span className="shrink-0 font-heading text-[10px] font-bold tabular-nums text-muted-foreground/70">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                    </div>
-                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                      {industry.body}
-                    </p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                  <industry.Icon className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="mt-3 font-heading text-sm font-bold leading-snug text-brand-navy">
+                  {industry.title}
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                  {industry.body}
+                </p>
+              </article>
+            ))}
           </div>
 
           <div className="mt-12 flex justify-center">
-            <Link href="/get-started" className="block w-full sm:w-auto">
-              <Button variant="accent" size="lg" className="w-full shadow-glow sm:w-auto">
-                Request services
-              </Button>
-            </Link>
+            <Button href="/get-started" variant="accent" size="lg" className="w-full shadow-glow sm:w-auto">
+              Request services
+            </Button>
           </div>
         </div>
       </section>
@@ -727,19 +833,16 @@ export default function HomePage() {
               <div className="section-divider-duo mt-4" aria-hidden />
               <p className="mt-6 max-w-2xl text-muted-foreground">
                 The professionals who lead LEAF-C’s investigations, training,
-                and integrity work. Photographs are placeholders until
-                approved portraits are in place.
+                and integrity work.
               </p>
             </div>
-            <Link href="/experts">
-              <Button variant="outline" size="md">
-                View experts
-              </Button>
-            </Link>
+            <Button href="/experts" variant="outline" size="md">
+              View experts
+            </Button>
           </div>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {EXPERTS.map((expert) => (
+            {getPublishedExperts().map((expert) => (
               <article
                 key={expert.slug}
                 className="flex h-full flex-col items-center rounded-2xl bg-surface px-6 py-8 text-center"
@@ -747,6 +850,7 @@ export default function HomePage() {
                 <ExpertPhotoPlaceholder
                   name={expert.name}
                   portrait={expert.portrait}
+                  photoSrc={expert.photoSrc}
                 />
                 <h3 className="mt-5 font-heading text-lg font-bold text-brand-navy">
                   {expert.name}
@@ -754,50 +858,8 @@ export default function HomePage() {
                 <p className="mt-1 text-sm font-medium text-brand-orange">
                   {expert.title}
                 </p>
+                <ExpertContactLinks expert={expert} className="mt-4" />
               </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trust & Governance */}
-      <section className="relative overflow-hidden border-t border-border-subtle py-20">
-        <Image
-          src="/rules-followed.svg"
-          alt=""
-          fill
-          className="object-cover object-center"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-surface/55" aria-hidden />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="section-divider-duo section-divider-center" aria-hidden />
-            <h2 className="mt-4 font-heading text-3xl font-bold text-brand-navy">
-              Trust & Governance
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              Institutional safeguards designed for sensitive investigative work.
-            </p>
-          </div>
-          <div className="mt-14 grid gap-5 md:grid-cols-3">
-            {trustItems.map((item) => (
-              <Card key={item.title} variant="elevated">
-                <div className="px-4 py-3.5">
-                  <span
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-brand-navy/15 bg-warm-cream text-brand-navy"
-                    aria-hidden
-                  >
-                    <item.Icon className="h-4 w-4" />
-                  </span>
-                  <h3 className="mt-2.5 font-heading text-sm font-semibold text-heading">
-                    {item.title}
-                  </h3>
-                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                    {item.body}
-                  </p>
-                </div>
-              </Card>
             ))}
           </div>
         </div>
@@ -837,6 +899,26 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
+              <address className="mt-8 not-italic text-sm text-muted-foreground">
+                <p className="font-heading text-sm font-semibold text-heading">
+                  {SITE_CONTACT.location}
+                </p>
+                <p className="mt-1">
+                  <a
+                    href={SITE_CONTACT.phoneHref}
+                    className="font-medium text-brand-navy underline-offset-2 hover:underline"
+                  >
+                    {SITE_CONTACT.phoneDisplay}
+                  </a>
+                  <span aria-hidden> · </span>
+                  <a
+                    href={`mailto:${SITE_CONTACT.email}`}
+                    className="font-medium text-brand-navy underline-offset-2 hover:underline"
+                  >
+                    {SITE_CONTACT.email}
+                  </a>
+                </p>
+              </address>
             </div>
             <div className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-card sm:p-8">
               <h3 className="font-heading text-lg font-semibold text-heading">

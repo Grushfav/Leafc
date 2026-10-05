@@ -445,18 +445,25 @@ export function getCategoryLabel(id: InsightCategoryId) {
   return INSIGHT_CATEGORIES.find((category) => category.id === id)?.label ?? id;
 }
 
-export function categoriesWithArticles() {
+export function categoriesWithArticles(articles: InsightArticle[] = INSIGHTS) {
   return INSIGHT_CATEGORIES.filter((category) =>
-    INSIGHTS.some((article) => article.category === category.id),
+    articles.some((article) => article.category === category.id),
   );
 }
 
-export function insightsInCategory(id: InsightCategoryId) {
-  return INSIGHTS.filter((article) => article.category === id);
+export function insightsInCategory(
+  id: InsightCategoryId,
+  articles: InsightArticle[] = INSIGHTS,
+) {
+  return articles.filter((article) => article.category === id);
 }
 
-export function relatedInsights(article: InsightArticle, limit = 3) {
-  return INSIGHTS.filter(
-    (item) => item.category === article.category && item.slug !== article.slug,
-  ).slice(0, limit);
+export function relatedInsights(
+  article: InsightArticle,
+  limit = 3,
+  articles: InsightArticle[] = INSIGHTS,
+) {
+  return articles
+    .filter((item) => item.category === article.category && item.slug !== article.slug)
+    .slice(0, limit);
 }

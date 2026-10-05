@@ -6,6 +6,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { PageLoader } from "@/components/ui/LogoLoader";
 import { ProfileForm } from "@/components/auth/ProfileForm";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { isStaffRole } from "@/lib/auth";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isReady) return;
-    if (!user) router.replace("/login");
+    if (!user || !isStaffRole(user.role)) router.replace("/login");
   }, [isReady, user, router]);
 
   if (!isReady || !user) {

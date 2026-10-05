@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { PageHero } from "@/components/layout/PageHero";
 import { ExpertPhotoPlaceholder } from "@/components/experts/ExpertPhotoPlaceholder";
-import { EXPERTS } from "@/lib/experts";
+import { ExpertContactLinks } from "@/components/experts/ExpertContactLinks";
+import { getPublishedExperts } from "@/lib/experts";
 
 export const metadata: Metadata = {
   title: "Our Experts",
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://leafc.net";
 
 export default function ExpertsPage() {
-  const featured = EXPERTS.find((expert) => expert.published);
-  const pending = EXPERTS.filter((expert) => !expert.published);
+  const published = getPublishedExperts();
+  const featured = published[0];
 
   const jsonLd = featured
     ? {
@@ -41,6 +41,9 @@ export default function ExpertsPage() {
         },
         description: featured.summary,
         url: new URL("/experts", siteUrl).toString(),
+        ...(featured.photoSrc
+          ? { image: new URL(featured.photoSrc, siteUrl).toString() }
+          : {}),
       }
     : null;
 
@@ -56,14 +59,12 @@ export default function ExpertsPage() {
       <PageHero
         badge="Leadership"
         title="Our Experts"
-        description="The professionals who lead LEAF-C’s investigations, training, and integrity work. Photographs are placeholders until approved portraits are in place."
+        description="The professionals who lead LEAF-C’s investigations, training, and integrity work."
         imageSrc="/consulting_backgroung.jpeg"
         actions={
-          <Link href="/get-started">
-            <Button variant="accent" size="md">
-              Request a consultation
-            </Button>
-          </Link>
+          <Button href="/get-started" variant="accent" size="md">
+            Request a consultation
+          </Button>
         }
       />
 
@@ -74,7 +75,8 @@ export default function ExpertsPage() {
               <ExpertPhotoPlaceholder
                 name={featured.name}
                 portrait={featured.portrait}
-                className="h-32 w-32"
+                photoSrc={featured.photoSrc}
+                className="h-40 w-40 sm:h-52 sm:w-52"
               />
             </div>
             <div className="lg:col-span-9">
@@ -83,6 +85,7 @@ export default function ExpertsPage() {
                 {featured.name}
               </h2>
               <div className="section-divider-duo mt-4" aria-hidden />
+              <ExpertContactLinks expert={featured} className="mt-5 justify-start" />
               <p className="mt-6 text-base leading-relaxed text-muted-foreground">
                 {featured.summary}
               </p>
@@ -149,19 +152,15 @@ export default function ExpertsPage() {
         </section>
       ) : null}
 
-      {pending.length > 0 ? (
+      {published.length > 1 ? (
         <section className="border-t border-border-subtle bg-warm-cream py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 className="font-heading text-2xl font-bold text-brand-navy sm:text-3xl">
-              Directors
+              Leadership
             </h2>
             <div className="section-divider-duo mt-4" aria-hidden />
-            <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
-              Name and title are shown for these roles. Full biographies and
-              photographs will be published when they are approved.
-            </p>
             <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {pending.map((expert) => (
+              {published.slice(1).map((expert) => (
                 <article
                   key={expert.slug}
                   className="flex h-full flex-col items-center rounded-2xl bg-surface px-6 py-8 text-center"
@@ -169,6 +168,7 @@ export default function ExpertsPage() {
                   <ExpertPhotoPlaceholder
                     name={expert.name}
                     portrait={expert.portrait}
+                    photoSrc={expert.photoSrc}
                   />
                   <h3 className="mt-5 font-heading text-lg font-bold text-brand-navy">
                     {expert.name}
@@ -176,6 +176,7 @@ export default function ExpertsPage() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     {expert.title}
                   </p>
+                  <ExpertContactLinks expert={expert} className="mt-4" />
                 </article>
               ))}
             </div>

@@ -68,7 +68,7 @@ export function CollapsibleInquiry({
         aria-label={title}
         className={cn(!open && "hidden")}
       >
-        {open ? children : null}
+        {children}
       </CardBody>
     </Card>
   );

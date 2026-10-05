@@ -4,39 +4,10 @@ import { Badge } from "@/components/ui/Badge";
 import {
   Card,
   CardBody,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/Card";
 import { CollapsibleInquiry } from "@/components/forms/CollapsibleInquiry";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
-
-const programmes = [
-  {
-    id: "TRN-001",
-    title: "Forensic Investigation Fundamentals",
-    duration: "5 days",
-    level: "Foundation",
-  },
-  {
-    id: "TRN-002",
-    title: "International Compliance & AML",
-    duration: "3 days",
-    level: "Intermediate",
-  },
-  {
-    id: "TRN-003",
-    title: "Ethics in Public Service",
-    duration: "2 days",
-    level: "Foundation",
-  },
-  {
-    id: "TRN-004",
-    title: "Advanced Digital Forensics",
-    duration: "10 days",
-    level: "Advanced",
-  },
-];
+import { AcademyCourseGrid } from "@/components/academy/AcademyCourseGrid";
 
 const features = [
   "LEAF-C accredited certificates",
@@ -84,7 +55,7 @@ export default function TrainingPage() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3">
           <div className="section-divider-duo shrink-0" aria-hidden />
-          <h2 className="font-heading text-2xl font-bold text-brand-navy">
+          <h2 id="courses" className="font-heading text-2xl font-bold text-brand-navy">
             Upcoming Programmes
           </h2>
         </div>
@@ -110,26 +81,7 @@ export default function TrainingPage() {
             methods with confidence and integrity.
           </p>
         </div>
-        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {programmes.map((prog) => (
-            <Card key={prog.id} variant="elevated" className="flex flex-col">
-              <CardHeader className="border-none px-4 py-3">
-                <Badge variant="outline" className="px-2 py-0 text-[10px]">
-                  {prog.level}
-                </Badge>
-                <CardTitle className="mt-1.5 text-sm leading-snug">
-                  {prog.title}
-                </CardTitle>
-                <CardDescription className="mt-1 text-xs">
-                  {prog.duration}
-                </CardDescription>
-                <span className="mt-0.5 font-mono text-xs text-muted-foreground">
-                  {prog.id}
-                </span>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+        <AcademyCourseGrid variant="training" />
 
         <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
           <CollapsibleInquiry
@@ -160,10 +112,10 @@ export default function TrainingPage() {
             </Card>
 
             <Link
-              href="/signup"
+              href="/get-started"
               className="block text-center text-sm font-medium text-brand-orange hover:underline"
             >
-              Create an account →
+              Request training →
             </Link>
           </div>
         </div>

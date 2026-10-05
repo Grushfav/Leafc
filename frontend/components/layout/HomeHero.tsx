@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -223,14 +222,13 @@ export function HomeHero() {
         <div
           className={cn(
             "hero-card max-w-2xl rounded-2xl bg-warm-white/55 p-5 shadow-lg sm:p-7 lg:max-w-xl",
-            revealed ? "is-in" : "pointer-events-none",
+            revealed && "is-in",
           )}
-          aria-hidden={!revealed}
         >
           <Badge variant="accent" className="mb-5">
             Integrity & Excellence
           </Badge>
-          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-brand-navy sm:text-4xl lg:text-5xl">
+          <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-brand-navy sm:text-3xl lg:text-4xl">
             Specialist Investigations, Compliance and Professional Training
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-brand-navy/80 sm:text-lg">
@@ -240,16 +238,12 @@ export function HomeHero() {
             worldwide.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link href="/get-started">
-              <Button variant="accent" size="md">
-                Get Started
-              </Button>
-            </Link>
-            <Link href="/consultancy">
-              <Button variant="outline" size="md">
-                Explore Divisions
-              </Button>
-            </Link>
+            <Button href="/get-started" variant="accent" size="md">
+              Get Started
+            </Button>
+            <Button href="/consultancy" variant="outline" size="md">
+              Explore Divisions
+            </Button>
           </div>
         </div>
       </div>

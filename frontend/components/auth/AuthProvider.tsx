@@ -13,6 +13,7 @@ import {
   clearToken,
   fetchCurrentUser,
   getStoredToken,
+  isStaffRole,
   loginAccount,
   registerAccount,
   storeToken,
@@ -50,6 +51,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     fetchCurrentUser(stored)
       .then((profile) => {
+        if (!isStaffRole(profile.role)) {
+          clearToken();
+          setToken(null);
+          setUser(null);
+          return;
+        }
         setToken(stored);
         setUser(profile);
       })
@@ -63,6 +70,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const result = await loginAccount(email, password);
+    if (!isStaffRole(result.user.role)) {
+      clearToken();
+      throw {
+        error:
+          "This portal is for LEAF-C staff. Request services from the Get Started form.",
+        code: "staff_only",
+      };
+    }
     storeToken(result.token);
     setToken(result.token);
     setUser(result.user);

@@ -129,8 +129,8 @@ export default function OperationsPage() {
               </CardBody>
             </Card>
 
-            <Link href="/signup" className="block text-center text-sm font-medium text-brand-orange hover:underline">
-              Create an account →
+            <Link href="/get-started" className="block text-center text-sm font-medium text-brand-orange hover:underline">
+              Request services →
             </Link>
           </div>
         </div>

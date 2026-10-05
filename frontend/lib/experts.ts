@@ -4,6 +4,9 @@ export type ExpertProfile = {
   initials: string;
   title: string;
   portrait: "male" | "female";
+  photoSrc?: string;
+  email?: string;
+  linkedin?: string;
   /** Full biography is shown only when approved for public disclosure. */
   published: boolean;
   summary?: string;
@@ -20,6 +23,7 @@ export const EXPERTS: ExpertProfile[] = [
     initials: "AW",
     title: "Founder and Managing Director",
     portrait: "male",
+    photoSrc: "/Adrian_Wellington_Headshot.jpeg",
     published: true,
     summary:
       "Adrian Wellington is an investigations, ethics and compliance professional with experience spanning law enforcement, anti-corruption investigations, corporate investigations, financial crime and professional education. He has developed policy, training and investigative frameworks for public and private sector environments.",

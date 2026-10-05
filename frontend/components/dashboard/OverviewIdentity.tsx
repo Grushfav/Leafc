@@ -38,11 +38,9 @@ export function OverviewIdentity({ user, primaryAction }: OverviewIdentityProps)
           Profile
         </Link>
         {primaryAction ? (
-          <Link href={primaryAction.href}>
-            <Button variant="accent" size="sm">
-              {primaryAction.label}
-            </Button>
-          </Link>
+          <Button href={primaryAction.href} variant="accent" size="sm">
+            {primaryAction.label}
+          </Button>
         ) : null}
       </div>
     </div>

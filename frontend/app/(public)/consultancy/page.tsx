@@ -105,17 +105,17 @@ export default function ConsultancyPage() {
             Core Services
           </h2>
         </div>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
           {services.map((service) => (
-            <Card key={service.name} variant="elevated">
-              <CardBody className="flex items-start gap-4">
+            <Card key={service.name} className="h-full">
+              <CardBody className="flex flex-col items-start gap-2 px-3 py-3">
                 <span
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-brand-navy/20 bg-brand-navy/10 text-brand-navy"
                   aria-hidden
                 >
-                  <service.Icon className="h-5 w-5" />
+                  <service.Icon className="h-3.5 w-3.5" />
                 </span>
-                <span className="text-sm font-medium leading-relaxed">{service.name}</span>
+                <span className="text-xs font-medium leading-snug">{service.name}</span>
               </CardBody>
             </Card>
           ))}
@@ -135,15 +135,16 @@ export default function ConsultancyPage() {
               <CardBody>
                 <Badge variant="accent" className="mb-3">Why LEAF-C</Badge>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  Our advisory team combines UWI academic rigour with decades of
-                  global governance experience. All engagements include encrypted
-                  document handling and independent oversight.
+                  Our advisory team works to industry standards and brings
+                  professional-services experience in governance, compliance,
+                  and risk. All engagements include encrypted document handling
+                  and independent oversight.
                 </p>
               </CardBody>
             </Card>
 
-            <Link href="/signup" className="block text-center text-sm font-medium text-brand-orange hover:underline">
-              Create an account →
+            <Link href="/get-started" className="block text-center text-sm font-medium text-brand-orange hover:underline">
+              Request services →
             </Link>
           </div>
         </div>

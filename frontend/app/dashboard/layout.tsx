@@ -4,7 +4,9 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
   return (
     <>
       <SiteHeader />
-      <div className="flex-1">{children}</div>
+      <main id="main-content" className="flex-1" tabIndex={-1}>
+        {children}
+      </main>
     </>
   );
 }
