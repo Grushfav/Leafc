@@ -194,8 +194,8 @@ export default function HomePage() {
                   briefings or training outcomes.
                 </p>
               </div>
-              <Button href="/polygraph" variant="outline" size="md" className="mt-8">
-                Polygraph & Integrity Unit
+              <Button href="/about" variant="outline" size="md" className="mt-8">
+                About us
               </Button>
             </div>
 
@@ -219,10 +219,6 @@ export default function HomePage() {
                     </p>
                     <p className="mt-2 font-heading text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-orange">
                       Combined years of experience
-                    </p>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      Examiner experience pooled across the Polygraph
-                      Department.
                     </p>
                   </div>
                 </div>

@@ -17,9 +17,10 @@ const socialIcons = {
 const footerLinks = {
   divisions: DIVISION_LINKS,
   company: [
+    { href: "/about", label: "About us" },
     { href: "/insights", label: "Insights" },
     { href: "/experts", label: "Our Experts" },
-    { href: "/training", label: "Courses" },
+    { href: "/training", label: "Programmes" },
     { href: "/get-started", label: "Get Started" },
     { href: "/login", label: "Staff sign in" },
   ],

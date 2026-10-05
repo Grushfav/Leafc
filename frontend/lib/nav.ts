@@ -16,9 +16,10 @@ export const DIVISION_LINKS = [
 ] as const;
 
 export const PRIMARY_NAV_LINKS = [
+  { href: "/about", label: "About" },
   { href: "/insights", label: "Insights" },
   { href: "/experts", label: "Experts" },
-  { href: "/training", label: "Courses" },
+  { href: "/training", label: "Programmes" },
 ] as const;
 
 export const SOCIAL_LINKS = [

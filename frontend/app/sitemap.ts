@@ -12,6 +12,7 @@ const publicRoutes: {
 }[] = [
   { path: "/", changeFrequency: "weekly", priority: 1 },
   { path: "/get-started", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/about", changeFrequency: "monthly", priority: 0.8 },
   { path: "/insights", changeFrequency: "weekly", priority: 0.8 },
   { path: "/experts", changeFrequency: "monthly", priority: 0.7 },
   { path: "/consultancy", changeFrequency: "monthly", priority: 0.8 },
