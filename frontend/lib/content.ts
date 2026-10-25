@@ -1,5 +1,6 @@
 import type { AuthError } from "@/lib/auth";
 import type { AcademyCourse } from "@/lib/academy";
+import type { DivisionPageContent, DivisionSlug } from "@/lib/division-pages";
 import type { InsightArticle } from "@/lib/insights";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -170,6 +171,61 @@ export async function deleteAcademyCourse(
     headers: authHeaders(token),
   });
   await parseJson<{ ok: boolean }>(response);
+}
+
+export interface NewsletterSubscriber {
+  id: number;
+  email: string;
+  status: "pending" | "subscribed" | "unsubscribed";
+  source: string;
+  consentAt: string;
+  confirmedAt: string | null;
+  unsubscribedAt: string | null;
+  createdAt: string;
+}
+
+export async function fetchNewsletterSubscribers(
+  token: string,
+): Promise<NewsletterSubscriber[]> {
+  const response = await fetch(`${API_URL}/admin/newsletter/subscribers`, {
+    headers: authHeaders(token),
+  });
+  const data = await parseJson<{ subscribers: NewsletterSubscriber[] }>(response);
+  return data.subscribers;
+}
+
+export async function fetchPublishedDivision(
+  slug: DivisionSlug,
+): Promise<DivisionPageContent | null> {
+  const response = await fetch(`${API_URL}/divisions/${slug}`);
+  const data = await parseJson<{ page: { content: DivisionPageContent } | null }>(response);
+  return data.page?.content ?? null;
+}
+
+export async function fetchAdminDivisions(
+  token: string,
+): Promise<{ slug: DivisionSlug; content: DivisionPageContent; updatedAt: string }[]> {
+  const response = await fetch(`${API_URL}/admin/divisions`, {
+    headers: authHeaders(token),
+  });
+  const data = await parseJson<{
+    pages: { slug: DivisionSlug; content: DivisionPageContent; updatedAt: string }[];
+  }>(response);
+  return data.pages;
+}
+
+export async function saveDivisionPage(
+  token: string,
+  slug: DivisionSlug,
+  content: DivisionPageContent,
+): Promise<DivisionPageContent> {
+  const response = await fetch(`${API_URL}/admin/divisions/${slug}`, {
+    method: "PUT",
+    headers: authHeaders(token),
+    body: JSON.stringify({ content }),
+  });
+  const data = await parseJson<{ page: { content: DivisionPageContent } }>(response);
+  return data.page.content;
 }
 
 export function insightHref(slug: string, fromApi = false): string {

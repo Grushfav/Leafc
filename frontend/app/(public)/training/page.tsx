@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useDivisionPage } from "@/components/divisions/useDivisionPage";
 import { Badge } from "@/components/ui/Badge";
 import {
   Card,
@@ -9,14 +12,9 @@ import { CollapsibleInquiry } from "@/components/forms/CollapsibleInquiry";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 import { AcademyCourseGrid } from "@/components/academy/AcademyCourseGrid";
 
-const features = [
-  "LEAF-C accredited certificates",
-  "CPE credits for select courses",
-  "Industry competency frameworks",
-  "Hands-on case simulations",
-];
-
 export default function TrainingPage() {
+  const content = useDivisionPage("training");
+
   return (
     <>
       <section className="relative overflow-hidden bg-charcoal text-white">
@@ -34,16 +32,15 @@ export default function TrainingPage() {
           aria-hidden
         />
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <Badge variant="accent" className="mb-4">Training Division</Badge>
+          <Badge variant="accent" className="mb-4">{content.heroBadge}</Badge>
           <h1 className="hero-heading text-4xl font-bold sm:text-5xl">
-            Professional Development Programmes
+            {content.heroTitle}
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-white/80">
-            Accredited training in investigative methodology, forensic science,
-            and international regulatory compliance — building professional capacity.
+            {content.heroIntro}
           </p>
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {features.map((f) => (
+            {content.highlights.map((f) => (
               <div key={f} className="rounded-lg border border-brand-navy/25 bg-brand-navy/10 px-3 py-2 text-center text-xs backdrop-blur-sm">
                 {f}
               </div>
@@ -56,37 +53,20 @@ export default function TrainingPage() {
         <div className="flex items-center gap-3">
           <div className="section-divider-duo shrink-0" aria-hidden />
           <h2 id="courses" className="font-heading text-2xl font-bold text-brand-navy">
-            Upcoming Programmes
+            {content.introTitle}
           </h2>
         </div>
         <div className="mt-5 grid max-w-5xl gap-5 text-sm leading-relaxed text-muted-foreground sm:grid-cols-2">
-          <p>
-            Our Training Division is dedicated to building professional capacity
-            in investigative methods, integrity testing, and compliance protocols.
-            We deliver structured programs that combine theoretical foundations
-            with practical simulations, ensuring participants gain both knowledge
-            and applied skills. Each course is designed to meet international
-            standards, equipping professionals with the tools to conduct
-            examinations, manage sensitive data, and uphold strict confidentiality
-            requirements.
-          </p>
-          <p>
-            Beyond technical instruction, we emphasize ethical practice and
-            organizational resilience. Our certified trainers guide participants
-            through real-world case studies, chain-of-custody procedures, and
-            advanced reporting techniques, preparing them to operate effectively
-            in high-stakes environments. Whether serving corporate clients,
-            government agencies, or financial institutions, the Training Division
-            ensures every graduate is ready to apply scientifically validated
-            methods with confidence and integrity.
-          </p>
+          {content.paragraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
         </div>
         <AcademyCourseGrid variant="training" />
 
         <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
           <CollapsibleInquiry
-            title="Enroll in a Programme"
-            description="Register interest for upcoming training sessions."
+            title={content.inquiryTitle}
+            description={content.inquiryDescription}
             className="lg:col-span-8"
           >
             <ServiceInquiryForm initialServiceInterest="training" />
@@ -96,17 +76,18 @@ export default function TrainingPage() {
             <Card variant="callout">
               <CardBody>
                 <h3 className="font-heading font-semibold text-heading">
-                  Certification
+                  {content.asideTitle}
                 </h3>
                 <div className="section-divider-duo mt-2" aria-hidden />
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  All programmes issue LEAF-C certificates aligned with
-                  international competency frameworks. CPE credits available
-                  for select courses.
+                  {content.asideBody}
                 </p>
                 <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <Badge variant="accent">Accredited</Badge>
-                  <Badge variant="muted">CPE Available</Badge>
+                  {content.badges.map((badge, index) => (
+                    <Badge key={badge} variant={index === 0 ? "accent" : "muted"}>
+                      {badge}
+                    </Badge>
+                  ))}
                 </div>
               </CardBody>
             </Card>
@@ -115,7 +96,7 @@ export default function TrainingPage() {
               href="/get-started"
               className="block text-center text-sm font-medium text-brand-orange hover:underline"
             >
-              Request training →
+              {content.linkLabel}
             </Link>
           </div>
         </div>

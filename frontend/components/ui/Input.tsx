@@ -18,7 +18,7 @@ export function Input({
   const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex w-full flex-col gap-1.5">
       {label && (
         <label
           htmlFor={inputId}

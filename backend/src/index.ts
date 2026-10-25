@@ -5,6 +5,14 @@ import cors from "cors";
 import express from "express";
 import { healthRouter } from "./routes/health.js";
 import { inquiriesRouter } from "./routes/inquiries.js";
+import {
+  newsletterAdminRouter,
+  newsletterRouter,
+} from "./routes/newsletter.js";
+import {
+  divisionAdminRouter,
+  divisionPublicRouter,
+} from "./routes/divisions.js";
 import { authRouter } from "./routes/auth.js";
 import { dashboardRouter } from "./routes/dashboard.js";
 import { casesRouter } from "./routes/cases.js";
@@ -65,6 +73,10 @@ app.get("/", (_req, res) => {
 app.use("/health", healthRouter);
 app.use("/auth", authRouter);
 app.use("/inquiries", inquiriesRouter);
+app.use("/newsletter", newsletterRouter);
+app.use("/admin/newsletter", newsletterAdminRouter);
+app.use("/divisions", divisionPublicRouter);
+app.use("/admin/divisions", divisionAdminRouter);
 app.use("/dashboard", dashboardRouter);
 app.use("/cases", casesRouter);
 app.use("/training", trainingRouter);

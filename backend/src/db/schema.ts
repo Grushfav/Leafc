@@ -98,6 +98,12 @@ export const inquiryServiceInterestEnum = pgEnum("inquiry_service_interest", [
   "unsure",
 ]);
 
+export const newsletterStatusEnum = pgEnum("newsletter_status", [
+  "pending",
+  "subscribed",
+  "unsubscribed",
+]);
+
 // ─── Divisions ───────────────────────────────────────────────────────────────
 
 export const divisions = pgTable("divisions", {
@@ -349,6 +355,28 @@ export const academyCourses = pgTable("academy_courses", {
   published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
   createdById: integer("created_by_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const divisionPages = pgTable("division_pages", {
+  slug: text("slug").primaryKey(),
+  content: jsonb("content").$type<Record<string, unknown>>().notNull(),
+  updatedById: integer("updated_by_id").references(() => users.id),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const newsletterSubscribers = pgTable("newsletter_subscribers", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  status: newsletterStatusEnum("status").notNull().default("pending"),
+  source: text("source").notNull().default("homepage"),
+  consentAt: timestamp("consent_at").notNull(),
+  confirmTokenHash: text("confirm_token_hash"),
+  confirmExpiresAt: timestamp("confirm_expires_at"),
+  confirmedAt: timestamp("confirmed_at"),
+  unsubscribeTokenHash: text("unsubscribe_token_hash"),
+  unsubscribedAt: timestamp("unsubscribed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -11,6 +11,7 @@ import { getPublishedExperts } from "@/lib/experts";
 import { ExpertPhotoPlaceholder } from "@/components/experts/ExpertPhotoPlaceholder";
 import { ExpertContactLinks } from "@/components/experts/ExpertContactLinks";
 import { AcademyCourseGrid } from "@/components/academy/AcademyCourseGrid";
+import { NewsletterSignup } from "@/components/newsletter/NewsletterSignup";
 import { SITE_CONTACT } from "@/lib/nav";
 
 const services = [
@@ -809,11 +810,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             {industries.map((industry) => (
               <article
                 key={industry.title}
-                className="flex h-full flex-col rounded-xl border border-border-subtle bg-surface px-4 py-4 shadow-sm"
+                className="flex h-full flex-col"
               >
                 <span
                   className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-navy/10 bg-warm-cream text-brand-navy"
@@ -821,10 +822,10 @@ export default function HomePage() {
                 >
                   <industry.Icon className="h-3.5 w-3.5" />
                 </span>
-                <h3 className="mt-3 font-heading text-sm font-bold leading-snug text-brand-navy">
+                <h3 className="mt-2 font-heading text-sm font-bold leading-snug text-brand-navy">
                   {industry.title}
                 </h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   {industry.body}
                 </p>
               </article>
@@ -878,6 +879,35 @@ export default function HomePage() {
                 <ExpertContactLinks expert={expert} className="mt-4" />
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-brand-navy py-20 text-white sm:py-24">
+        <div
+          className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -right-24 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-brand-gold/20 blur-3xl"
+          aria-hidden
+        />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
+          <div>
+            <p className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-brand-gold">
+              Newsletter
+            </p>
+            <h2 className="mt-3 font-heading text-4xl font-extrabold tracking-tight sm:text-5xl">
+              Stay informed
+            </h2>
+            <div className="section-divider-duo mt-4" aria-hidden />
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">
+              Programme dates, LEAF-C updates, and occasional offers. No
+              account required.
+            </p>
+          </div>
+          <div className="rounded-3xl bg-warm-white p-6 text-heading shadow-glow sm:p-8">
+            <NewsletterSignup />
           </div>
         </div>
       </section>

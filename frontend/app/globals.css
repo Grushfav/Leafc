@@ -256,10 +256,10 @@ h6 {
 }
 
 /* KPI accent borders */
-.kpi-accent-orange { border-left: 4px solid var(--brand-bronze); }
-.kpi-accent-gold { border-left: 4px solid var(--brand-gold); }
-.kpi-accent-charcoal { border-left: 4px solid var(--charcoal); }
-.kpi-accent-navy { border-left: 4px solid var(--brand-navy); }
+.kpi-accent-orange,
+.kpi-accent-gold,
+.kpi-accent-charcoal,
+.kpi-accent-navy { border-left: 4px solid var(--brand-navy-light); }
 
 @keyframes hero-card-enter {
   from {

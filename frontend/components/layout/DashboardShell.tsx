@@ -68,6 +68,20 @@ export function DashboardShell({
           active: pathname.startsWith("/dashboard/academy"),
         }
       : null,
+    admin
+      ? {
+          href: "/dashboard/divisions",
+          label: "Division pages",
+          active: pathname.startsWith("/dashboard/divisions"),
+        }
+      : null,
+    admin
+      ? {
+          href: "/dashboard/newsletter",
+          label: "Newsletter",
+          active: pathname.startsWith("/dashboard/newsletter"),
+        }
+      : null,
     {
       href: "/dashboard#incoming-inquiries",
       label: "Service inquiries",

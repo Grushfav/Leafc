@@ -53,6 +53,11 @@ export default function PrivacyPolicyPage() {
             by authorised staff in the course of an engagement.
           </li>
           <li>
+            <strong className="text-heading">Newsletter.</strong> Email address
+            and the time you consented, if you subscribe. We keep a record of
+            confirmation and unsubscribe requests.
+          </li>
+          <li>
             <strong className="text-heading">Session data.</strong> A sign-in
             token stored in your browser so you remain signed in. We do not
             use advertising cookies or third-party trackers on the public
@@ -72,10 +77,16 @@ export default function PrivacyPolicyPage() {
             including inquiry receipts and follow-up from our team.
           </li>
           <li>Protect the security and integrity of our systems and engagements.</li>
+          <li>
+            Send newsletter emails only to addresses that confirmed a
+            subscription, covering programmes, updates, and occasional
+            promotions. You can unsubscribe from any of those emails.
+          </li>
         </ul>
         <p>
           We do not sell personal information. We do not use inquiry or case
-          content for marketing lists.
+          content for marketing lists. Newsletter addresses are used only for
+          the emails the person opted into.
         </p>
       </PolicySection>
 

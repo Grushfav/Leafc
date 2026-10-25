@@ -52,7 +52,7 @@ export function KpiMetric({
     <>
       {featured ? (
         <div
-          className="h-1 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold"
+          className="h-1 bg-brand-navy-light"
           aria-hidden
         />
       ) : null}
