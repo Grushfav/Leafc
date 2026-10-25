@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { sendMail } from "./mailer.js";
+import { emailSiteOrigin } from "./site-origin.js";
 
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -25,10 +26,7 @@ export async function sendMemberVerificationEmail(options: {
   name: string;
   token: string;
 }): Promise<void> {
-  const origin = (process.env.FRONTEND_ORIGIN ?? "http://localhost:3000")
-    .split(",")[0]
-    .trim()
-    .replace(/\/$/, "");
+  const origin = emailSiteOrigin();
   const verifyUrl = `${origin}/verify-email?token=${encodeURIComponent(options.token)}`;
   const firstName = options.name.trim().split(/\s+/)[0] || "there";
 

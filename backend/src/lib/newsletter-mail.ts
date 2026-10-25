@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { sendMail } from "./mailer.js";
+import { emailSiteOrigin } from "./site-origin.js";
 
 const CONFIRM_TTL_MS = 72 * 60 * 60 * 1000;
 
@@ -20,13 +21,6 @@ export function hashNewsletterToken(raw: string): string {
   return createHash("sha256").update(raw).digest("hex");
 }
 
-function siteOrigin(): string {
-  return (process.env.FRONTEND_ORIGIN ?? "http://localhost:3000")
-    .split(",")[0]
-    .trim()
-    .replace(/\/$/, "");
-}
-
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -39,7 +33,7 @@ export async function sendNewsletterConfirmEmail(options: {
   to: string;
   token: string;
 }): Promise<boolean> {
-  const confirmUrl = `${siteOrigin()}/newsletter/confirm?token=${encodeURIComponent(options.token)}`;
+  const confirmUrl = `${emailSiteOrigin()}/newsletter/confirm?token=${encodeURIComponent(options.token)}`;
 
   return sendMail({
     to: options.to,
@@ -66,7 +60,7 @@ export async function sendNewsletterWelcomeEmail(options: {
   to: string;
   unsubscribeToken: string;
 }): Promise<boolean> {
-  const unsubscribeUrl = `${siteOrigin()}/newsletter/unsubscribe?token=${encodeURIComponent(options.unsubscribeToken)}`;
+  const unsubscribeUrl = `${emailSiteOrigin()}/newsletter/unsubscribe?token=${encodeURIComponent(options.unsubscribeToken)}`;
 
   return sendMail({
     to: options.to,
