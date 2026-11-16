@@ -54,7 +54,7 @@ export async function sendMemberVerificationEmail(options: {
   });
 
   if (!sent) {
-    throw new Error("SES SMTP is not configured.");
+    throw new Error("Email is not configured.");
   }
 }
 
