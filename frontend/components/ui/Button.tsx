@@ -58,10 +58,27 @@ export function Button({
   const classes = buttonClassName(variant, size, className);
 
   if (href) {
+    const external = /^https?:\/\//i.test(href);
+    const linkClass = cn(classes, disabled && "pointer-events-none opacity-50");
+    if (external) {
+      return (
+        <a
+          href={href}
+          className={linkClass}
+          aria-disabled={disabled || undefined}
+          tabIndex={disabled ? -1 : undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onClick as MouseEventHandler<HTMLAnchorElement> | undefined}
+        >
+          {children}
+        </a>
+      );
+    }
     return (
       <Link
         href={href}
-        className={cn(classes, disabled && "pointer-events-none opacity-50")}
+        className={linkClass}
         aria-disabled={disabled || undefined}
         tabIndex={disabled ? -1 : undefined}
         onClick={onClick as MouseEventHandler<HTMLAnchorElement> | undefined}

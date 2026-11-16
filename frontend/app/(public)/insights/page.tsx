@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Button } from "@/components/ui/Button";
-import { PageHero } from "@/components/layout/PageHero";
 import { InsightsListing } from "@/components/insights/InsightsListing";
+import { InsightsPageHero } from "@/components/insights/InsightsPageHero";
 
 export const metadata: Metadata = {
   title: "Insights",
@@ -22,17 +21,7 @@ export const metadata: Metadata = {
 export default function InsightsPage() {
   return (
     <>
-      <PageHero
-        badge="Insights"
-        title="Guidance for integrity, investigations, and financial crime"
-        description="LEAF-C publishes practical commentary for boards, counsel, and operators. These articles are written to be used."
-        imageSrc="/consulting_backgroung.jpeg"
-        actions={
-          <Button href="/get-started" variant="accent" size="md">
-            Request a consultation
-          </Button>
-        }
-      />
+      <InsightsPageHero />
       <InsightsListing />
     </>
   );

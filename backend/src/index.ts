@@ -19,12 +19,16 @@ import { casesRouter } from "./routes/cases.js";
 import { trainingRouter } from "./routes/training.js";
 import {
   academyAdminRouter,
+  academyPageAdminRouter,
   academyPublicRouter,
 } from "./routes/academy.js";
 import {
   insightsAdminRouter,
+  insightsPageAdminRouter,
   insightsPublicRouter,
 } from "./routes/insights.js";
+import { cmsAdminRouter, cmsPublicRouter } from "./routes/cms.js";
+import { usersAdminRouter } from "./routes/users.js";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");
@@ -51,6 +55,7 @@ const allowedOrigins = new Set([
 ]);
 
 mkdirSync(path.join(uploadsRoot, "avatars"), { recursive: true });
+mkdirSync(path.join(uploadsRoot, "cms"), { recursive: true });
 
 app.use(
   cors({
@@ -81,9 +86,14 @@ app.use("/dashboard", dashboardRouter);
 app.use("/cases", casesRouter);
 app.use("/training", trainingRouter);
 app.use("/insights", insightsPublicRouter);
+app.use("/admin/insights", insightsPageAdminRouter);
 app.use("/admin/insights", insightsAdminRouter);
 app.use("/academy/courses", academyPublicRouter);
 app.use("/admin/academy/courses", academyAdminRouter);
+app.use("/admin/academy", academyPageAdminRouter);
+app.use("/cms", cmsPublicRouter);
+app.use("/admin/cms", cmsAdminRouter);
+app.use("/admin/users", usersAdminRouter);
 
 app.listen(port, () => {
   console.log(`API listening on http://localhost:${port}`);

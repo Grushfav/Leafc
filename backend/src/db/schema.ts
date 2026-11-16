@@ -130,7 +130,17 @@ export const users = pgTable("users", {
   emailVerifiedAt: timestamp("email_verified_at"),
   emailVerificationToken: text("email_verification_token"),
   emailVerificationExpiresAt: timestamp("email_verification_expires_at"),
+  inviteTokenHash: text("invite_token_hash"),
+  inviteExpiresAt: timestamp("invite_expires_at"),
   isActive: boolean("is_active").notNull().default(true),
+  /** @deprecated Prefer granular can_* flags; kept for migration compatibility. */
+  siteContentEditor: boolean("site_content_editor").notNull().default(false),
+  canEditHome: boolean("can_edit_home").notNull().default(false),
+  canEditPages: boolean("can_edit_pages").notNull().default(false),
+  canManageInsights: boolean("can_manage_insights").notNull().default(false),
+  canManageAcademy: boolean("can_manage_academy").notNull().default(false),
+  canViewNewsletter: boolean("can_view_newsletter").notNull().default(false),
+  canEditMenusFooter: boolean("can_edit_menus_footer").notNull().default(false),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -352,6 +362,7 @@ export const academyCourses = pgTable("academy_courses", {
   duration: text("duration").notNull(),
   dates: text("dates").notNull(),
   level: text("level").notNull(),
+  comingSoon: boolean("coming_soon").notNull().default(false),
   published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
   createdById: integer("created_by_id").references(() => users.id),
@@ -363,6 +374,52 @@ export const divisionPages = pgTable("division_pages", {
   slug: text("slug").primaryKey(),
   content: jsonb("content").$type<Record<string, unknown>>().notNull(),
   updatedById: integer("updated_by_id").references(() => users.id),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ─── Site CMS ────────────────────────────────────────────────────────────────
+
+export const cmsPages = pgTable("cms_pages", {
+  slug: text("slug").primaryKey(),
+  draftContent: jsonb("draft_content").$type<Record<string, unknown>>().notNull(),
+  publishedContent: jsonb("published_content").$type<Record<string, unknown>>(),
+  updatedById: integer("updated_by_id").references(() => users.id),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const cmsExperts = pgTable("cms_experts", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull().default(""),
+  title: text("title").notNull().default(""),
+  photoUrl: text("photo_url"),
+  initials: text("initials"),
+  portrait: text("portrait"),
+  email: text("email"),
+  linkedin: text("linkedin"),
+  summary: text("summary"),
+  specialistAreas: jsonb("specialist_areas").$type<string[]>(),
+  experience: jsonb("experience").$type<string[]>(),
+  qualifications: jsonb("qualifications").$type<string[]>(),
+  memberships: jsonb("memberships").$type<string[]>(),
+  draft: jsonb("draft").$type<Record<string, unknown>>().notNull(),
+  published: boolean("published").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+  updatedById: integer("updated_by_id").references(() => users.id),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const cmsGlobals = pgTable("cms_globals", {
+  key: text("key").primaryKey(),
+  draftContent: jsonb("draft_content").$type<Record<string, unknown>>().notNull(),
+  publishedContent: jsonb("published_content").$type<Record<string, unknown>>(),
+  updatedById: integer("updated_by_id").references(() => users.id),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

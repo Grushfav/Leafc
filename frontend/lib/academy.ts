@@ -7,6 +7,7 @@ export type AcademyCourse = {
   duration: string;
   dates: string;
   level: string;
+  comingSoon?: boolean;
   published?: boolean;
   sortOrder?: number;
 };

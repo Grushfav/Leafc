@@ -15,7 +15,8 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { PageLoader } from "@/components/ui/LogoLoader";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { isAdminRole, isStaffRole, type AuthError } from "@/lib/auth";
+import { SiteContentNav } from "@/components/cms/SiteContentNav";
+import { hasPermission, isStaffRole, type AuthError } from "@/lib/auth";
 import { fetchAdminDivisions, saveDivisionPage } from "@/lib/content";
 import {
   DIVISION_PAGES,
@@ -39,7 +40,7 @@ export default function DashboardDivisionsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isAdmin = Boolean(user && isAdminRole(user.role));
+  const canEdit = Boolean(user && hasPermission(user, "canEditPages"));
 
   useEffect(() => {
     if (!isReady) return;
@@ -47,13 +48,13 @@ export default function DashboardDivisionsPage() {
       router.replace("/login");
       return;
     }
-    if (!isAdminRole(user.role)) {
+    if (!hasPermission(user, "canEditPages")) {
       router.replace("/dashboard");
     }
   }, [isReady, user, token, router]);
 
   useEffect(() => {
-    if (!token || !isAdmin) return;
+    if (!token || !canEdit) return;
     let cancelled = false;
     setIsLoading(true);
     fetchAdminDivisions(token)
@@ -75,7 +76,7 @@ export default function DashboardDivisionsPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, isAdmin, slug]);
+  }, [token, canEdit, slug]);
 
   function setField<K extends keyof DivisionPageContent>(key: K, value: DivisionPageContent[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -101,13 +102,18 @@ export default function DashboardDivisionsPage() {
     }
   }
 
-  if (!isReady || !isAdmin) return <PageLoader />;
+  if (!isReady || !canEdit) return <PageLoader />;
 
   const showPolygraph = slug === "polygraph";
   const showList = slug !== "training";
 
   return (
-    <DashboardShell>
+    <DashboardShell
+      title="Division pages"
+      description="Edit Consultancy, Operations, Training, and Polygraph page copy."
+      toolbarPlacement="below"
+      toolbar={<SiteContentNav />}
+    >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>

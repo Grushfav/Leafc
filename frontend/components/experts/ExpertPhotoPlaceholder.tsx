@@ -6,6 +6,8 @@ type ExpertPhotoPlaceholderProps = {
   portrait: "male" | "female";
   photoSrc?: string;
   className?: string;
+  /** `contain` shows the full photo; `cover` fills the frame (may crop). */
+  fit?: "contain" | "cover";
 };
 
 function MaleHeadshot() {
@@ -41,6 +43,7 @@ export function ExpertPhotoPlaceholder({
   portrait,
   photoSrc,
   className,
+  fit = "cover",
 }: ExpertPhotoPlaceholderProps) {
   if (photoSrc) {
     return (
@@ -54,7 +57,11 @@ export function ExpertPhotoPlaceholder({
           src={photoSrc}
           alt={name}
           fill
-          className="object-cover object-[center_18%]"
+          className={cn(
+            fit === "contain"
+              ? "object-contain object-center p-1.5"
+              : "object-cover object-center",
+          )}
           sizes="208px"
         />
       </div>

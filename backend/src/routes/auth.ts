@@ -1,7 +1,6 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { Router } from "express";
 import bcrypt from "bcrypt";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { users } from "../db/schema.js";
 import { db } from "../db/index.js";
 import {
@@ -9,19 +8,25 @@ import {
   hashEmailVerificationToken,
   sendMemberVerificationEmail,
 } from "../lib/verification.js";
+import { writeAuditLog } from "../lib/audit.js";
+import { hashInviteToken } from "../lib/invites.js";
 import {
+  resolveContentPermissions,
+  type ContentPermissions,
+} from "../lib/permissions.js";
+import {
+  isEffectiveSiteContentEditor,
   isStaffRole,
   requireAuth,
   requireStaff,
   signToken,
   type AccountRole,
-  type StaffRole,
 } from "../middleware/auth.js";
 import {
-  avatarPublicUrl,
   discardUploadedFile,
   isAllowedImageFile,
   parseAvatarUpload,
+  persistAvatarUpload,
   removeStoredAvatar,
 } from "../lib/avatars.js";
 
@@ -32,17 +37,6 @@ type CustomerKind = (typeof CUSTOMER_KINDS)[number];
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
-
-interface RegisterBody {
-  accountType?: string;
-  name?: string;
-  email?: string;
-  password?: string;
-  role?: string;
-  inviteCode?: string;
-  customerKind?: string;
-  organizationName?: string;
-}
 
 interface LoginBody {
   email?: string;
@@ -61,6 +55,13 @@ const publicUserColumns = {
   customerKind: users.customerKind,
   organizationName: users.organizationName,
   avatarUrl: users.avatarUrl,
+  siteContentEditor: users.siteContentEditor,
+  canEditHome: users.canEditHome,
+  canEditPages: users.canEditPages,
+  canManageInsights: users.canManageInsights,
+  canManageAcademy: users.canManageAcademy,
+  canViewNewsletter: users.canViewNewsletter,
+  canEditMenusFooter: users.canEditMenusFooter,
   lastLoginAt: users.lastLoginAt,
   createdAt: users.createdAt,
 } as const;
@@ -73,9 +74,17 @@ function publicUser(user: {
   customerKind: CustomerKind | null;
   organizationName: string | null;
   avatarUrl: string | null;
+  siteContentEditor: boolean;
+  canEditHome: boolean;
+  canEditPages: boolean;
+  canManageInsights: boolean;
+  canManageAcademy: boolean;
+  canViewNewsletter: boolean;
+  canEditMenusFooter: boolean;
   lastLoginAt: Date | null;
   createdAt: Date;
 }) {
+  const permissions: ContentPermissions = resolveContentPermissions(user);
   return {
     id: user.id,
     name: user.name,
@@ -84,143 +93,23 @@ function publicUser(user: {
     customerKind: user.customerKind,
     organizationName: user.organizationName,
     avatarUrl: user.avatarUrl,
+    siteContentEditor: isEffectiveSiteContentEditor(
+      user.role,
+      user.siteContentEditor,
+      permissions,
+    ),
+    permissions,
     lastLoginAt: user.lastLoginAt,
     createdAt: user.createdAt,
   };
 }
 
-function inviteCodeMatches(provided: string, expected: string): boolean {
-  const left = createHash("sha256").update(provided).digest();
-  const right = createHash("sha256").update(expected).digest();
-  return timingSafeEqual(left, right);
-}
-
-authRouter.post("/register", async (req, res) => {
-  const body = req.body as RegisterBody;
-  const errors: Record<string, string> = {};
-
-  if (body.accountType && body.accountType !== "member") {
-    errors.accountType =
-      "Customer accounts are no longer used. Request services from the Get Started form.";
-  }
-
-  if (!isNonEmptyString(body.name)) {
-    errors.name = "Full name is required.";
-  }
-
-  if (!isNonEmptyString(body.email)) {
-    errors.email = "Email is required.";
-  } else if (!EMAIL_PATTERN.test(body.email.trim())) {
-    errors.email = "Enter a valid email address.";
-  }
-
-  if (!isNonEmptyString(body.password)) {
-    errors.password = "Password is required.";
-  } else if (body.password.length < MIN_PASSWORD_LENGTH) {
-    errors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
-  }
-
-  let role: AccountRole = "agent";
-  const customerKind: CustomerKind | null = null;
-  const organizationName: string | null = null;
-
-  if (!isNonEmptyString(body.role) || !isStaffRole(body.role)) {
-    errors.role = "Select admin, senior agent, or agent.";
-  } else {
-    role = body.role as StaffRole;
-  }
-
-  const expected = process.env.STAFF_INVITE_CODE ?? "";
-  if (!expected) {
-    errors.inviteCode =
-      "Member signup is not configured. Contact a LEAF-C administrator.";
-  } else if (!isNonEmptyString(body.inviteCode)) {
-    errors.inviteCode = "Member invite code is required.";
-  } else if (!inviteCodeMatches(body.inviteCode.trim(), expected)) {
-    errors.inviteCode = "Invalid invite code.";
-  }
-
-  if (Object.keys(errors).length > 0) {
-    res.status(400).json({ error: "Validation failed", fields: errors });
-    return;
-  }
-
-  const email = body.email!.trim().toLowerCase();
-
-  try {
-    const existing = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-
-    if (existing.length > 0) {
-      res.status(409).json({
-        error: "An account with this email already exists.",
-        fields: { email: "This email is already registered." },
-      });
-      return;
-    }
-
-    const passwordHash = await bcrypt.hash(body.password!, 12);
-    const memberVerification = createEmailVerificationToken();
-
-    const [created] = await db
-      .insert(users)
-      .values({
-        name: body.name!.trim(),
-        email,
-        role,
-        customerKind,
-        organizationName,
-        passwordHash,
-        emailVerifiedAt: memberVerification ? null : new Date(),
-        emailVerificationToken: memberVerification?.hash ?? null,
-        emailVerificationExpiresAt: memberVerification?.expiresAt ?? null,
-      })
-      .returning(publicUserColumns);
-
-    if (memberVerification) {
-      try {
-        await sendMemberVerificationEmail({
-          to: created.email,
-          name: created.name,
-          token: memberVerification.raw,
-        });
-      } catch (error) {
-        await db.delete(users).where(eq(users.id, created.id));
-        console.error("Failed to send member verification email:", error);
-        res.status(503).json({
-          error:
-            "Account could not be created because the confirmation email could not be sent. Try again shortly.",
-        });
-        return;
-      }
-
-      res.status(201).json({
-        requiresVerification: true,
-        email: created.email,
-      });
-      return;
-    }
-
-    const token = signToken({
-      id: created.id,
-      email: created.email,
-      role: created.role,
-    });
-
-    res.status(201).json({
-      requiresVerification: false,
-      token,
-      user: publicUser(created),
-    });
-  } catch (error) {
-    console.error("Failed to register user:", error);
-    res.status(500).json({
-      error: "Unable to create your account right now. Please try again.",
-    });
-  }
+authRouter.post("/register", async (_req, res) => {
+  res.status(403).json({
+    error:
+      "Staff accounts are created by admin invite only. Ask a LEAF-C administrator.",
+    code: "invite_only",
+  });
 });
 
 authRouter.post("/login", async (req, res) => {
@@ -238,8 +127,17 @@ authRouter.post("/login", async (req, res) => {
       .where(eq(users.email, body.email.trim().toLowerCase()))
       .limit(1);
 
-    if (!user?.passwordHash) {
+    if (!user) {
       res.status(401).json({ error: "Invalid email or password." });
+      return;
+    }
+
+    if (!user.passwordHash) {
+      res.status(403).json({
+        error:
+          "This account is waiting for you to accept your invite email.",
+        code: "invite_pending",
+      });
       return;
     }
 
@@ -273,6 +171,15 @@ authRouter.post("/login", async (req, res) => {
       .where(eq(users.id, user.id))
       .returning(publicUserColumns);
 
+    await writeAuditLog({
+      userId: updated.id,
+      action: "login",
+      resourceType: "user",
+      resourceId: String(updated.id),
+      req,
+      metadata: { email: updated.email, role: updated.role },
+    });
+
     const token = signToken({
       id: updated.id,
       email: updated.email,
@@ -283,6 +190,159 @@ authRouter.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Failed to sign in:", error);
     res.status(500).json({ error: "Unable to sign in right now." });
+  }
+});
+
+authRouter.get("/invite/:token", async (req, res) => {
+  const raw = String(req.params.token ?? "").trim();
+  if (!raw) {
+    res.status(400).json({ error: "Invite token is required." });
+    return;
+  }
+  const hash = hashInviteToken(raw);
+  try {
+    const [row] = await db
+      .select({
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        passwordHash: users.passwordHash,
+        isActive: users.isActive,
+        inviteExpiresAt: users.inviteExpiresAt,
+        inviteTokenHash: users.inviteTokenHash,
+      })
+      .from(users)
+      .where(eq(users.inviteTokenHash, hash))
+      .limit(1);
+
+    if (!row || row.passwordHash) {
+      res.status(400).json({
+        error: "This invite link is invalid or has already been used.",
+      });
+      return;
+    }
+    if (!row.isActive) {
+      res.status(403).json({
+        error: "This invite is no longer available.",
+      });
+      return;
+    }
+    if (!row.inviteExpiresAt || row.inviteExpiresAt.getTime() < Date.now()) {
+      res.status(410).json({
+        error: "This invite link has expired. Ask an admin to resend it.",
+      });
+      return;
+    }
+
+    res.json({
+      name: row.name,
+      email: row.email,
+      role: row.role,
+      expiresAt: row.inviteExpiresAt,
+    });
+  } catch (error) {
+    console.error("Failed to load invite:", error);
+    res.status(500).json({ error: "Unable to load invite." });
+  }
+});
+
+authRouter.post("/accept-invite", async (req, res) => {
+  const raw =
+    typeof req.body?.token === "string" ? req.body.token.trim() : "";
+  const password =
+    typeof req.body?.password === "string" ? req.body.password : "";
+
+  if (!raw) {
+    res.status(400).json({ error: "Invite token is required." });
+    return;
+  }
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    res.status(400).json({
+      error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+    });
+    return;
+  }
+
+  const hash = hashInviteToken(raw);
+  try {
+    const [row] = await db
+      .select({
+        id: users.id,
+        passwordHash: users.passwordHash,
+        isActive: users.isActive,
+        inviteExpiresAt: users.inviteExpiresAt,
+      })
+      .from(users)
+      .where(eq(users.inviteTokenHash, hash))
+      .limit(1);
+
+    if (!row || row.passwordHash) {
+      res.status(400).json({
+        error: "This invite link is invalid or has already been used.",
+      });
+      return;
+    }
+    if (!row.isActive) {
+      res.status(403).json({
+        error: "This invite is no longer available.",
+      });
+      return;
+    }
+    if (!row.inviteExpiresAt || row.inviteExpiresAt.getTime() < Date.now()) {
+      res.status(410).json({
+        error: "This invite link has expired. Ask an admin to resend it.",
+      });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const [updated] = await db
+      .update(users)
+      .set({
+        passwordHash,
+        emailVerifiedAt: new Date(),
+        inviteTokenHash: null,
+        inviteExpiresAt: null,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
+        lastLoginAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(users.id, row.id),
+          isNull(users.passwordHash),
+          eq(users.inviteTokenHash, hash),
+        ),
+      )
+      .returning(publicUserColumns);
+
+    if (!updated) {
+      res.status(400).json({
+        error: "This invite link is invalid or has already been used.",
+      });
+      return;
+    }
+
+    await writeAuditLog({
+      userId: updated.id,
+      action: "user.invite.accept",
+      resourceType: "user",
+      resourceId: String(updated.id),
+      req,
+      metadata: { email: updated.email, role: updated.role },
+    });
+
+    const token = signToken({
+      id: updated.id,
+      email: updated.email,
+      role: updated.role,
+    });
+
+    res.json({ token, user: publicUser(updated) });
+  } catch (error) {
+    console.error("Failed to accept invite:", error);
+    res.status(500).json({ error: "Unable to accept invite." });
   }
 });
 
@@ -358,6 +418,7 @@ authRouter.post("/resend-verification", async (req, res) => {
     if (
       user &&
       user.isActive &&
+      user.passwordHash &&
       isStaffRole(user.role) &&
       !user.emailVerifiedAt
     ) {
@@ -547,7 +608,8 @@ authRouter.post("/me/avatar", requireAuth, requireStaff, parseAvatarUpload, asyn
       return;
     }
 
-    const avatarUrl = avatarPublicUrl(file.filename);
+    const stored = await persistAvatarUpload(file);
+    const avatarUrl = stored.url;
     const [updated] = await db
       .update(users)
       .set({ avatarUrl, updatedAt: new Date() })

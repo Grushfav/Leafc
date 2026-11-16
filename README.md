@@ -18,6 +18,7 @@ Leafc/
 cd backend
 cp .env.example .env
 # Add your Neon DATABASE_URL, JWT_SECRET, and STAFF_INVITE_CODE to .env
+# Optional: set S3_* (or R2_*/BUCKET_*) for CMS/avatar object storage; otherwise uploads stay local
 npm install
 npm run db:push      # push schema to Neon (or use db:generate + db:migrate)
 npm run dev          # http://localhost:4000

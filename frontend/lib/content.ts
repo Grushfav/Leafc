@@ -42,6 +42,7 @@ export interface AcademyCoursePayload {
   duration: string;
   dates: string;
   level: string;
+  comingSoon: boolean;
   published: boolean;
   sortOrder?: number;
 }
@@ -119,6 +120,37 @@ export async function deleteInsight(token: string, id: number): Promise<void> {
   await parseJson<{ ok: boolean }>(response);
 }
 
+export type InsightsPageCopy = {
+  badge: string;
+  title: string;
+  description: string;
+  buttonLabel: string;
+  buttonHref: string;
+};
+
+export async function fetchInsightsPageCopy(
+  token: string,
+): Promise<InsightsPageCopy> {
+  const response = await fetch(`${API_URL}/admin/insights/page`, {
+    headers: authHeaders(token),
+  });
+  const data = await parseJson<{ page: InsightsPageCopy }>(response);
+  return data.page;
+}
+
+export async function saveInsightsPageCopy(
+  token: string,
+  page: InsightsPageCopy,
+  makeLive = false,
+): Promise<{ page: InsightsPageCopy; live: boolean }> {
+  const response = await fetch(`${API_URL}/admin/insights/page`, {
+    method: "PUT",
+    headers: authHeaders(token),
+    body: JSON.stringify({ page, makeLive }),
+  });
+  return parseJson<{ page: InsightsPageCopy; live: boolean }>(response);
+}
+
 export async function fetchPublishedAcademyCourses(): Promise<AcademyCourse[]> {
   const response = await fetch(`${API_URL}/academy/courses`);
   const data = await parseJson<{ courses: AcademyCourse[] }>(response);
@@ -173,6 +205,44 @@ export async function deleteAcademyCourse(
   await parseJson<{ ok: boolean }>(response);
 }
 
+export type AcademyPageCopy = {
+  heroBadge: string;
+  heroTitle: string;
+  heroIntro: string;
+  introTitle: string;
+  paragraphs: string;
+  inquiryTitle: string;
+  inquiryDescription: string;
+  homeLabel: string;
+  homeHeading: string;
+  homeParagraph: string;
+  homeButtonLabel: string;
+  homeButtonHref: string;
+};
+
+export async function fetchAcademyPageCopy(
+  token: string,
+): Promise<AcademyPageCopy> {
+  const response = await fetch(`${API_URL}/admin/academy/page`, {
+    headers: authHeaders(token),
+  });
+  const data = await parseJson<{ page: AcademyPageCopy }>(response);
+  return data.page;
+}
+
+export async function saveAcademyPageCopy(
+  token: string,
+  page: AcademyPageCopy,
+  makeLive = false,
+): Promise<{ page: AcademyPageCopy; live: boolean }> {
+  const response = await fetch(`${API_URL}/admin/academy/page`, {
+    method: "PUT",
+    headers: authHeaders(token),
+    body: JSON.stringify({ page, makeLive }),
+  });
+  return parseJson<{ page: AcademyPageCopy; live: boolean }>(response);
+}
+
 export interface NewsletterSubscriber {
   id: number;
   email: string;
@@ -192,6 +262,25 @@ export async function fetchNewsletterSubscribers(
   });
   const data = await parseJson<{ subscribers: NewsletterSubscriber[] }>(response);
   return data.subscribers;
+}
+
+export interface NewsletterBroadcastResult {
+  attempted: number;
+  sent: number;
+  failed: number;
+  message: string;
+}
+
+export async function broadcastNewsletter(
+  token: string,
+  payload: { subject: string; body: string },
+): Promise<NewsletterBroadcastResult> {
+  const response = await fetch(`${API_URL}/admin/newsletter/broadcast`, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify(payload),
+  });
+  return parseJson<NewsletterBroadcastResult>(response);
 }
 
 export async function fetchPublishedDivision(

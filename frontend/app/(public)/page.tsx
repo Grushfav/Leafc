@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { CmsOrFallback } from "@/components/cms/CmsOrFallback";
 import { HomeHero } from "@/components/layout/HomeHero";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 import { IconAlert, IconBriefcase, IconBuilding, IconClipboard, IconGlobe, IconGraduationCap, IconLock, IconMonitor, IconPulse, IconScale, IconSearch, IconUser } from "@/components/icons/MonoIcons";
@@ -11,8 +12,48 @@ import { getPublishedExperts } from "@/lib/experts";
 import { ExpertPhotoPlaceholder } from "@/components/experts/ExpertPhotoPlaceholder";
 import { ExpertContactLinks } from "@/components/experts/ExpertContactLinks";
 import { AcademyCourseGrid } from "@/components/academy/AcademyCourseGrid";
+import { PhotoCoverflowGallery } from "@/components/cms/PhotoCoverflowGallery";
 import { NewsletterSignup } from "@/components/newsletter/NewsletterSignup";
 import { SITE_CONTACT } from "@/lib/nav";
+
+const HOME_GALLERY_SLIDES = [
+  {
+    id: "gal-1",
+    title: "Interview & examination",
+    image: "/gallery/interrogation.jpg",
+    imageAlt: "Interview room under focused lighting",
+  },
+  {
+    id: "gal-2",
+    title: "Team collaboration",
+    image: "/gallery/team-celebration.jpg",
+    imageAlt: "Professionals celebrating a successful collaboration",
+  },
+  {
+    id: "gal-3",
+    title: "Conference briefing",
+    image: "/gallery/conference.jpg",
+    imageAlt: "Professionals discussing information in conference",
+  },
+  {
+    id: "gal-4",
+    title: "Polygraph trace",
+    image: "/gallery/polygraph-trace.jpg",
+    imageAlt: "Polygraph needles recording on chart paper",
+  },
+  {
+    id: "gal-5",
+    title: "Surveillance awareness",
+    image: "/gallery/surveillance.jpg",
+    imageAlt: "Surveillance footage with facial recognition overlay",
+  },
+  {
+    id: "gal-6",
+    title: "Forensic scene work",
+    image: "/gallery/forensics-scene.jpg",
+    imageAlt: "Investigators documenting a forensic scene",
+  },
+];
 
 const services = [
   {
@@ -163,7 +204,7 @@ const polygraphCredentials = [
 
 export default function HomePage() {
   return (
-    <>
+    <CmsOrFallback slug="home">
       <HomeHero />
 
       <section className="relative overflow-hidden bg-warm-cream py-16 sm:py-20">
@@ -545,6 +586,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      <PhotoCoverflowGallery
+        label="In the field"
+        heading="Photo gallery"
+        paragraph="Moments from investigations, integrity testing, training, and forensic work."
+        slides={HOME_GALLERY_SLIDES}
+      />
+
       <section className="relative overflow-hidden bg-charcoal py-20 text-white sm:py-24">
         <Image
           src="/training_background.jpeg"
@@ -559,47 +607,48 @@ export default function HomePage() {
           aria-hidden
         />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <Badge variant="accent" className="shadow-sm">
-                Training & Capacity Building
-              </Badge>
-              <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-                LEAF-C Academy
-              </h2>
-              <div className="section-divider-duo mt-4" aria-hidden />
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
-                Structured programmes in investigations, integrity, and
-                financial crime, with case work and a LEAF-C certificate.
-              </p>
-              <ul className="mt-5 flex flex-wrap gap-2">
-                {[
-                  { label: "Investigate", detail: "Financial crime, fraud, and digital evidence" },
-                  { label: "Examine", detail: "Interviewing, integrity testing, and case documentation" },
-                  { label: "Certify", detail: "LEAF-C certificates; CPE on select courses" },
-                ].map((item) => (
-                  <li
-                    key={item.label}
-                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-heading text-[11px] font-semibold uppercase tracking-[0.12em] text-white/90"
-                    title={item.detail}
-                  >
-                    {item.label}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/get-started"
-                className="mt-6 inline-block font-heading text-2xl font-extrabold tracking-tight text-brand-gold drop-shadow-[0_0_18px_rgba(212,175,55,0.45)] transition-all hover:text-brand-orange hover:drop-shadow-[0_0_24px_rgba(232,140,48,0.55)] sm:text-3xl"
-              >
-                Get started!
-              </Link>
-            </div>
+          <div>
+            <Badge variant="accent" className="shadow-sm">
+              Training & Capacity Building
+            </Badge>
+            <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+              LEAF-C Academy
+            </h2>
+            <div className="section-divider-duo mt-4" aria-hidden />
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
+              Structured programmes in investigations, integrity, and
+              financial crime, with case work and a LEAF-C certificate.
+            </p>
+            <ul className="mt-5 flex flex-wrap gap-2">
+              {[
+                { label: "Investigate", detail: "Financial crime, fraud, and digital evidence" },
+                { label: "Examine", detail: "Interviewing, integrity testing, and case documentation" },
+                { label: "Certify", detail: "LEAF-C certificates; CPE on select courses" },
+              ].map((item) => (
+                <li
+                  key={item.label}
+                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-heading text-[11px] font-semibold uppercase tracking-[0.12em] text-white/90"
+                  title={item.detail}
+                >
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/get-started"
+              className="mt-6 inline-block font-heading text-2xl font-extrabold tracking-tight text-brand-gold drop-shadow-[0_0_18px_rgba(212,175,55,0.45)] transition-all hover:text-brand-orange hover:drop-shadow-[0_0_24px_rgba(232,140,48,0.55)] sm:text-3xl"
+            >
+              Get started!
+            </Link>
+          </div>
+
+          <AcademyCourseGrid />
+
+          <div className="mt-10 flex justify-center">
             <Button href="/training" variant="accent" size="md">
               View upcoming programmes
             </Button>
           </div>
-
-          <AcademyCourseGrid />
         </div>
       </section>
 
@@ -814,20 +863,30 @@ export default function HomePage() {
             {industries.map((industry) => (
               <article
                 key={industry.title}
-                className="flex h-full flex-col"
+                className="flex h-full gap-2.5"
               >
                 <span
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-navy/10 bg-warm-cream text-brand-navy"
+                  className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange"
                   aria-hidden
                 >
-                  <industry.Icon className="h-3.5 w-3.5" />
+                  <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none">
+                    <path
+                      d="M3.5 8.5 6.5 11.5 12.5 4.5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </span>
-                <h3 className="mt-2 font-heading text-sm font-bold leading-snug text-brand-navy">
-                  {industry.title}
-                </h3>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  {industry.body}
-                </p>
+                <div className="min-w-0">
+                  <h3 className="font-heading text-sm font-bold leading-snug text-brand-navy">
+                    {industry.title}
+                  </h3>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {industry.body}
+                  </p>
+                </div>
               </article>
             ))}
           </div>
@@ -842,43 +901,48 @@ export default function HomePage() {
 
       <section className="relative overflow-hidden bg-background py-20 sm:py-24">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <Badge variant="accent">Leadership</Badge>
-              <h2 className="mt-4 font-heading text-3xl font-bold text-brand-navy sm:text-4xl">
-                Our Experts
-              </h2>
-              <div className="section-divider-duo mt-4" aria-hidden />
-              <p className="mt-6 max-w-2xl text-muted-foreground">
-                The professionals who lead LEAF-C’s investigations, training,
-                and integrity work.
-              </p>
-            </div>
-            <Button href="/experts" variant="outline" size="md">
-              View experts
-            </Button>
+          <div>
+            <Badge variant="accent">Leadership</Badge>
+            <h2 className="mt-4 font-heading text-3xl font-bold text-brand-navy sm:text-4xl">
+              Our Experts
+            </h2>
+            <div className="section-divider-duo mt-4" aria-hidden />
+            <p className="mt-6 max-w-2xl text-muted-foreground">
+              The professionals who lead LEAF-C’s investigations, training,
+              and integrity work.
+            </p>
           </div>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {getPublishedExperts().map((expert) => (
-              <article
-                key={expert.slug}
-                className="flex h-full flex-col items-center rounded-2xl bg-surface px-6 py-8 text-center"
-              >
-                <ExpertPhotoPlaceholder
-                  name={expert.name}
-                  portrait={expert.portrait}
-                  photoSrc={expert.photoSrc}
-                />
-                <h3 className="mt-5 font-heading text-lg font-bold text-brand-navy">
-                  {expert.name}
-                </h3>
-                <p className="mt-1 text-sm font-medium text-brand-orange">
-                  {expert.title}
-                </p>
-                <ExpertContactLinks expert={expert} className="mt-4" />
-              </article>
-            ))}
+            {getPublishedExperts()
+              .slice(0, 6)
+              .map((expert) => (
+                <article
+                  key={expert.slug}
+                  className="flex h-full flex-col items-center rounded-2xl bg-surface px-6 py-8 text-center"
+                >
+                  <ExpertPhotoPlaceholder
+                    name={expert.name}
+                    portrait={expert.portrait}
+                    photoSrc={expert.photoSrc}
+                    fit="cover"
+                    className="h-32 w-32 sm:h-36 sm:w-36"
+                  />
+                  <h3 className="mt-5 font-heading text-lg font-bold text-brand-navy">
+                    {expert.name}
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-brand-orange">
+                    {expert.title}
+                  </p>
+                  <ExpertContactLinks expert={expert} className="mt-4" />
+                </article>
+              ))}
+          </div>
+
+          <div className="mt-12 flex justify-center">
+            <Button href="/experts" variant="outline" size="md">
+              View experts
+            </Button>
           </div>
         </div>
       </section>
@@ -979,6 +1043,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </>
+    </CmsOrFallback>
   );
 }

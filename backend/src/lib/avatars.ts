@@ -1,9 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { mkdirSync, unlink } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { readFile, unlink as unlinkAsync } from "node:fs/promises";
 import path from "node:path";
 import type { NextFunction, Request, Response } from "express";
 import multer from "multer";
+import {
+  deleteStoredObject,
+  storeUploadedFile,
+} from "./object-storage.js";
 
 export const AVATARS_DIR = path.join(process.cwd(), "uploads", "avatars");
 export const AVATAR_PUBLIC_PREFIX = "/uploads/avatars/";
@@ -68,19 +72,25 @@ export function avatarPublicUrl(filename: string) {
   return `${AVATAR_PUBLIC_PREFIX}${filename}`;
 }
 
+export function avatarObjectKey(filename: string) {
+  return `avatars/${filename}`;
+}
+
+export async function persistAvatarUpload(file: Express.Multer.File) {
+  return storeUploadedFile({
+    localPath: file.path,
+    key: avatarObjectKey(file.filename),
+    contentType: file.mimetype,
+    localPublicUrl: avatarPublicUrl(file.filename),
+  });
+}
+
 export function removeStoredAvatar(avatarUrl: string | null | undefined) {
-  if (!avatarUrl?.startsWith(AVATAR_PUBLIC_PREFIX)) return;
-  const filename = avatarUrl.slice(AVATAR_PUBLIC_PREFIX.length);
-  if (
-    !filename ||
-    filename.includes("/") ||
-    filename.includes("\\") ||
-    filename.includes("..")
-  ) {
-    return;
-  }
-  unlink(path.join(AVATARS_DIR, filename), () => {
-    // Ignore missing files from earlier uploads.
+  if (!avatarUrl) return;
+  void deleteStoredObject({
+    publicUrl: avatarUrl,
+    localPrefix: AVATAR_PUBLIC_PREFIX,
+    localDir: AVATARS_DIR,
   });
 }
 

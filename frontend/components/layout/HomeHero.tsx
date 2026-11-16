@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-const VIDEO_SRC = "/Lady_justice_Video.webm";
-const VIDEO_SRC_MP4 = "/Lady_justice_Video.mp4";
+export const DEFAULT_HERO_VIDEO_WEBM = "/Lady_justice_Video.webm";
+export const DEFAULT_HERO_VIDEO_MP4 = "/Lady_justice_Video.mp4";
 const POSTER_SRC = "/hero-justice.svg";
 const HERO_MEDIA_CLASS =
   "object-cover object-[64%_center] sm:object-[center_right]";
@@ -15,7 +15,34 @@ const SLIDE_LEAD_SECONDS = 0.7;
 const PLAYBACK_RATE = 1.2;
 const INTRO_FALLBACK_MS = 16000;
 
-export function HomeHero() {
+export type HomeHeroContent = {
+  label?: string;
+  heading?: string;
+  paragraph?: string;
+  primaryCta?: { label: string; href: string };
+  secondaryCta?: { label: string; href: string };
+  videoSrc?: string;
+  videoSrcMp4?: string;
+};
+
+const DEFAULT_CONTENT = {
+  label: "Integrity & Excellence",
+  heading: "Specialist Investigations, Compliance and Professional Training",
+  paragraph:
+    "LEAF‑C provides multidisciplinary investigative, compliance, and training services, combining institutional rigor with deep expertise to support governments, enterprises, and justice partners worldwide.",
+  primaryCta: { label: "Get Started", href: "/get-started" },
+  secondaryCta: { label: "Explore Divisions", href: "/consultancy" },
+} as const;
+
+export function HomeHero({
+  label = DEFAULT_CONTENT.label,
+  heading = DEFAULT_CONTENT.heading,
+  paragraph = DEFAULT_CONTENT.paragraph,
+  primaryCta = DEFAULT_CONTENT.primaryCta,
+  secondaryCta = DEFAULT_CONTENT.secondaryCta,
+  videoSrc = DEFAULT_HERO_VIDEO_WEBM,
+  videoSrcMp4 = DEFAULT_HERO_VIDEO_MP4,
+}: HomeHeroContent = {}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const revealedRef = useRef(false);
   const frozenRef = useRef(false);
@@ -208,8 +235,8 @@ export function HomeHero() {
           }}
           onTimeUpdate={syncIntro}
         >
-          <source src={VIDEO_SRC} type="video/webm" />
-          <source src={VIDEO_SRC_MP4} type="video/mp4" />
+          <source src={videoSrc} type="video/webm" />
+          <source src={videoSrcMp4} type="video/mp4" />
         </video>
       )}
 
@@ -225,25 +252,30 @@ export function HomeHero() {
             revealed && "is-in",
           )}
         >
-          <Badge variant="accent" className="mb-5">
-            Integrity & Excellence
-          </Badge>
+          {label ? (
+            <Badge variant="accent" className="mb-5">
+              {label}
+            </Badge>
+          ) : null}
           <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-brand-navy sm:text-3xl lg:text-4xl">
-            Specialist Investigations, Compliance and Professional Training
+            {heading}
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-brand-navy/80 sm:text-lg">
-            LEAF‑C provides multidisciplinary investigative, compliance, and
-            training services, combining institutional rigor with deep
-            expertise to support governments, enterprises, and justice partners
-            worldwide.
-          </p>
+          {paragraph ? (
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-brand-navy/80 sm:text-lg">
+              {paragraph}
+            </p>
+          ) : null}
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Button href="/get-started" variant="accent" size="md">
-              Get Started
-            </Button>
-            <Button href="/consultancy" variant="outline" size="md">
-              Explore Divisions
-            </Button>
+            {primaryCta ? (
+              <Button href={primaryCta.href} variant="accent" size="md">
+                {primaryCta.label}
+              </Button>
+            ) : null}
+            {secondaryCta ? (
+              <Button href={secondaryCta.href} variant="outline" size="md">
+                {secondaryCta.label}
+              </Button>
+            ) : null}
           </div>
         </div>
       </div>

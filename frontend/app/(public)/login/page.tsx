@@ -34,7 +34,7 @@ export default function LoginPage() {
             <p className="mt-6 text-sm text-muted-foreground">
               New staff member?{" "}
               <Link href="/signup" className="font-medium text-brand-orange hover:underline">
-                Create an account with an invite code
+                How staff accounts work
               </Link>
               .
             </p>

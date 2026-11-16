@@ -80,3 +80,31 @@ export async function sendNewsletterWelcomeEmail(options: {
     `,
   });
 }
+
+export async function sendNewsletterBroadcastEmail(options: {
+  to: string;
+  subject: string;
+  body: string;
+  unsubscribeToken: string;
+}): Promise<boolean> {
+  const unsubscribeUrl = `${emailSiteOrigin()}/newsletter/unsubscribe?token=${encodeURIComponent(options.unsubscribeToken)}`;
+  const htmlBody = escapeHtml(options.body).replaceAll("\n", "<br>");
+
+  return sendMail({
+    to: options.to,
+    subject: options.subject,
+    text: [
+      options.body,
+      "",
+      "Unsubscribe at any time:",
+      unsubscribeUrl,
+      "",
+      "LEAF-C",
+    ].join("\n"),
+    html: `
+      <p>${htmlBody}</p>
+      <p><a href="${escapeHtml(unsubscribeUrl)}">Unsubscribe</a></p>
+      <p>LEAF-C</p>
+    `,
+  });
+}

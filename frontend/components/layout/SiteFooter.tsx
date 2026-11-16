@@ -1,5 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo } from "react";
+import {
+  usePublishedFooter,
+  usePublishedNav,
+  usePublishedPolicies,
+} from "@/components/cms/usePublishedCms";
 import { DIVISION_LINKS, SITE_CONTACT, SITE_EXPANSION, SOCIAL_LINKS } from "@/lib/nav";
+import { policyPublicPath } from "@/lib/cms/types";
 import {
   IconFacebook,
   IconInstagram,
@@ -7,43 +16,74 @@ import {
   IconTikTok,
 } from "@/components/icons/MonoIcons";
 
-const socialIcons = {
+const socialIcons: Record<string, typeof IconInstagram> = {
   Instagram: IconInstagram,
   TikTok: IconTikTok,
   LinkedIn: IconLinkedIn,
   Facebook: IconFacebook,
-} as const;
-
-const footerLinks = {
-  divisions: DIVISION_LINKS,
-  company: [
-    { href: "/about", label: "About us" },
-    { href: "/insights", label: "Insights" },
-    { href: "/experts", label: "Our Experts" },
-    { href: "/training", label: "Programmes" },
-    { href: "/get-started", label: "Get Started" },
-    { href: "/login", label: "Staff sign in" },
-  ],
-  governance: [
-    { href: "/privacy", label: "Privacy Policy" },
-    { href: "/data-protection", label: "Data Protection" },
-  ],
 };
 
-const trustBadges = [
-  "ISO-Aligned",
-  "Internationally Compliant",
-  "Encrypted Data",
-  "Independent Oversight",
+const defaultCompany = [
+  { href: "/about", label: "About us" },
+  { href: "/insights", label: "Insights" },
+  { href: "/experts", label: "Our Experts" },
+  { href: "/training", label: "Programmes" },
+  { href: "/get-started", label: "Get Started" },
+  { href: "/login", label: "Staff sign in" },
+];
+
+const defaultGovernance = [
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/data-protection", label: "Data Protection" },
+  { href: "/terms", label: "Terms and Conditions" },
 ];
 
 export function SiteFooter() {
+  const cmsFooter = usePublishedFooter();
+  const cmsNav = usePublishedNav();
+  const cmsPolicies = usePublishedPolicies();
+
+  const blurb = cmsFooter?.blurb ?? `${SITE_EXPANSION} — delivering investigative excellence and compliance solutions for public and private sector clients worldwide.`;
+  const location = cmsFooter?.location ?? SITE_CONTACT.location;
+  const phoneDisplay = cmsFooter?.phoneDisplay ?? SITE_CONTACT.phoneDisplay;
+  const phoneHref = cmsFooter?.phoneHref ?? SITE_CONTACT.phoneHref;
+  const email = cmsFooter?.email ?? SITE_CONTACT.email;
+  const trustBadges = cmsFooter?.trustBadges?.length
+    ? cmsFooter.trustBadges
+    : ["ISO-Aligned", "Internationally Compliant", "Encrypted Data", "Independent Oversight"];
+  const social = cmsFooter?.social?.length
+    ? cmsFooter.social
+    : SOCIAL_LINKS.map((item) => ({
+        id: item.label,
+        label: item.label,
+        href: item.href,
+      }));
+  const company = useMemo(() => {
+    if (cmsFooter?.companyLinks?.length) {
+      return cmsFooter.companyLinks.filter((item) => item.visible);
+    }
+    return defaultCompany;
+  }, [cmsFooter]);
+  const governance = useMemo(() => {
+    if (cmsPolicies?.length) {
+      return cmsPolicies.map((policy) => ({
+        href: policyPublicPath(policy.slug),
+        label: policy.title,
+      }));
+    }
+    return defaultGovernance;
+  }, [cmsPolicies]);
+  const divisions = useMemo(() => {
+    if (cmsNav?.divisions?.length) {
+      return cmsNav.divisions.filter((item) => item.visible);
+    }
+    return DIVISION_LINKS;
+  }, [cmsNav]);
+
   return (
     <footer className="mt-auto bg-charcoal text-white">
-      {/* Navy-to-orange accent band */}
       <div className="h-1 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold" aria-hidden />
 
-      {/* Partner / trust strip */}
       <div className="border-b border-white/10 bg-charcoal-light">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-6 px-4 py-4 sm:gap-10 sm:px-6 lg:px-8">
           {trustBadges.map((badge) => (
@@ -51,7 +91,10 @@ export function SiteFooter() {
               key={badge}
               className="flex items-center gap-2 font-heading text-xs font-semibold uppercase tracking-wider text-white/70"
             >
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-orange/20 text-brand-orange text-[10px]" aria-hidden>
+              <span
+                className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-orange/20 text-[10px] text-brand-orange"
+                aria-hidden
+              >
                 ✓
               </span>
               {badge}
@@ -64,39 +107,33 @@ export function SiteFooter() {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid gap-10 md:grid-cols-4">
             <div>
-              <p className="font-heading text-xl font-bold">
-                LEAF-C
-              </p>
+              <p className="font-heading text-xl font-bold">LEAF-C</p>
               <div className="section-divider-duo mt-3" aria-hidden />
-              <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/75">
-                {SITE_EXPANSION} — delivering investigative excellence and
-                compliance solutions for public and private sector clients
-                worldwide.
-              </p>
+              <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/75">{blurb}</p>
               <address className="mt-5 not-italic text-sm text-white/75">
-                <p>{SITE_CONTACT.location}</p>
+                <p>{location}</p>
                 <p className="mt-1">
                   <a
-                    href={SITE_CONTACT.phoneHref}
+                    href={phoneHref}
                     className="transition-colors hover:text-white hover:underline underline-offset-2"
                   >
-                    {SITE_CONTACT.phoneDisplay}
+                    {phoneDisplay}
                   </a>
                 </p>
                 <p className="mt-1">
                   <a
-                    href={`mailto:${SITE_CONTACT.email}`}
+                    href={`mailto:${email}`}
                     className="transition-colors hover:text-white hover:underline underline-offset-2"
                   >
-                    {SITE_CONTACT.email}
+                    {email}
                   </a>
                 </p>
               </address>
               <ul className="mt-5 flex items-center gap-2">
-                {SOCIAL_LINKS.map((item) => {
-                  const Icon = socialIcons[item.label];
+                {social.map((item) => {
+                  const Icon = socialIcons[item.label] ?? IconLinkedIn;
                   return (
-                    <li key={item.label}>
+                    <li key={item.id ?? item.label}>
                       <a
                         href={item.href}
                         target="_blank"
@@ -117,8 +154,8 @@ export function SiteFooter() {
                 Divisions
               </h3>
               <ul className="mt-4 space-y-2">
-                {footerLinks.divisions.map((link) => (
-                  <li key={link.href}>
+                {divisions.map((link) => (
+                  <li key={`${link.href}-${link.label}`}>
                     <Link
                       href={link.href}
                       className="text-sm text-white/75 transition-colors duration-150 hover:text-white hover:underline decoration-brand-navy/60 underline-offset-2"
@@ -135,8 +172,8 @@ export function SiteFooter() {
                 Company
               </h3>
               <ul className="mt-4 space-y-2">
-                {footerLinks.company.map((link) => (
-                  <li key={link.href}>
+                {company.map((link) => (
+                  <li key={`${link.href}-${link.label}`}>
                     <Link
                       href={link.href}
                       className="text-sm text-white/75 transition-colors duration-150 hover:text-white hover:underline decoration-brand-navy/60 underline-offset-2"
@@ -153,7 +190,7 @@ export function SiteFooter() {
                 Governance
               </h3>
               <ul className="mt-4 space-y-2">
-                {footerLinks.governance.map((link) => (
+                {governance.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
@@ -172,8 +209,7 @@ export function SiteFooter() {
               © {new Date().getFullYear()} LEAF-C. All rights reserved.
             </p>
             <p className="text-xs text-white/60">
-              Global operations · ISO-aligned processes · Encrypted document
-              handling
+              Global operations · ISO-aligned processes · Encrypted document handling
             </p>
           </div>
         </div>

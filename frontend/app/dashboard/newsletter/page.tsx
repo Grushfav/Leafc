@@ -14,9 +14,12 @@ import {
 } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { PageLoader } from "@/components/ui/LogoLoader";
+import { Textarea } from "@/components/ui/Textarea";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { isAdminRole, isStaffRole, type AuthError } from "@/lib/auth";
+import { SiteContentNav } from "@/components/cms/SiteContentNav";
+import { hasPermission, isStaffRole, type AuthError } from "@/lib/auth";
 import {
+  broadcastNewsletter,
   fetchNewsletterSubscribers,
   type NewsletterSubscriber,
 } from "@/lib/content";
@@ -46,8 +49,12 @@ export default function DashboardNewsletterPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
-  const isAdmin = Boolean(user && isAdminRole(user.role));
+  const canEdit = Boolean(user && hasPermission(user, "canViewNewsletter"));
 
   useEffect(() => {
     if (!isReady) return;
@@ -55,13 +62,13 @@ export default function DashboardNewsletterPage() {
       router.replace("/login");
       return;
     }
-    if (!isAdminRole(user.role)) {
+    if (!hasPermission(user, "canViewNewsletter")) {
       router.replace("/dashboard");
     }
   }, [isReady, user, token, router]);
 
   useEffect(() => {
-    if (!token || !isAdmin) return;
+    if (!token || !canEdit) return;
     let cancelled = false;
     setIsLoading(true);
     fetchNewsletterSubscribers(token)
@@ -80,7 +87,7 @@ export default function DashboardNewsletterPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, isAdmin]);
+  }, [token, canEdit]);
 
   const counts = useMemo(() => {
     return subscribers.reduce(
@@ -110,10 +117,54 @@ export default function DashboardNewsletterPage() {
     }
   }
 
-  if (!isReady || !isAdmin) return <PageLoader />;
+  async function sendBroadcast() {
+    if (!token) return;
+    const trimmedSubject = subject.trim();
+    const trimmedBody = body.trim();
+    if (!trimmedSubject || !trimmedBody) return;
+    if (counts.subscribed === 0) return;
+
+    const confirmed = window.confirm(
+      `Send this newsletter to ${counts.subscribed} subscribed recipient(s)? This cannot be undone.`,
+    );
+    if (!confirmed) return;
+
+    setIsSending(true);
+    setSendError(null);
+    setNotice(null);
+    try {
+      const result = await broadcastNewsletter(token, {
+        subject: trimmedSubject,
+        body: trimmedBody,
+      });
+      setNotice(
+        result.failed > 0
+          ? `Sent ${result.sent} of ${result.attempted}; ${result.failed} failed.`
+          : result.message,
+      );
+    } catch (error) {
+      const authError = error as AuthError;
+      setSendError(authError.error ?? "Unable to send the newsletter.");
+    } finally {
+      setIsSending(false);
+    }
+  }
+
+  const canSend =
+    counts.subscribed > 0 &&
+    subject.trim().length > 0 &&
+    body.trim().length > 0 &&
+    !isSending;
+
+  if (!isReady || !canEdit) return <PageLoader />;
 
   return (
-    <DashboardShell>
+    <DashboardShell
+      title="Newsletter"
+      description="Manage confirmed subscribers and copy recipient lists."
+      toolbarPlacement="below"
+      toolbar={<SiteContentNav />}
+    >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-bold text-heading">Newsletter</h1>
@@ -167,6 +218,53 @@ export default function DashboardNewsletterPage() {
           </CardBody>
         </Card>
       </div>
+
+      <Card variant="elevated" className="mt-6">
+        <CardHeader>
+          <CardTitle>Compose & send</CardTitle>
+          <CardDescription>
+            Email everyone who is currently subscribed. Each message includes an
+            unsubscribe link. This cannot be undone.
+          </CardDescription>
+        </CardHeader>
+        <CardBody className="space-y-4">
+          <Input
+            label="Subject"
+            value={subject}
+            maxLength={200}
+            placeholder="LEAF-C update"
+            onChange={(event) => setSubject(event.target.value)}
+          />
+          <Textarea
+            label="Body"
+            value={body}
+            rows={8}
+            maxLength={20000}
+            placeholder="Write the newsletter in plain text. Line breaks are kept in the email."
+            onChange={(event) => setBody(event.target.value)}
+          />
+          {sendError && (
+            <p className="text-sm text-error" role="alert">
+              {sendError}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="accent"
+              disabled={!canSend}
+              onClick={() => void sendBroadcast()}
+            >
+              {isSending ? "Sending…" : "Send to subscribers"}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              {counts.subscribed === 0
+                ? "No subscribed recipients yet."
+                : `${counts.subscribed} subscribed recipient${counts.subscribed === 1 ? "" : "s"}.`}
+            </p>
+          </div>
+        </CardBody>
+      </Card>
 
       <Card variant="elevated" className="mt-6 overflow-hidden">
         <CardHeader>

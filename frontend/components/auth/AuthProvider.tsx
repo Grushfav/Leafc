@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import {
+  acceptInvite,
   clearToken,
   fetchCurrentUser,
   getStoredToken,
@@ -29,6 +30,7 @@ interface AuthContextValue {
   token: string | null;
   isReady: boolean;
   login: (email: string, password: string) => Promise<void>;
+  completeInvite: (rawToken: string, password: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<{ requiresVerification: boolean }>;
   updateUser: (payload: ProfileUpdatePayload) => Promise<void>;
   uploadUserAvatar: (file: File) => Promise<void>;
@@ -83,6 +85,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(result.user);
   }, []);
 
+  const completeInvite = useCallback(
+    async (rawToken: string, password: string) => {
+      const result = await acceptInvite(rawToken, password);
+      if (!isStaffRole(result.user.role)) {
+        clearToken();
+        throw {
+          error:
+            "This portal is for LEAF-C staff. Request services from the Get Started form.",
+          code: "staff_only",
+        };
+      }
+      storeToken(result.token);
+      setToken(result.token);
+      setUser(result.user);
+    },
+    [],
+  );
+
   const register = useCallback(async (payload: RegisterPayload) => {
     const result = await registerAccount(payload);
     if (result.requiresVerification || !result.token || !result.user) {
@@ -124,12 +144,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token,
       isReady,
       login,
+      completeInvite,
       register,
       updateUser,
       uploadUserAvatar,
       logout,
     }),
-    [user, token, isReady, login, register, updateUser, uploadUserAvatar, logout],
+    [
+      user,
+      token,
+      isReady,
+      login,
+      completeInvite,
+      register,
+      updateUser,
+      uploadUserAvatar,
+      logout,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

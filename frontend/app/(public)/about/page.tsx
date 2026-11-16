@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
+import { CmsOrFallback } from "@/components/cms/CmsOrFallback";
 import { PageHero } from "@/components/layout/PageHero";
 import { ExpertPhotoPlaceholder } from "@/components/experts/ExpertPhotoPlaceholder";
 import { ExpertContactLinks } from "@/components/experts/ExpertContactLinks";
@@ -99,7 +100,7 @@ export default function AboutPage() {
   };
 
   return (
-    <>
+    <CmsOrFallback slug="about">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -319,6 +320,6 @@ export default function AboutPage() {
           </CardBody>
         </Card>
       </div>
-    </>
+    </CmsOrFallback>
   );
 }

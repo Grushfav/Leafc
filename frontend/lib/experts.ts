@@ -1,3 +1,5 @@
+import { resolveCmsAssetUrl } from "@/lib/cms/api";
+
 export type ExpertProfile = {
   slug: string;
   name: string;
@@ -74,4 +76,65 @@ export function getPublishedExperts() {
 
 export function getExpert(slug: string) {
   return EXPERTS.find((expert) => expert.slug === slug);
+}
+
+function preferList(
+  cms: string[] | null | undefined,
+  fallback?: string[],
+): string[] | undefined {
+  if (cms != null) return cms;
+  return fallback;
+}
+
+export function mergeExperts(
+  local: ExpertProfile[],
+  remote: Array<{
+    slug: string;
+    name: string;
+    title: string;
+    photoUrl?: string | null;
+    initials?: string | null;
+    portrait?: string | null;
+    email?: string | null;
+    linkedin?: string | null;
+    summary?: string | null;
+    specialistAreas?: string[] | null;
+    experience?: string[] | null;
+    qualifications?: string[] | null;
+    memberships?: string[] | null;
+    published: boolean;
+    sortOrder?: number;
+  }>,
+): ExpertProfile[] {
+  // Empty remote means CMS returned no published experts — do not resurrect hardcoded locals.
+  if (!remote.length) return [];
+  const localBySlug = new Map(local.map((expert) => [expert.slug, expert]));
+  return [...remote]
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map((expert) => {
+      const fallback = localBySlug.get(expert.slug);
+      return {
+        slug: expert.slug,
+        name: expert.name,
+        initials: expert.initials || expert.name.slice(0, 2).toUpperCase(),
+        title: expert.title,
+        portrait: expert.portrait === "female" ? "female" : "male",
+        photoSrc:
+          resolveCmsAssetUrl(expert.photoUrl) ?? fallback?.photoSrc ?? undefined,
+        email: expert.email ?? fallback?.email ?? undefined,
+        linkedin: expert.linkedin ?? fallback?.linkedin ?? undefined,
+        published: expert.published,
+        summary: expert.summary ?? fallback?.summary ?? undefined,
+        specialistAreas: preferList(
+          expert.specialistAreas,
+          fallback?.specialistAreas,
+        ),
+        experience: preferList(expert.experience, fallback?.experience),
+        qualifications: preferList(
+          expert.qualifications,
+          fallback?.qualifications,
+        ),
+        memberships: preferList(expert.memberships, fallback?.memberships),
+      };
+    });
 }

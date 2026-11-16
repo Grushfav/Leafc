@@ -1,8 +1,13 @@
 import { Router } from "express";
 import { desc, eq } from "drizzle-orm";
-import { insights } from "../db/schema.js";
+import { cmsPages, insights } from "../db/schema.js";
 import { db } from "../db/index.js";
-import { requireAdmin, requireAuth } from "../middleware/auth.js";
+import { writeAuditLog } from "../lib/audit.js";
+import {
+  requireAuth,
+  requirePermission,
+  requireStaff,
+} from "../middleware/auth.js";
 import {
   estimateReadMinutes,
   isNonEmptyString,
@@ -12,9 +17,13 @@ import {
   parseTakeaways,
   slugify,
 } from "../lib/content.js";
+import type { PageContent } from "../lib/cms/types.js";
+import { validatePageContent } from "../lib/cms/validate.js";
+import { ensurePageDraft } from "./cms.js";
 
 export const insightsPublicRouter = Router();
 export const insightsAdminRouter = Router();
+export const insightsPageAdminRouter = Router();
 
 const TITLE_MAX = 180;
 const DESCRIPTION_MAX = 400;
@@ -182,7 +191,7 @@ insightsPublicRouter.get("/:slug", async (req, res) => {
   }
 });
 
-insightsAdminRouter.use(requireAuth, requireAdmin);
+insightsAdminRouter.use(requireAuth, requireStaff, requirePermission("canManageInsights"));
 
 insightsAdminRouter.get("/", async (_req, res) => {
   try {
@@ -230,6 +239,15 @@ insightsAdminRouter.post("/", async (req, res) => {
         createdById: req.auth!.id,
       })
       .returning(publicColumns);
+
+    await writeAuditLog({
+      userId: req.auth?.id,
+      action: "insight.create",
+      resourceType: "insight",
+      resourceId: String(created.id),
+      req,
+      metadata: { slug: created.slug, published: created.published },
+    });
 
     res.status(201).json({ insight: created });
   } catch (error) {
@@ -311,6 +329,15 @@ insightsAdminRouter.patch("/:id", async (req, res) => {
       .where(eq(insights.id, id))
       .returning(publicColumns);
 
+    await writeAuditLog({
+      userId: req.auth?.id,
+      action: "insight.update",
+      resourceType: "insight",
+      resourceId: String(id),
+      req,
+      metadata: { slug: updated.slug, published: updated.published },
+    });
+
     res.json({ insight: updated });
   } catch (error) {
     console.error("Failed to update insight:", error);
@@ -334,9 +361,160 @@ insightsAdminRouter.delete("/:id", async (req, res) => {
       res.status(404).json({ error: "Article not found." });
       return;
     }
+    await writeAuditLog({
+      userId: req.auth?.id,
+      action: "insight.delete",
+      resourceType: "insight",
+      resourceId: String(id),
+      req,
+    });
     res.json({ ok: true });
   } catch (error) {
     console.error("Failed to delete insight:", error);
     res.status(500).json({ error: "Unable to delete the article." });
+  }
+});
+
+type InsightsPageCopy = {
+  badge: string;
+  title: string;
+  description: string;
+  buttonLabel: string;
+  buttonHref: string;
+};
+
+function asText(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
+
+function extractInsightsPageCopy(content: PageContent): InsightsPageCopy {
+  const hero = content.sections.find((section) => section.type === "hero");
+  if (!hero || hero.type !== "hero") {
+    return {
+      badge: "Insights",
+      title: "",
+      description: "",
+      buttonLabel: "Request a consultation",
+      buttonHref: "/get-started",
+    };
+  }
+  return {
+    badge: asText(hero.label, "Insights"),
+    title: asText(hero.heading),
+    description: asText(hero.paragraph),
+    buttonLabel: asText(hero.primaryCta?.label, "Request a consultation"),
+    buttonHref: asText(hero.primaryCta?.href, "/get-started"),
+  };
+}
+
+function applyInsightsPageCopy(
+  content: PageContent,
+  copy: InsightsPageCopy,
+): PageContent {
+  let hasHero = false;
+  const sections = content.sections.map((section) => {
+    if (section.type !== "hero") return section;
+    hasHero = true;
+    return {
+      ...section,
+      label: copy.badge.trim() || "Insights",
+      heading: copy.title.trim(),
+      paragraph: copy.description.trim(),
+      primaryCta: {
+        label: copy.buttonLabel.trim() || "Request a consultation",
+        href: copy.buttonHref.trim() || "/get-started",
+      },
+    };
+  });
+  if (!hasHero) {
+    sections.unshift({
+      id: crypto.randomUUID(),
+      type: "hero",
+      label: copy.badge.trim() || "Insights",
+      heading: copy.title.trim() || "Insights",
+      paragraph: copy.description.trim(),
+      mediaUrl: "/consulting_backgroung.jpeg",
+      mediaType: "image",
+      primaryCta: {
+        label: copy.buttonLabel.trim() || "Request a consultation",
+        href: copy.buttonHref.trim() || "/get-started",
+      },
+    });
+  }
+  return { ...content, sections };
+}
+
+insightsPageAdminRouter.use(
+  requireAuth,
+  requireStaff,
+  requirePermission("canEditPages"),
+);
+
+insightsPageAdminRouter.get("/page", async (req, res) => {
+  try {
+    const row = await ensurePageDraft("insights", req.auth?.id);
+    const parsed = validatePageContent(row.draftContent);
+    if (!parsed.ok) {
+      res.status(500).json({ error: "Unable to load Insights page copy." });
+      return;
+    }
+    res.json({ page: extractInsightsPageCopy(parsed.value) });
+  } catch (error) {
+    console.error("Failed to load Insights page copy:", error);
+    res.status(500).json({ error: "Unable to load Insights page copy." });
+  }
+});
+
+insightsPageAdminRouter.put("/page", async (req, res) => {
+  const raw = (req.body?.page ?? req.body) as Record<string, unknown>;
+  const copy: InsightsPageCopy = {
+    badge: asText(raw?.badge, "Insights"),
+    title: asText(raw?.title),
+    description: asText(raw?.description),
+    buttonLabel: asText(raw?.buttonLabel, "Request a consultation"),
+    buttonHref: asText(raw?.buttonHref, "/get-started"),
+  };
+  if (!copy.title.trim()) {
+    res.status(400).json({ error: "Page title is required." });
+    return;
+  }
+  const makeLive = Boolean(req.body?.makeLive);
+  try {
+    const row = await ensurePageDraft("insights", req.auth?.id);
+    const parsed = validatePageContent(row.draftContent);
+    if (!parsed.ok) {
+      res.status(400).json({ error: "Stored page content is invalid." });
+      return;
+    }
+    const next = applyInsightsPageCopy(parsed.value, copy);
+    const validated = validatePageContent(next);
+    if (!validated.ok) {
+      res.status(400).json({ error: validated.error });
+      return;
+    }
+    await db
+      .update(cmsPages)
+      .set({
+        draftContent: validated.value,
+        updatedById: req.auth!.id,
+        updatedAt: new Date(),
+      })
+      .where(eq(cmsPages.slug, "insights"));
+    if (makeLive) {
+      const now = new Date();
+      await db
+        .update(cmsPages)
+        .set({
+          publishedContent: validated.value,
+          publishedAt: now,
+          updatedById: req.auth!.id,
+          updatedAt: now,
+        })
+        .where(eq(cmsPages.slug, "insights"));
+    }
+    res.json({ page: copy, live: makeLive });
+  } catch (error) {
+    console.error("Failed to save Insights page copy:", error);
+    res.status(500).json({ error: "Unable to save Insights page copy." });
   }
 });

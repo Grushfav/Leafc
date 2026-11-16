@@ -1,14 +1,22 @@
 import { Router } from "express";
 import { eq } from "drizzle-orm";
-import { divisionPages } from "../db/schema.js";
+import { cmsPages, divisionPages } from "../db/schema.js";
 import { db } from "../db/index.js";
-import { requireAdmin, requireAuth } from "../middleware/auth.js";
+import { writeAuditLog } from "../lib/audit.js";
+import type { PageContent } from "../lib/cms/types.js";
+import { validatePageContent } from "../lib/cms/validate.js";
+import {
+  requireAuth,
+  requirePermission,
+  requireStaff,
+} from "../middleware/auth.js";
 import { isNonEmptyString } from "../lib/content.js";
+import { ensurePageDraft } from "./cms.js";
 
 export const divisionPublicRouter = Router();
 export const divisionAdminRouter = Router();
 
-divisionAdminRouter.use(requireAuth, requireAdmin);
+divisionAdminRouter.use(requireAuth, requireStaff, requirePermission("canEditPages"));
 
 export const DIVISION_SLUGS = [
   "consultancy",
@@ -169,16 +177,51 @@ divisionPublicRouter.get("/:slug", async (req, res) => {
   }
 });
 
-divisionAdminRouter.get("/", async (_req, res) => {
+function extractDivisionLayoutContent(
+  page: PageContent,
+): Record<string, unknown> {
+  const section = page.sections.find((item) => item.type === "divisionLayout");
+  if (section && section.type === "divisionLayout" && section.content) {
+    return section.content as Record<string, unknown>;
+  }
+  return {};
+}
+
+function applyDivisionLayoutContent(
+  page: PageContent,
+  content: Record<string, unknown>,
+): PageContent {
+  const sections = [...page.sections];
+  const index = sections.findIndex((item) => item.type === "divisionLayout");
+  const nextSection = {
+    id:
+      index >= 0 && sections[index].type === "divisionLayout"
+        ? sections[index].id
+        : crypto.randomUUID(),
+    type: "divisionLayout" as const,
+    content,
+  };
+  if (index >= 0) sections[index] = nextSection;
+  else sections.push(nextSection);
+  return { version: 1, sections };
+}
+
+divisionAdminRouter.get("/", async (req, res) => {
   try {
-    const rows = await db
-      .select({
-        slug: divisionPages.slug,
-        content: divisionPages.content,
-        updatedAt: divisionPages.updatedAt,
-      })
-      .from(divisionPages);
-    res.json({ pages: rows });
+    const pages = [];
+    for (const slug of DIVISION_SLUGS) {
+      const row = await ensurePageDraft(slug, req.auth?.id);
+      const parsed = validatePageContent(row.draftContent);
+      const content = parsed.ok
+        ? extractDivisionLayoutContent(parsed.value)
+        : {};
+      pages.push({
+        slug,
+        content,
+        updatedAt: row.updatedAt,
+      });
+    }
+    res.json({ pages });
   } catch (error) {
     console.error("Failed to list division pages:", error);
     res.status(500).json({ error: "Unable to load division pages." });
@@ -201,29 +244,69 @@ divisionAdminRouter.put("/:slug", async (req, res) => {
   const content = normalizeContent(req.body.content as Record<string, unknown>);
 
   try {
-    const [saved] = await db
+    const row = await ensurePageDraft(slug, req.auth?.id);
+    const parsed = validatePageContent(row.draftContent);
+    if (!parsed.ok) {
+      res.status(400).json({ error: "Stored page content is invalid." });
+      return;
+    }
+    const nextPage = applyDivisionLayoutContent(parsed.value, content);
+    const validated = validatePageContent(nextPage);
+    if (!validated.ok) {
+      res.status(400).json({ error: validated.error });
+      return;
+    }
+
+    const now = new Date();
+    // Public division pages read published CMS — save draft and publish together.
+    const [updated] = await db
+      .update(cmsPages)
+      .set({
+        draftContent: validated.value,
+        publishedContent: validated.value,
+        publishedAt: now,
+        updatedById: req.auth?.id,
+        updatedAt: now,
+      })
+      .where(eq(cmsPages.slug, slug))
+      .returning({
+        slug: cmsPages.slug,
+        updatedAt: cmsPages.updatedAt,
+      });
+
+    // Keep legacy division_pages in sync for older clients.
+    await db
       .insert(divisionPages)
       .values({
         slug,
         content,
         updatedById: req.auth?.id,
-        updatedAt: new Date(),
+        updatedAt: now,
       })
       .onConflictDoUpdate({
         target: divisionPages.slug,
         set: {
           content,
           updatedById: req.auth?.id,
-          updatedAt: new Date(),
+          updatedAt: now,
         },
-      })
-      .returning({
-        slug: divisionPages.slug,
-        content: divisionPages.content,
-        updatedAt: divisionPages.updatedAt,
       });
 
-    res.json({ page: saved });
+    await writeAuditLog({
+      userId: req.auth?.id,
+      action: "division.save",
+      resourceType: "division_page",
+      resourceId: slug,
+      req,
+    });
+
+    res.json({
+      page: {
+        slug: updated.slug,
+        content,
+        updatedAt: updated.updatedAt,
+      },
+    });
   } catch (error) {
     console.error("Failed to save division page:", error);
     res.status(500).json({ error: "Unable to save this page." });

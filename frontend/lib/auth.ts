@@ -9,6 +9,39 @@ export type AccountRole = (typeof ACCOUNT_ROLES)[number];
 export type CustomerKind = "individual" | "organization";
 export type AccountType = "member" | "customer";
 
+export const CONTENT_PERMISSION_KEYS = [
+  "canEditHome",
+  "canEditPages",
+  "canManageInsights",
+  "canManageAcademy",
+  "canViewNewsletter",
+  "canEditMenusFooter",
+] as const;
+
+export type ContentPermissionKey = (typeof CONTENT_PERMISSION_KEYS)[number];
+
+export type ContentPermissions = Record<ContentPermissionKey, boolean>;
+
+export const CONTENT_PERMISSION_LABELS: Record<ContentPermissionKey, string> = {
+  canEditHome: "Edit home page",
+  canEditPages: "Edit other pages",
+  canManageInsights: "Add / edit insights",
+  canManageAcademy: "Add / edit academy courses",
+  canViewNewsletter: "View newsletter sign-ups",
+  canEditMenusFooter: "Edit menus & footer",
+};
+
+export function emptyPermissions(): ContentPermissions {
+  return {
+    canEditHome: false,
+    canEditPages: false,
+    canManageInsights: false,
+    canManageAcademy: false,
+    canViewNewsletter: false,
+    canEditMenusFooter: false,
+  };
+}
+
 export interface AuthUser {
   id: number;
   name: string;
@@ -17,6 +50,8 @@ export interface AuthUser {
   customerKind: CustomerKind | null;
   organizationName: string | null;
   avatarUrl: string | null;
+  siteContentEditor?: boolean;
+  permissions?: ContentPermissions;
   lastLoginAt: string | null;
   createdAt: string;
 }
@@ -62,6 +97,7 @@ export interface InquiryRecord {
   referenceNumber: string;
   fullName: string;
   email: string;
+  phone: string | null;
   organization: string | null;
   clientType: string;
   serviceInterest: string;
@@ -84,6 +120,60 @@ export function isStaffRole(role: AccountRole): role is StaffRole {
 
 export function isAdminRole(role: AccountRole): boolean {
   return role === "admin";
+}
+
+function permissionsOf(user: AuthUser): ContentPermissions {
+  if (user.permissions) return user.permissions;
+  if (isAdminRole(user.role)) {
+    return {
+      canEditHome: true,
+      canEditPages: true,
+      canManageInsights: true,
+      canManageAcademy: true,
+      canViewNewsletter: true,
+      canEditMenusFooter: true,
+    };
+  }
+  if (user.siteContentEditor) {
+    return {
+      canEditHome: true,
+      canEditPages: true,
+      canManageInsights: true,
+      canManageAcademy: true,
+      canViewNewsletter: true,
+      canEditMenusFooter: true,
+    };
+  }
+  return emptyPermissions();
+}
+
+export function hasPermission(
+  user: AuthUser | null | undefined,
+  key: ContentPermissionKey,
+): boolean {
+  if (!user) return false;
+  if (isAdminRole(user.role)) return true;
+  return permissionsOf(user)[key] === true;
+}
+
+export function canEditSiteContent(user: AuthUser | null | undefined): boolean {
+  if (!user) return false;
+  if (isAdminRole(user.role)) return true;
+  const perms = permissionsOf(user);
+  return (
+    perms.canEditHome ||
+    perms.canEditPages ||
+    perms.canEditMenusFooter ||
+    user.siteContentEditor === true
+  );
+}
+
+export function canAccessSitePages(user: AuthUser | null | undefined): boolean {
+  return hasPermission(user, "canEditHome") || hasPermission(user, "canEditPages");
+}
+
+export function canAccessMenusFooter(user: AuthUser | null | undefined): boolean {
+  return hasPermission(user, "canEditMenusFooter");
 }
 
 export function roleLabel(role: AccountRole): string {
@@ -244,4 +334,28 @@ export async function fetchInquiries(
   });
   const data = await parseJson<{ inquiries: InquiryRecord[] }>(response);
   return data.inquiries;
+}
+
+export async function fetchInvite(rawToken: string) {
+  const response = await fetch(
+    `${API_URL}/auth/invite/${encodeURIComponent(rawToken)}`,
+  );
+  return parseJson<{
+    name: string;
+    email: string;
+    role: AccountRole;
+    expiresAt: string;
+  }>(response);
+}
+
+export async function acceptInvite(
+  rawToken: string,
+  password: string,
+): Promise<AuthResponse> {
+  const response = await fetch(`${API_URL}/auth/accept-invite`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ token: rawToken, password }),
+  });
+  return parseJson<AuthResponse>(response);
 }

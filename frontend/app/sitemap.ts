@@ -20,6 +20,7 @@ const publicRoutes: {
   { path: "/training", changeFrequency: "monthly", priority: 0.8 },
   { path: "/polygraph", changeFrequency: "monthly", priority: 0.8 },
   { path: "/signup", changeFrequency: "monthly", priority: 0.5 },
+  { path: "/accept-invite", changeFrequency: "monthly", priority: 0.4 },
   { path: "/login", changeFrequency: "monthly", priority: 0.4 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
   { path: "/data-protection", changeFrequency: "yearly", priority: 0.3 },

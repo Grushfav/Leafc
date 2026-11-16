@@ -2,10 +2,17 @@ import { Router } from "express";
 import { desc, eq } from "drizzle-orm";
 import { newsletterSubscribers } from "../db/schema.js";
 import { db } from "../db/index.js";
-import { requireAdmin, requireAuth } from "../middleware/auth.js";
+import { writeAuditLog } from "../lib/audit.js";
+import { isMailConfigured } from "../lib/mailer.js";
+import {
+  requireAuth,
+  requirePermission,
+  requireStaff,
+} from "../middleware/auth.js";
 import {
   createNewsletterToken,
   hashNewsletterToken,
+  sendNewsletterBroadcastEmail,
   sendNewsletterConfirmEmail,
   sendNewsletterWelcomeEmail,
 } from "../lib/newsletter-mail.js";
@@ -222,7 +229,11 @@ newsletterRouter.post("/unsubscribe", async (req, res) => {
 
 export const newsletterAdminRouter = Router();
 
-newsletterAdminRouter.use(requireAuth, requireAdmin);
+newsletterAdminRouter.use(
+  requireAuth,
+  requireStaff,
+  requirePermission("canViewNewsletter"),
+);
 
 newsletterAdminRouter.get("/subscribers", async (_req, res) => {
   try {
@@ -244,5 +255,125 @@ newsletterAdminRouter.get("/subscribers", async (_req, res) => {
   } catch (error) {
     console.error("Failed to list newsletter subscribers:", error);
     res.status(500).json({ error: "Unable to load newsletter subscribers." });
+  }
+});
+
+const MAX_BROADCAST_SUBJECT = 200;
+const MAX_BROADCAST_BODY = 20_000;
+
+newsletterAdminRouter.post("/broadcast", async (req, res) => {
+  const subjectRaw = req.body?.subject;
+  const bodyRaw = req.body?.body;
+
+  if (typeof subjectRaw !== "string" || typeof bodyRaw !== "string") {
+    res.status(400).json({ error: "Subject and body are required." });
+    return;
+  }
+
+  const subject = subjectRaw.trim();
+  const body = bodyRaw.trim();
+
+  if (!subject || !body) {
+    res.status(400).json({ error: "Subject and body cannot be empty." });
+    return;
+  }
+
+  if (subject.length > MAX_BROADCAST_SUBJECT) {
+    res.status(400).json({
+      error: `Subject must be at most ${MAX_BROADCAST_SUBJECT} characters.`,
+    });
+    return;
+  }
+
+  if (body.length > MAX_BROADCAST_BODY) {
+    res.status(400).json({
+      error: `Body must be at most ${MAX_BROADCAST_BODY} characters.`,
+    });
+    return;
+  }
+
+  try {
+    const recipients = await db
+      .select({
+        id: newsletterSubscribers.id,
+        email: newsletterSubscribers.email,
+      })
+      .from(newsletterSubscribers)
+      .where(eq(newsletterSubscribers.status, "subscribed"));
+
+    if (recipients.length === 0) {
+      res.status(400).json({ error: "There are no subscribed recipients to email." });
+      return;
+    }
+
+    if (!isMailConfigured()) {
+      res.status(502).json({
+        error: "Email is not configured. Newsletter was not sent.",
+      });
+      return;
+    }
+
+    let sent = 0;
+    let failed = 0;
+    const attempted = recipients.length;
+
+    for (const recipient of recipients) {
+      const unsubscribe = createNewsletterToken();
+      try {
+        const ok = await sendNewsletterBroadcastEmail({
+          to: recipient.email,
+          subject,
+          body,
+          unsubscribeToken: unsubscribe.raw,
+        });
+        if (!ok) {
+          failed += 1;
+          continue;
+        }
+        const now = new Date();
+        await db
+          .update(newsletterSubscribers)
+          .set({
+            unsubscribeTokenHash: unsubscribe.hash,
+            updatedAt: now,
+          })
+          .where(eq(newsletterSubscribers.id, recipient.id));
+        sent += 1;
+      } catch (error) {
+        console.error("Newsletter broadcast send failed:", recipient.id, error);
+        failed += 1;
+      }
+    }
+
+    await writeAuditLog({
+      userId: req.auth?.id,
+      action: "newsletter.broadcast",
+      resourceType: "newsletter",
+      req,
+      metadata: { subject, attempted, sent, failed },
+    });
+
+    const payload = {
+      attempted,
+      sent,
+      failed,
+      message:
+        failed === 0
+          ? `Sent to ${sent} subscribed recipient(s).`
+          : `Sent to ${sent} of ${attempted}; ${failed} failed.`,
+    };
+
+    if (sent === 0) {
+      res.status(502).json({
+        error: "No messages were delivered.",
+        ...payload,
+      });
+      return;
+    }
+
+    res.json(payload);
+  } catch (error) {
+    console.error("Failed to broadcast newsletter:", error);
+    res.status(500).json({ error: "Unable to send the newsletter right now." });
   }
 });

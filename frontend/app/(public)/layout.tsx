@@ -1,3 +1,4 @@
+import { SiteNoticePopup } from "@/components/cms/SiteNoticePopup";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SITE_CONTACT, SITE_EXPANSION } from "@/lib/nav";
@@ -31,6 +32,7 @@ export default function PublicLayout({ children }: LayoutProps<"/">) {
         {children}
       </main>
       <SiteFooter />
+      <SiteNoticePopup />
     </>
   );
 }

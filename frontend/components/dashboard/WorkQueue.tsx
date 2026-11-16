@@ -201,6 +201,8 @@ export function SessionQueueRow({ title, meta, status }: SessionQueueRowProps) {
 interface InquiryQueueRowProps {
   reference: string;
   title: string;
+  email?: string | null;
+  phone?: string | null;
   meta: string;
   status: ReactNode;
   date: string;
@@ -209,16 +211,37 @@ interface InquiryQueueRowProps {
 export function InquiryQueueRow({
   reference,
   title,
+  email,
+  phone,
   meta,
   status,
   date,
 }: InquiryQueueRowProps) {
+  const emailText = email?.trim() || null;
+  const phoneText = phone?.trim() || null;
+
   return (
     <QueueRowShell className="lg:grid-cols-[7.25rem_minmax(0,1.1fr)_minmax(0,1fr)_auto_6.5rem] lg:items-center">
       <p className="font-mono text-xs text-muted-foreground">{reference}</p>
-      <p className="truncate font-heading text-sm font-semibold text-heading">
-        {title}
-      </p>
+      <div className="min-w-0">
+        <p className="truncate font-heading text-sm font-semibold text-heading">
+          {title}
+        </p>
+        {emailText || phoneText ? (
+          <div className="mt-0.5 space-y-0.5 text-xs text-muted-foreground">
+            {emailText ? (
+              <p className="truncate" title={emailText}>
+                {emailText}
+              </p>
+            ) : null}
+            {phoneText ? (
+              <p className="truncate" title={phoneText}>
+                {phoneText}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
       <p className="truncate text-sm text-muted-foreground">{meta}</p>
       <div className="flex flex-wrap items-center gap-2">
         {status}

@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { usePublishedNav } from "@/components/cms/usePublishedCms";
 import { DIVISION_LINKS, PRIMARY_NAV_LINKS, SITE_EXPANSION } from "@/lib/nav";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -14,8 +15,29 @@ export function SiteHeader() {
   const { user, isReady, logout } = useAuth();
   const [divisionsOpen, setDivisionsOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const cmsNav = usePublishedNav();
 
-  const isDivisionActive = DIVISION_LINKS.some(
+  const primaryLinks = useMemo(() => {
+    if (cmsNav?.primary?.length) {
+      return cmsNav.primary.filter((item) => item.visible);
+    }
+    return PRIMARY_NAV_LINKS.map((item) => ({
+      href: item.href,
+      label: item.label,
+    }));
+  }, [cmsNav]);
+
+  const divisionLinks = useMemo(() => {
+    if (cmsNav?.divisions?.length) {
+      return cmsNav.divisions.filter((item) => item.visible);
+    }
+    return DIVISION_LINKS.map((item) => ({
+      href: item.href,
+      label: item.label,
+    }));
+  }, [cmsNav]);
+
+  const isDivisionActive = divisionLinks.some(
     (d) => d.href !== "/training" && pathname.startsWith(d.href),
   );
 
@@ -56,9 +78,9 @@ export function SiteHeader() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
-          {PRIMARY_NAV_LINKS.map((link) => (
+          {primaryLinks.map((link) => (
             <Link
-              key={link.href}
+              key={`${link.href}-${link.label}`}
               href={link.href}
               className={cn(
                 "rounded-lg px-3 py-2 font-heading text-sm font-medium transition-all duration-150",
@@ -96,7 +118,7 @@ export function SiteHeader() {
                 role="menu"
               >
                 <div className="h-0.5 bg-gradient-to-r from-brand-navy to-brand-orange" aria-hidden />
-                {DIVISION_LINKS.map((item) => (
+                {divisionLinks.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -153,9 +175,9 @@ export function SiteHeader() {
           className="border-t border-border-subtle bg-surface px-4 py-4 md:hidden"
           aria-label="Mobile"
         >
-          {PRIMARY_NAV_LINKS.map((link) => (
+          {primaryLinks.map((link) => (
             <Link
-              key={link.href}
+              key={`m-${link.href}-${link.label}`}
               href={link.href}
               onClick={() => setMobileOpen(false)}
               className="block rounded-lg px-3 py-2.5 font-heading text-sm font-medium text-brand-navy/70 hover:bg-warm-cream hover:text-brand-navy"
@@ -166,9 +188,9 @@ export function SiteHeader() {
           <p className="mt-3 px-3 font-heading text-xs font-semibold uppercase tracking-wider text-brand-orange">
             Divisions
           </p>
-          {DIVISION_LINKS.map((item) => (
+          {divisionLinks.map((item) => (
             <Link
-              key={item.href}
+              key={`md-${item.href}-${item.label}`}
               href={item.href}
               onClick={() => setMobileOpen(false)}
               className="block rounded-lg px-3 py-2.5 text-sm text-brand-navy/70 hover:bg-warm-cream hover:text-brand-navy"

@@ -6,13 +6,21 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { UserAvatar } from "@/components/auth/UserAvatar";
-import { isAdminRole, isStaffRole, roleLabel } from "@/lib/auth";
+import {
+  canEditSiteContent,
+  hasPermission,
+  isAdminRole,
+  isStaffRole,
+  roleLabel,
+} from "@/lib/auth";
 
 interface DashboardShellProps {
   children: React.ReactNode;
   title?: string;
   description?: string;
   toolbar?: React.ReactNode;
+  /** `beside` keeps actions to the right of the title; `below` stacks a full-width toolbar under it. */
+  toolbarPlacement?: "beside" | "below";
 }
 
 export function DashboardShell({
@@ -20,6 +28,7 @@ export function DashboardShell({
   title,
   description,
   toolbar,
+  toolbarPlacement = "beside",
 }: DashboardShellProps) {
   const pathname = usePathname();
   const { user } = useAuth();
@@ -34,52 +43,59 @@ export function DashboardShell({
 
   const onOverview = pathname === "/dashboard" && hash !== "#incoming-inquiries";
   const onInquiries = pathname === "/dashboard" && hash === "#incoming-inquiries";
-  const staff = Boolean(user && isStaffRole(user.role));
   const admin = Boolean(user && isAdminRole(user.role));
+  const siteEditor = Boolean(user && canEditSiteContent(user));
+  const canNewsletter = Boolean(user && hasPermission(user, "canViewNewsletter"));
+  const canInsights = Boolean(user && hasPermission(user, "canManageInsights"));
+  const canAcademy = Boolean(user && hasPermission(user, "canManageAcademy"));
+  const useHorizontalNav = pathname.startsWith("/dashboard/site-content");
 
   const links = [
     { href: "/dashboard", label: "Overview", active: onOverview, onClick: () => setHash("") },
     { href: "/dashboard/profile", label: "Profile", active: pathname === "/dashboard/profile" },
-    staff
+    siteEditor
       ? {
-          href: "/dashboard/cases",
-          label: "Cases",
-          active: pathname.startsWith("/dashboard/cases"),
+          href: "/dashboard/site-content",
+          label: "Site content",
+          active:
+            pathname.startsWith("/dashboard/site-content") ||
+            pathname.startsWith("/dashboard/policies") ||
+            pathname.startsWith("/dashboard/divisions"),
         }
       : null,
-    staff
+    canNewsletter && !siteEditor
       ? {
-          href: "/dashboard/training",
-          label: "Training",
-          active: pathname.startsWith("/dashboard/training"),
+          href: "/dashboard/newsletter",
+          label: "Newsletter",
+          active: pathname.startsWith("/dashboard/newsletter"),
         }
       : null,
-    admin
+    canInsights
       ? {
           href: "/dashboard/insights",
-          label: "Insights",
+          label: "Add insight",
           active: pathname.startsWith("/dashboard/insights"),
         }
       : null,
-    admin
+    canAcademy
       ? {
           href: "/dashboard/academy",
-          label: "Academy",
+          label: "Add academy course",
           active: pathname.startsWith("/dashboard/academy"),
         }
       : null,
     admin
       ? {
-          href: "/dashboard/divisions",
-          label: "Division pages",
-          active: pathname.startsWith("/dashboard/divisions"),
+          href: "/dashboard/users",
+          label: "Users",
+          active: pathname.startsWith("/dashboard/users"),
         }
       : null,
     admin
       ? {
-          href: "/dashboard/newsletter",
-          label: "Newsletter",
-          active: pathname.startsWith("/dashboard/newsletter"),
+          href: "/dashboard/activity",
+          label: "Activity",
+          active: pathname.startsWith("/dashboard/activity"),
         }
       : null,
     {
@@ -110,6 +126,80 @@ export function DashboardShell({
       active
         ? "border-l-2 border-brand-orange bg-gradient-to-r from-brand-orange/15 to-brand-gold/10 text-charcoal shadow-sm"
         : "text-muted-foreground hover:bg-warm-cream hover:text-brand-navy",
+    );
+  }
+
+  const userBlock = user ? (
+    <div className="flex shrink-0 items-center gap-2.5">
+      <UserAvatar name={user.name} avatarUrl={user.avatarUrl} className="h-8 w-8" />
+      <div className="min-w-0">
+        <p className="truncate font-heading text-sm font-semibold text-heading">
+          {user.name}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {roleLabel(user.role)}
+          {isStaffRole(user.role) ? " · Member" : ""}
+        </p>
+      </div>
+    </div>
+  ) : null;
+
+  const pageHeader =
+    title || description || toolbar ? (
+      <div className="border-b border-border-subtle bg-surface px-5 py-4 sm:px-6">
+        {toolbarPlacement === "below" ? (
+          <div className="space-y-4">
+            <div className="min-w-0">
+              {title ? (
+                <h1 className="font-heading text-2xl font-bold text-heading">{title}</h1>
+              ) : null}
+              {description ? (
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>
+              ) : null}
+            </div>
+            {toolbar ? <div className="min-w-0">{toolbar}</div> : null}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              {title ? (
+                <h1 className="font-heading text-2xl font-bold text-heading">{title}</h1>
+              ) : null}
+              {description ? (
+                <p className="mt-1 max-w-xl text-sm text-muted-foreground">{description}</p>
+              ) : null}
+            </div>
+            {toolbar ? <div className="lg:pt-0.5">{toolbar}</div> : null}
+          </div>
+        )}
+      </div>
+    ) : null;
+
+  if (useHorizontalNav) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] bg-warm-white">
+        <div className="border-b border-border-subtle bg-surface">
+          <div className="flex flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+            <nav className="-mx-1 flex gap-2 overflow-x-auto px-1" aria-label="Workspace">
+              {links.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={item.onClick}
+                  className={linkClass(item.active, true)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            {userBlock}
+          </div>
+        </div>
+
+        {pageHeader}
+
+        <div className="p-5 sm:p-6">{children}</div>
+      </div>
     );
   }
 
@@ -173,25 +263,7 @@ export function DashboardShell({
             ))}
           </div>
         </nav>
-        {(title || description || toolbar) && (
-          <div className="border-b border-border-subtle bg-surface px-5 py-4 sm:px-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                {title && (
-                  <h1 className="font-heading text-2xl font-bold text-heading">
-                    {title}
-                  </h1>
-                )}
-                {description && (
-                  <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                    {description}
-                  </p>
-                )}
-              </div>
-              {toolbar ? <div className="lg:pt-0.5">{toolbar}</div> : null}
-            </div>
-          </div>
-        )}
+        {pageHeader}
         <div className="p-5 sm:p-6">{children}</div>
       </div>
     </div>
