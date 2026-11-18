@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-import { usePublishedNav } from "@/components/cms/usePublishedCms";
+import { useCmsNavState } from "@/components/cms/usePublishedCms";
 import { DIVISION_LINKS, PRIMARY_NAV_LINKS, SITE_EXPANSION } from "@/lib/nav";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -15,7 +15,9 @@ export function SiteHeader() {
   const { user, isReady, logout } = useAuth();
   const [divisionsOpen, setDivisionsOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const cmsNav = usePublishedNav();
+  const { nav: cmsNav, status: navStatus } = useCmsNavState();
+  // Keep layout but hide the built-in links until published nav arrives (or the API is slow).
+  const navHolding = navStatus === "loading";
 
   const primaryLinks = useMemo(() => {
     if (cmsNav?.primary?.length) {
@@ -42,7 +44,7 @@ export function SiteHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface">
       <div className="h-0.5 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold" aria-hidden />
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
@@ -77,7 +79,14 @@ export function SiteHeader() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+        <nav
+          className={cn(
+            "hidden items-center gap-1 transition-opacity duration-200 md:flex",
+            navHolding ? "opacity-0" : "opacity-100",
+          )}
+          aria-label="Main"
+          aria-busy={navHolding}
+        >
           {primaryLinks.map((link) => (
             <Link
               key={`${link.href}-${link.label}`}

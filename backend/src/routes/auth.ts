@@ -1,8 +1,16 @@
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
 import bcrypt from "bcrypt";
 import { and, eq, isNull } from "drizzle-orm";
-import { users } from "../db/schema.js";
+import { loginChallenges, users } from "../db/schema.js";
 import { db } from "../db/index.js";
+import {
+  isChallengeId,
+  isTwoFactorEnabled,
+  resendLoginChallenge,
+  startLoginChallenge,
+  TWO_FACTOR_RESEND_COOLDOWN_MS,
+  verifyLoginChallenge,
+} from "../lib/two-factor.js";
 import {
   createEmailVerificationToken,
   hashEmailVerificationToken,
@@ -165,31 +173,201 @@ authRouter.post("/login", async (req, res) => {
       return;
     }
 
-    const [updated] = await db
-      .update(users)
-      .set({ lastLoginAt: new Date(), updatedAt: new Date() })
-      .where(eq(users.id, user.id))
-      .returning(publicUserColumns);
+    if (isTwoFactorEnabled()) {
+      try {
+        const challenge = await startLoginChallenge({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        });
+        res.json({
+          requiresTwoFactor: true,
+          challengeId: challenge.challengeId,
+          maskedEmail: challenge.maskedEmail,
+          resendAfterSeconds: Math.round(TWO_FACTOR_RESEND_COOLDOWN_MS / 1000),
+        });
+      } catch (error) {
+        console.error("Failed to send sign-in code:", error);
+        res.status(502).json({
+          error:
+            "We could not email your sign-in code right now. Please try again in a moment.",
+          code: "two_factor_email_failed",
+        });
+      }
+      return;
+    }
 
-    await writeAuditLog({
-      userId: updated.id,
-      action: "login",
-      resourceType: "user",
-      resourceId: String(updated.id),
-      req,
-      metadata: { email: updated.email, role: updated.role },
-    });
-
-    const token = signToken({
-      id: updated.id,
-      email: updated.email,
-      role: updated.role,
-    });
-
-    res.json({ token, user: publicUser(updated) });
+    await completeLogin(req, res, user.id);
   } catch (error) {
     console.error("Failed to sign in:", error);
     res.status(500).json({ error: "Unable to sign in right now." });
+  }
+});
+
+async function completeLogin(req: Request, res: Response, userId: number) {
+  const [updated] = await db
+    .update(users)
+    .set({ lastLoginAt: new Date(), updatedAt: new Date() })
+    .where(eq(users.id, userId))
+    .returning(publicUserColumns);
+
+  await writeAuditLog({
+    userId: updated.id,
+    action: "login",
+    resourceType: "user",
+    resourceId: String(updated.id),
+    req,
+    metadata: { email: updated.email, role: updated.role },
+  });
+
+  const token = signToken({
+    id: updated.id,
+    email: updated.email,
+    role: updated.role,
+  });
+
+  res.json({ token, user: publicUser(updated) });
+}
+
+authRouter.post("/login/verify", async (req, res) => {
+  const body = req.body as { challengeId?: unknown; code?: unknown };
+  const code = typeof body.code === "string" ? body.code.replace(/\s+/g, "") : "";
+
+  if (!isChallengeId(body.challengeId) || !/^\d{6}$/.test(code)) {
+    res.status(400).json({ error: "Enter the 6-digit code from your email." });
+    return;
+  }
+
+  try {
+    const result = await verifyLoginChallenge(body.challengeId, code);
+
+    if (!result.ok) {
+      switch (result.reason) {
+        case "wrong_code":
+          res.status(401).json({
+            error: `That code is not correct. ${result.attemptsLeft} attempt${result.attemptsLeft === 1 ? "" : "s"} left.`,
+            code: "wrong_code",
+          });
+          return;
+        case "locked":
+          res.status(429).json({
+            error: "Too many incorrect codes. Sign in again to get a new code.",
+            code: "two_factor_locked",
+          });
+          return;
+        case "expired":
+          res.status(401).json({
+            error: "That code has expired. Sign in again to get a new code.",
+            code: "two_factor_expired",
+          });
+          return;
+        default:
+          res.status(401).json({
+            error: "This sign-in attempt is no longer valid. Sign in again.",
+            code: "two_factor_invalid",
+          });
+          return;
+      }
+    }
+
+    const [user] = await db
+      .select({ id: users.id, role: users.role, isActive: users.isActive })
+      .from(users)
+      .where(eq(users.id, result.userId))
+      .limit(1);
+
+    if (!user || !user.isActive || !isStaffRole(user.role)) {
+      res.status(401).json({ error: "Invalid email or password." });
+      return;
+    }
+
+    await completeLogin(req, res, user.id);
+  } catch (error) {
+    console.error("Failed to verify sign-in code:", error);
+    res.status(500).json({ error: "Unable to sign in right now." });
+  }
+});
+
+authRouter.post("/login/resend", async (req, res) => {
+  const body = req.body as { challengeId?: unknown };
+
+  if (!isChallengeId(body.challengeId)) {
+    res.status(400).json({ error: "Sign in again to get a new code." });
+    return;
+  }
+
+  try {
+    const [challenge] = await db
+      .select({ userId: loginChallenges.userId })
+      .from(loginChallenges)
+      .where(eq(loginChallenges.id, body.challengeId))
+      .limit(1);
+
+    if (!challenge) {
+      res.status(401).json({
+        error: "This sign-in attempt is no longer valid. Sign in again.",
+        code: "two_factor_invalid",
+      });
+      return;
+    }
+
+    const [user] = await db
+      .select({ email: users.email, name: users.name, isActive: users.isActive })
+      .from(users)
+      .where(eq(users.id, challenge.userId))
+      .limit(1);
+
+    if (!user || !user.isActive) {
+      res.status(401).json({
+        error: "This sign-in attempt is no longer valid. Sign in again.",
+        code: "two_factor_invalid",
+      });
+      return;
+    }
+
+    const result = await resendLoginChallenge(body.challengeId, user);
+
+    if (!result.ok) {
+      switch (result.reason) {
+        case "cooldown":
+          res.status(429).json({
+            error: `Please wait ${result.retryAfterSeconds} seconds before requesting another code.`,
+            code: "two_factor_cooldown",
+            retryAfterSeconds: result.retryAfterSeconds,
+          });
+          return;
+        case "limit":
+          res.status(429).json({
+            error: "Too many codes requested. Sign in again to start over.",
+            code: "two_factor_resend_limit",
+          });
+          return;
+        case "expired":
+          res.status(401).json({
+            error: "That sign-in attempt has expired. Sign in again.",
+            code: "two_factor_expired",
+          });
+          return;
+        default:
+          res.status(401).json({
+            error: "This sign-in attempt is no longer valid. Sign in again.",
+            code: "two_factor_invalid",
+          });
+          return;
+      }
+    }
+
+    res.json({
+      message: `We sent a new code to ${result.maskedEmail}.`,
+      maskedEmail: result.maskedEmail,
+      resendAfterSeconds: Math.round(TWO_FACTOR_RESEND_COOLDOWN_MS / 1000),
+    });
+  } catch (error) {
+    console.error("Failed to resend sign-in code:", error);
+    res.status(502).json({
+      error: "We could not email a new code right now. Please try again shortly.",
+      code: "two_factor_email_failed",
+    });
   }
 });
 

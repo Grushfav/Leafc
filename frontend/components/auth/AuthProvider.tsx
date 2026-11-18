@@ -15,21 +15,27 @@ import {
   fetchCurrentUser,
   getStoredToken,
   isStaffRole,
+  isTwoFactorChallenge,
   loginAccount,
   registerAccount,
   storeToken,
   updateProfile,
   uploadAvatar,
+  verifyLoginCode,
+  type AuthResponse,
   type AuthUser,
   type ProfileUpdatePayload,
   type RegisterPayload,
+  type TwoFactorChallenge,
 } from "@/lib/auth";
 
 interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
   isReady: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  /** Resolves with a challenge when an emailed code is required, otherwise null once signed in. */
+  login: (email: string, password: string) => Promise<TwoFactorChallenge | null>;
+  verifyTwoFactor: (challengeId: string, code: string) => Promise<void>;
   completeInvite: (rawToken: string, password: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<{ requiresVerification: boolean }>;
   updateUser: (payload: ProfileUpdatePayload) => Promise<void>;
@@ -70,8 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsReady(true));
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await loginAccount(email, password);
+  const finishSignIn = useCallback((result: AuthResponse) => {
     if (!isStaffRole(result.user.role)) {
       clearToken();
       throw {
@@ -84,6 +89,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(result.token);
     setUser(result.user);
   }, []);
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const result = await loginAccount(email, password);
+      if (isTwoFactorChallenge(result)) {
+        return result;
+      }
+      finishSignIn(result);
+      return null;
+    },
+    [finishSignIn],
+  );
+
+  const verifyTwoFactor = useCallback(
+    async (challengeId: string, code: string) => {
+      const result = await verifyLoginCode(challengeId, code);
+      finishSignIn(result);
+    },
+    [finishSignIn],
+  );
 
   const completeInvite = useCallback(
     async (rawToken: string, password: string) => {
@@ -144,6 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token,
       isReady,
       login,
+      verifyTwoFactor,
       completeInvite,
       register,
       updateUser,
@@ -155,6 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token,
       isReady,
       login,
+      verifyTwoFactor,
       completeInvite,
       register,
       updateUser,

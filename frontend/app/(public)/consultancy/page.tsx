@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useDivisionPage } from "@/components/divisions/useDivisionPage";
+import { CmsHold } from "@/components/cms/CmsHold";
+import { useDivisionPageState } from "@/components/divisions/useDivisionPage";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardBody } from "@/components/ui/Card";
 import { CollapsibleInquiry } from "@/components/forms/CollapsibleInquiry";
@@ -18,7 +19,8 @@ import {
 const serviceIcons = [IconClipboard, IconBuilding, IconAlert, IconFile, IconSearch];
 
 export default function ConsultancyPage() {
-  const content = useDivisionPage("consultancy");
+  const { content, status } = useDivisionPageState("consultancy");
+  if (status === "loading") return <CmsHold />;
 
   return (
     <>

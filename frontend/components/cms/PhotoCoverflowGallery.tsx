@@ -33,9 +33,6 @@ export function PhotoCoverflowGallery({
   if (!items.length) return null;
 
   const count = items.length;
-  const go = (direction: -1 | 1) => {
-    setActive((current) => (current + direction + count) % count);
-  };
 
   return (
     <section className="relative overflow-hidden bg-warm-white py-16 sm:py-20">
@@ -58,7 +55,7 @@ export function PhotoCoverflowGallery({
           ) : null}
         </div>
 
-        <div className="relative mx-auto mt-12 h-[340px] max-w-5xl sm:h-[420px] lg:h-[480px]">
+        <div className="relative z-0 mx-auto mt-12 h-[340px] max-w-5xl isolate sm:h-[420px] lg:h-[480px]">
           {items.map((slide, index) => {
             const offset = index - active;
             const wrapped =
@@ -72,7 +69,7 @@ export function PhotoCoverflowGallery({
 
             const scale = abs === 0 ? 1 : abs === 1 ? 0.86 : 0.72;
             const translateX = wrapped * 58;
-            const z = 30 - abs * 10;
+            const z = 3 - abs;
             const opacity = abs === 0 ? 1 : abs === 1 ? 0.78 : 0.55;
             const src = resolveCmsAssetUrl(slide.image) ?? slide.image!;
 
@@ -83,7 +80,7 @@ export function PhotoCoverflowGallery({
                 aria-label={slide.title || slide.imageAlt || `Photo ${index + 1}`}
                 onClick={() => setActive(index)}
                 className={cn(
-                  "absolute left-1/2 top-1/2 h-[88%] w-[48%] max-w-[320px] overflow-hidden rounded-2xl bg-charcoal shadow-xl ring-1 ring-black/5 transition-all duration-500 ease-out sm:w-[40%] lg:max-w-[340px]",
+                  "absolute left-1/2 top-1/2 h-[88%] w-[58%] max-w-[384px] overflow-hidden rounded-2xl bg-charcoal shadow-xl ring-1 ring-black/5 transition-all duration-500 ease-out sm:w-[48%] lg:max-w-[408px]",
                   abs === 0 ? "cursor-default" : "cursor-pointer",
                 )}
                 style={{
@@ -108,27 +105,8 @@ export function PhotoCoverflowGallery({
           })}
         </div>
 
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <button
-            type="button"
-            aria-label="Previous photo"
-            onClick={() => go(-1)}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-charcoal/30 text-charcoal transition-colors hover:border-brand-orange hover:text-brand-orange"
-          >
-            ←
-          </button>
-          <button
-            type="button"
-            aria-label="Next photo"
-            onClick={() => go(1)}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-charcoal/30 text-charcoal transition-colors hover:border-brand-orange hover:text-brand-orange"
-          >
-            →
-          </button>
-        </div>
-
         {items[active]?.title ? (
-          <p className="mt-5 text-center font-heading text-sm font-semibold text-brand-navy">
+          <p className="mt-8 text-center font-heading text-sm font-semibold text-brand-navy">
             {items[active].title}
           </p>
         ) : null}

@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { emailParagraph, escapeHtml, renderEmail } from "./email-template.js";
 import { sendMail } from "./mailer.js";
 import { emailSiteOrigin } from "./site-origin.js";
 
@@ -21,14 +22,6 @@ export function hashNewsletterToken(raw: string): string {
   return createHash("sha256").update(raw).digest("hex");
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
 export async function sendNewsletterConfirmEmail(options: {
   to: string;
   token: string;
@@ -47,12 +40,18 @@ export async function sendNewsletterConfirmEmail(options: {
       "",
       "LEAF-C",
     ].join("\n"),
-    html: `
-      <p>Confirm that you want emails from LEAF-C about programmes, updates, and occasional promotions.</p>
-      <p><a href="${escapeHtml(confirmUrl)}">Confirm subscription</a></p>
-      <p>This link expires in 72 hours. If you did not request this, ignore this email.</p>
-      <p>LEAF-C</p>
-    `,
+    html: renderEmail({
+      preheader: "Confirm your LEAF-C newsletter subscription.",
+      heading: "Confirm your subscription",
+      bodyHtml: [
+        emailParagraph(
+          "Confirm that you want emails from LEAF-C about programmes, updates, and occasional promotions.",
+        ),
+        emailParagraph("This link expires in 72 hours."),
+      ].join(""),
+      button: { label: "Confirm subscription", url: confirmUrl },
+      footerNote: "If you did not request this, ignore this email.",
+    }),
   });
 }
 
@@ -73,11 +72,14 @@ export async function sendNewsletterWelcomeEmail(options: {
       "",
       "LEAF-C",
     ].join("\n"),
-    html: `
-      <p>You are subscribed. We will email you about programmes, updates, and occasional promotions.</p>
-      <p><a href="${escapeHtml(unsubscribeUrl)}">Unsubscribe</a></p>
-      <p>LEAF-C</p>
-    `,
+    html: renderEmail({
+      preheader: "You are subscribed to the LEAF-C newsletter.",
+      heading: "You are subscribed",
+      bodyHtml: emailParagraph(
+        "You are subscribed. We will email you about programmes, updates, and occasional promotions.",
+      ),
+      footerLink: { label: "Unsubscribe", url: unsubscribeUrl },
+    }),
   });
 }
 
@@ -101,10 +103,11 @@ export async function sendNewsletterBroadcastEmail(options: {
       "",
       "LEAF-C",
     ].join("\n"),
-    html: `
-      <p>${htmlBody}</p>
-      <p><a href="${escapeHtml(unsubscribeUrl)}">Unsubscribe</a></p>
-      <p>LEAF-C</p>
-    `,
+    html: renderEmail({
+      preheader: options.body.replace(/\s+/g, " ").trim().slice(0, 120),
+      heading: options.subject,
+      bodyHtml: emailParagraph(htmlBody),
+      footerLink: { label: "Unsubscribe", url: unsubscribeUrl },
+    }),
   });
 }

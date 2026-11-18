@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { PageHero } from "@/components/layout/PageHero";
 import { ExpertPhotoPlaceholder } from "@/components/experts/ExpertPhotoPlaceholder";
 import { ExpertContactLinks } from "@/components/experts/ExpertContactLinks";
-import { usePublishedCmsExperts } from "@/components/cms/usePublishedCms";
+import { CmsHold } from "@/components/cms/CmsHold";
+import { useCmsExpertsState } from "@/components/cms/usePublishedCms";
 import {
   EXPERTS,
   getPublishedExperts,
@@ -15,7 +16,9 @@ import {
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://leafc.net";
 
 export function ExpertsPageContent() {
-  const remote = usePublishedCmsExperts();
+  const { experts: remote, status } = useCmsExpertsState();
+  // Hold until published experts arrive so the built-in list never flashes first.
+  if (status === "loading") return <CmsHold />;
   // null = loading/error → local fallback; [] = CMS says none published → show none
   const published =
     remote == null

@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import {
+  useCmsResource,
+  type CmsResourceStatus,
+} from "@/components/cms/useCmsResource";
 import {
   fetchCmsPagePreview,
   fetchPublishedCmsExperts,
@@ -25,110 +28,84 @@ function isPreviewQuery() {
   return new URLSearchParams(window.location.search).get("preview") === "1";
 }
 
+export type { CmsResourceStatus };
+
+/** True once the request has settled (data, failure, or slow-API timeout). */
+export function isSettled(status: CmsResourceStatus) {
+  return status !== "loading";
+}
+
 export function usePublishedCmsPage(slug: CmsPageSlug) {
-  const { user, token } = useAuth();
+  const { user, token, isReady } = useAuth();
   const preview = isPreviewQuery();
-  const [content, setContent] = useState<PageContent | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const usePreview = preview && Boolean(token) && canEditSiteContent(user);
 
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      try {
-        if (isPreviewQuery() && token && canEditSiteContent(user)) {
-          const data = await fetchCmsPagePreview(token, slug);
-          if (!cancelled) setContent(data.page.content);
-        } else {
-          const published = await fetchPublishedCmsPage(slug);
-          if (!cancelled) setContent(published);
-        }
-      } catch {
-        if (!cancelled) setContent(null);
-      } finally {
-        if (!cancelled) setLoaded(true);
+  // Wait for auth to resolve so we make one request (published or draft), not two.
+  const key = isReady ? (usePreview ? `page:${slug}:preview` : `page:${slug}`) : null;
+
+  const { data, status } = useCmsResource<PageContent | null>(
+    key,
+    async () => {
+      if (usePreview && token) {
+        const result = await fetchCmsPagePreview(token, slug);
+        return result.page.content;
       }
-    };
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [slug, token, user]);
+      return fetchPublishedCmsPage(slug);
+    },
+    { cache: !usePreview },
+  );
 
-  return { content, loaded, preview };
+  return {
+    content: data ?? null,
+    loaded: isSettled(status),
+    status,
+    preview,
+  };
 }
 
 export function usePublishedCmsExperts() {
-  const [experts, setExperts] = useState<ExpertDraft[] | null>(null);
+  return useCmsExpertsState().experts;
+}
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchPublishedCmsExperts()
-      .then((rows) => {
-        if (!cancelled) setExperts(rows);
-      })
-      .catch(() => {
-        if (!cancelled) setExperts(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return experts;
+export function useCmsExpertsState() {
+  const { data, status } = useCmsResource<ExpertDraft[]>(
+    "experts",
+    fetchPublishedCmsExperts,
+  );
+  return { experts: data ?? null, status };
 }
 
 export function usePublishedNav() {
-  const [nav, setNav] = useState<NavContent | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    fetchPublishedNav()
-      .then((data) => {
-        if (!cancelled) setNav(data);
-      })
-      .catch(() => {
-        if (!cancelled) setNav(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-  return nav;
+  return useCmsNavState().nav;
+}
+
+export function useCmsNavState() {
+  const { data, status } = useCmsResource<NavContent | null>(
+    "nav",
+    fetchPublishedNav,
+  );
+  return { nav: data ?? null, status };
 }
 
 export function usePublishedFooter() {
-  const [footer, setFooter] = useState<FooterContent | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    fetchPublishedFooter()
-      .then((data) => {
-        if (!cancelled) setFooter(data);
-      })
-      .catch(() => {
-        if (!cancelled) setFooter(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-  return footer;
+  return useCmsFooterState().footer;
+}
+
+export function useCmsFooterState() {
+  const { data, status } = useCmsResource<FooterContent | null>(
+    "footer",
+    fetchPublishedFooter,
+  );
+  return { footer: data ?? null, status };
 }
 
 export function usePublishedPolicies() {
-  const [policies, setPolicies] = useState<
-    Array<Pick<PolicyDocument, "slug" | "title" | "description" | "updated" | "badge">> | null
-  >(null);
-  useEffect(() => {
-    let cancelled = false;
-    fetchPublishedPolicies()
-      .then((data) => {
-        if (!cancelled) setPolicies(data);
-      })
-      .catch(() => {
-        if (!cancelled) setPolicies(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-  return policies;
+  return useCmsPoliciesState().policies;
+}
+
+export function useCmsPoliciesState() {
+  const { data, status } = useCmsResource<
+    Array<Pick<PolicyDocument, "slug" | "title" | "description" | "updated" | "badge">>
+  >("policies", fetchPublishedPolicies);
+  return { policies: data ?? null, status };
 }

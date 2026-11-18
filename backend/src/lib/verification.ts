@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { emailParagraph, escapeHtml, renderEmail } from "./email-template.js";
 import { sendMail } from "./mailer.js";
 import { emailSiteOrigin } from "./site-origin.js";
 
@@ -44,24 +45,22 @@ export async function sendMemberVerificationEmail(options: {
       "",
       "LEAF-C",
     ].join("\n"),
-    html: `
-      <p>Hello ${escapeHtml(firstName)},</p>
-      <p>Confirm your email address to finish creating your LEAF-C member account.</p>
-      <p><a href="${escapeHtml(verifyUrl)}">Verify email address</a></p>
-      <p>This link expires in 24 hours. If you did not request this account, ignore this email.</p>
-      <p>LEAF-C</p>
-    `,
+    html: renderEmail({
+      preheader: "Confirm your email address to finish creating your LEAF-C member account.",
+      heading: "Verify your email address",
+      bodyHtml: [
+        emailParagraph(`Hello ${escapeHtml(firstName)},`),
+        emailParagraph(
+          "Confirm your email address to finish creating your LEAF-C member account.",
+        ),
+        emailParagraph("This link expires in 24 hours."),
+      ].join(""),
+      button: { label: "Verify email address", url: verifyUrl },
+      footerNote: "If you did not request this account, ignore this email.",
+    }),
   });
 
   if (!sent) {
     throw new Error("Email is not configured.");
   }
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 }

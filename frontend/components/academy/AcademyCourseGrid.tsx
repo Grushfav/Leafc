@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCmsResource } from "@/components/cms/useCmsResource";
 import { Button } from "@/components/ui/Button";
 import {
   FALLBACK_ACADEMY_COURSES,
@@ -63,22 +63,40 @@ function CourseMeta({
   );
 }
 
+const HOME_COURSE_LIMIT = 6;
+
+function limitCoursesForVariant(
+  courses: AcademyCourse[],
+  variant: "home" | "training",
+): AcademyCourse[] {
+  if (variant !== "home") return courses;
+  return courses.slice(-HOME_COURSE_LIMIT);
+}
+
 export function AcademyCourseGrid({
   variant = "home",
 }: {
   variant?: "home" | "training";
 }) {
-  const [courses, setCourses] = useState<AcademyCourse[]>(FALLBACK_ACADEMY_COURSES);
+  const { data, status } = useCmsResource<AcademyCourse[]>(
+    "academy-courses",
+    fetchPublishedAcademyCourses,
+  );
 
-  useEffect(() => {
-    fetchPublishedAcademyCourses()
-      .then((remote) => {
-        if (remote.length > 0) setCourses(remote);
-      })
-      .catch(() => {
-        setCourses(FALLBACK_ACADEMY_COURSES);
-      });
-  }, []);
+  // Hold (no built-in courses) until published courses arrive or the API is slow.
+  if (status === "loading") {
+    return (
+      <div
+        className={variant === "training" ? "mt-8 min-h-[320px]" : "mt-12 min-h-[420px]"}
+        role="status"
+        aria-busy="true"
+        aria-label="Loading courses"
+      />
+    );
+  }
+
+  const source = data && data.length > 0 ? data : FALLBACK_ACADEMY_COURSES;
+  const courses = limitCoursesForVariant(source, variant);
 
   if (variant === "training") {
     return (

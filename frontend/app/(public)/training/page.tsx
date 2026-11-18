@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useDivisionPage } from "@/components/divisions/useDivisionPage";
+import { CmsHold } from "@/components/cms/CmsHold";
+import { useDivisionPageState } from "@/components/divisions/useDivisionPage";
 import { Badge } from "@/components/ui/Badge";
 import {
   Card,
@@ -13,7 +14,8 @@ import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 import { AcademyCourseGrid } from "@/components/academy/AcademyCourseGrid";
 
 export default function TrainingPage() {
-  const content = useDivisionPage("training");
+  const { content, status } = useDivisionPageState("training");
+  if (status === "loading") return <CmsHold />;
 
   return (
     <>

@@ -2,14 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useDivisionPage } from "@/components/divisions/useDivisionPage";
+import { CmsHold } from "@/components/cms/CmsHold";
+import { useDivisionPageState } from "@/components/divisions/useDivisionPage";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardBody } from "@/components/ui/Card";
 import { CollapsibleInquiry } from "@/components/forms/CollapsibleInquiry";
 import { ServiceInquiryForm } from "@/components/forms/ServiceInquiryForm";
 
 export default function OperationsPage() {
-  const content = useDivisionPage("operations");
+  const { content, status } = useDivisionPageState("operations");
+  if (status === "loading") return <CmsHold />;
 
   return (
     <>

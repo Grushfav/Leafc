@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import {
-  usePublishedFooter,
-  usePublishedNav,
-  usePublishedPolicies,
+  useCmsFooterState,
+  useCmsNavState,
+  useCmsPoliciesState,
 } from "@/components/cms/usePublishedCms";
+import { cn } from "@/lib/utils";
 import { DIVISION_LINKS, SITE_CONTACT, SITE_EXPANSION, SOCIAL_LINKS } from "@/lib/nav";
 import { policyPublicPath } from "@/lib/cms/types";
 import {
@@ -39,9 +40,14 @@ const defaultGovernance = [
 ];
 
 export function SiteFooter() {
-  const cmsFooter = usePublishedFooter();
-  const cmsNav = usePublishedNav();
-  const cmsPolicies = usePublishedPolicies();
+  const { footer: cmsFooter, status: footerStatus } = useCmsFooterState();
+  const { nav: cmsNav, status: navStatus } = useCmsNavState();
+  const { policies: cmsPolicies, status: policiesStatus } = useCmsPoliciesState();
+  // Hide built-in copy until published footer content arrives (or the API is slow).
+  const holding =
+    footerStatus === "loading" ||
+    navStatus === "loading" ||
+    policiesStatus === "loading";
 
   const blurb = cmsFooter?.blurb ?? `${SITE_EXPANSION} — delivering investigative excellence and compliance solutions for public and private sector clients worldwide.`;
   const location = cmsFooter?.location ?? SITE_CONTACT.location;
@@ -81,7 +87,13 @@ export function SiteFooter() {
   }, [cmsNav]);
 
   return (
-    <footer className="mt-auto bg-charcoal text-white">
+    <footer
+      className={cn(
+        "mt-auto bg-charcoal text-white transition-opacity duration-200",
+        holding ? "opacity-0" : "opacity-100",
+      )}
+      aria-busy={holding}
+    >
       <div className="h-1 bg-gradient-to-r from-brand-navy via-brand-orange to-brand-gold" aria-hidden />
 
       <div className="border-b border-white/10 bg-charcoal-light">

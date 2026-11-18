@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { emailParagraph, escapeHtml, renderEmail } from "./email-template.js";
 import { sendMail } from "./mailer.js";
 import { emailSiteOrigin } from "./site-origin.js";
 
@@ -34,14 +35,6 @@ function roleLabel(role: string): string {
   }
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
 export async function sendMemberInviteEmail(options: {
   to: string;
   name: string;
@@ -68,13 +61,19 @@ export async function sendMemberInviteEmail(options: {
       "",
       "LEAF-C",
     ].join("\n"),
-    html: `
-      <p>Hello ${escapeHtml(firstName)},</p>
-      <p>You have been invited to join the LEAF-C workspace as <strong>${escapeHtml(role)}</strong>.</p>
-      <p><a href="${escapeHtml(acceptUrl)}">Create your password</a></p>
-      <p>This link expires in 48 hours. If you were not expecting this invite, ignore this email.</p>
-      <p>LEAF-C</p>
-    `,
+    html: renderEmail({
+      preheader: "You have been invited to join the LEAF-C workspace.",
+      heading: "You're invited to LEAF-C",
+      bodyHtml: [
+        emailParagraph(`Hello ${escapeHtml(firstName)},`),
+        emailParagraph(
+          `You have been invited to join the LEAF-C workspace as <strong>${escapeHtml(role)}</strong>.`,
+        ),
+        emailParagraph("This link expires in 48 hours."),
+      ].join(""),
+      button: { label: "Create your password", url: acceptUrl },
+      footerNote: "If you were not expecting this invite, ignore this email.",
+    }),
   });
 
   if (!sent) {

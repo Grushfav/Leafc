@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useDivisionPage } from "@/components/divisions/useDivisionPage";
+import { CmsHold } from "@/components/cms/CmsHold";
+import { useDivisionPageState } from "@/components/divisions/useDivisionPage";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
@@ -27,7 +28,8 @@ const sessionIcons = [IconUser, IconScale, IconPulse, IconSearch];
 const suitableIcons = [IconUser, IconSearch, IconClipboard];
 
 export default function PolygraphPage() {
-  const content = useDivisionPage("polygraph");
+  const { content, status } = useDivisionPageState("polygraph");
+  if (status === "loading") return <CmsHold />;
 
   return (
     <>

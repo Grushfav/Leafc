@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { CmsHold } from "@/components/cms/CmsHold";
 import { PageHero } from "@/components/layout/PageHero";
 import { usePublishedCmsPage } from "@/components/cms/usePublishedCms";
 import { resolveCmsAssetUrl } from "@/lib/cms/api";
@@ -39,20 +40,9 @@ export function InsightsPageHero() {
       ? hero.primaryCta.href
       : FALLBACK.buttonHref;
 
+  // Hold (no built-in copy) until published content arrives or the API is slow.
   if (!loaded) {
-    return (
-      <PageHero
-        badge={FALLBACK.badge}
-        title={FALLBACK.title}
-        description={FALLBACK.description}
-        imageSrc={FALLBACK.imageSrc}
-        actions={
-          <Button href={FALLBACK.buttonHref} variant="accent" size="md">
-            {FALLBACK.buttonLabel}
-          </Button>
-        }
-      />
-    );
+    return <CmsHold className="min-h-[360px]" />;
   }
 
   return (

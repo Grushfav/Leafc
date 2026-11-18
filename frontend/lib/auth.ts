@@ -61,6 +61,21 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
+export interface TwoFactorChallenge {
+  requiresTwoFactor: true;
+  challengeId: string;
+  maskedEmail: string;
+  resendAfterSeconds: number;
+}
+
+export type LoginResult = AuthResponse | TwoFactorChallenge;
+
+export function isTwoFactorChallenge(
+  result: LoginResult,
+): result is TwoFactorChallenge {
+  return "requiresTwoFactor" in result && result.requiresTwoFactor === true;
+}
+
 export interface RegisterResult {
   requiresVerification: boolean;
   email?: string;
@@ -270,13 +285,42 @@ export async function resendVerification(
 export async function loginAccount(
   email: string,
   password: string,
-): Promise<AuthResponse> {
+): Promise<LoginResult> {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ email, password }),
   });
+  return parseJson<LoginResult>(response);
+}
+
+export async function verifyLoginCode(
+  challengeId: string,
+  code: string,
+): Promise<AuthResponse> {
+  const response = await fetch(`${API_URL}/auth/login/verify`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ challengeId, code }),
+  });
   return parseJson<AuthResponse>(response);
+}
+
+export async function resendLoginCode(challengeId: string): Promise<{
+  message: string;
+  maskedEmail: string;
+  resendAfterSeconds: number;
+}> {
+  const response = await fetch(`${API_URL}/auth/login/resend`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ challengeId }),
+  });
+  return parseJson<{
+    message: string;
+    maskedEmail: string;
+    resendAfterSeconds: number;
+  }>(response);
 }
 
 export async function updateProfile(
